@@ -4,3 +4,5 @@ g4f==0.3.3.2
 python-dotenv==1.0.1
 transformers==4.46.0
 torch==2.5.0
+fastapi==0.115.4
+rapidfuzz
