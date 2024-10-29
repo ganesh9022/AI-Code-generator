@@ -97,15 +97,6 @@ def find_best_matching_function(target_name: str, functions: Dict[str, str]) -> 
 
 repo_functions = extract_functions_from_repo(repo_path)
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the Function Finder API! Use POST /find-function/ to search for functions."}
-
-@app.get("/routes")
-async def get_routes():
-    routes = [{"path": route.path, "methods": list(route.methods)} for route in app.routes]
-    return routes
-
 @app.post("/find-function/")
 async def find_function(request: FunctionRequest):
     logger.info("Received request to find function: %s", request.function_name)
@@ -121,17 +112,4 @@ async def find_function(request: FunctionRequest):
         }
     else:
         logger.warning("No matching function found for '%s'", request.function_name)
-        raise HTTPException(status_code=404, detail="No matching function found.")
-
-@app.get("/find-function/{function_name}")
-async def find_function_get(function_name: str):
-    logger.info("Received GET request to find function: %s", function_name)
-    matched_function = find_best_matching_function(function_name, repo_functions)
-
-    if matched_function:
-        return {
-            "function_name": matched_function[0],
-            "code": matched_function[1],
-        }
-    else:
         raise HTTPException(status_code=404, detail="No matching function found.")
