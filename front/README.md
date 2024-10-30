@@ -15,13 +15,18 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
 
 1. **Clone the project**
    - Use below commands to clone the project repository
-         ```bash
-         git clone <repository-url>
-         cd AI-Code-generator-tool
-         ```
+      ```bash
+      git clone <repository-url>
+      cd AI-Code-generator-tool
+      ```
 
 2. **Frontend Setup**
    - Ensure you have nvm installed with Node.js version >= 18.18.0 .
+   - Install Yarn globally (if not already installed):
+      ```bash
+      npm install -g yarn
+      ```
+   - Install frontend dependencies and run the development server:
       ```bash
       cd front
       yarn install
