@@ -1,50 +1,35 @@
-# React + TypeScript + Vite
+# Intelligent Code Completion Tool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Project Overview
+The Intelligent Code Completion Tool provides real-time, context-aware code suggestions and completions based on the context of the code being written, leveraging AI models trained on vast code repositories across multiple programming languages, helping developers write efficient code more quickly and accurately.
 
-Currently, two official plugins are available:
+## Technologies Used
+- **Frontend**: Next.js, React
+- **Backend**: Python (for AI models and code analysis)
+- **Database**: PostgreSQL
+- **Testing**: Python, Playwright, Cucumber
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Getting Started 
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+1. **Clone the project**
+   ```bash
+   git clone <repository-url>
+   cd AI-Code-generator-tool
+2. **Frontend Setup**
+- Ensure you have nvm installed with Node.js version >= 18.18.0 .
+   ```bash
+   cd front
+   yarn install
+   yarn dev
+2. **Backend Setup**
+   ```bash
+   cd backend
+   make setup  
+- If dependencies are not installed, then manually install each of them from `requirement.txt` file using below command:
+   ```bash
+   pip install <module_name>
+4. **Run the Server**
+   ```bash
+   python server.py  
+   sudo lsof -i :8000
+   uvicorn server:app --reload --port 8001 
