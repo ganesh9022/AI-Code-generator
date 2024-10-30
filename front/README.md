@@ -49,5 +49,5 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
    - Use below commands to run the server
       ```bash
       python server.py
-      uvicorn server:app --reload --port 8000
+      uvicorn server:app --reload --port 8001
       ```
