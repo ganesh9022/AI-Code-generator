@@ -22,7 +22,6 @@ const CodeCompletionEditor: React.FC = () => {
         
         editorRef.current?.setValue( message);
     } catch (error) {
-        console.error("Error fetching code completion:", error);
         editorRef.current?.setValue(currentCode + "\nError fetching completion.");
     }
 };
@@ -91,7 +90,6 @@ const CodeCompletionEditor: React.FC = () => {
       <Paper style={{ display: "flex", height: "100%" }}>
         <Paper mr={"10px"} w={"50%"}>
           <Editor
-            defaultValue={`// Type some Javascript code here and press Ctrl + Enter to run...`}
             onMount={handleEditorDidMount}
             theme="vs-dark"
             language="javascript"
