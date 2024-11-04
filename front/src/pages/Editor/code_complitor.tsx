@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react"
 import Editor, { OnMount } from "@monaco-editor/react"
 import * as monaco from "monaco-editor"
-import { Button, Flex, Paper, Select } from "@mantine/core"
+import { Button, Flex, Paper, Select, Title } from "@mantine/core"
 import axios from "axios"
 
 const CodeCompletionEditor: React.FC = () => {
@@ -11,7 +11,7 @@ const CodeCompletionEditor: React.FC = () => {
   const API = axios.create({
     baseURL: "https://emkc.org/api/v2/piston",
   })
-  const LANGUAGE_VERSIONS = {
+  const supported_language_versions = {
     javascript: "18.15.0",
     typescript: "5.0.3",
     python: "3.10.0",
@@ -39,8 +39,8 @@ const CodeCompletionEditor: React.FC = () => {
       const code = editorRef.current.getValue();
 
       try {
-        const lang: keyof typeof LANGUAGE_VERSIONS = language;
-        const version = LANGUAGE_VERSIONS[lang];
+        const lang: keyof typeof supported_language_versions = language;
+        const version = supported_language_versions[lang];
         if (!lang || !version) {
           setOutput("Error: Unsupported language or missing version.");
           return;
@@ -98,7 +98,6 @@ const CodeCompletionEditor: React.FC = () => {
       <Paper style={{ display: "flex", height: "100%" }}>
         <Paper mr={"10px"} w={"50%"}>
           <Editor
-            defaultValue={`// Type some Javascript code here and press Ctrl + Enter to run...`}
             onMount={handleEditorDidMount}
             theme="vs-dark"
             language={language}
@@ -107,13 +106,12 @@ const CodeCompletionEditor: React.FC = () => {
 
         <Paper
           w={"50%"}
-          bg={"#f4f4f4"}
           p={"10px"}
           style={{
             overflowY: "auto",
           }}
         >
-          <h4>Output:</h4>
+          <Title order={4}>Output:</Title>
           <pre>{output || "No output yet"}</pre>
         </Paper>
       </Paper>
