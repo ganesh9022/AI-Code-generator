@@ -20,26 +20,34 @@ const CodeCompletionEditor: React.FC = () => {
     php: "8.2.3",
   }
   const handleCodeChange = async (currentCode: string) => {
-    const trimmedCode = currentCode.trim()
+    const trimmedCode = currentCode.trim();
+
     try {
-      const response = await axios.post("http://127.0.0.1:5000/complete", {
-        prompt: trimmedCode,
-      })
-      const completion = response.data.completion
-      const regex = /```(?:\w+)?\n([\s\S]*?)\n```/
-      const match = regex.exec(completion)
-      const message = match
-        ? response.data.completion
-        : "Sorry! Can you please be specific about the requirements"
-      editorRef.current?.setValue(currentCode + "\n" + message)
+        const response = await axios.post("http://127.0.0.1:8000/find-function/", {
+            function_name: trimmedCode,
+        });
+        const { function_name, code } = response.data;
+        const message = code
+            ? `Function: ${function_name}\n\n${code}`: "";
+        
+        editorRef.current?.setValue( message);
     } catch (error) {
-      console.error("Error fetching code completion:", error)
+        editorRef.current?.setValue(currentCode + "\nError fetching completion.");
     }
-  }
+};
+
+
 
   const runCode = async () => {
     if (editorRef.current) {
       const code = editorRef.current.getValue()
+      const logs: string[] = []
+      const originalConsoleLog = console.log
+      handleCodeChange(code)
+      console.log = function (...args) {
+        logs.push(args.join(" "))
+        originalConsoleLog.apply(console, args)
+      }
 
       try {
         const lang: keyof typeof supported_language_versions = language
