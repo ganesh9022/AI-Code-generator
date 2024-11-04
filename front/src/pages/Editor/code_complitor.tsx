@@ -6,8 +6,9 @@ import axios from "axios"
 
 const CodeCompletionEditor: React.FC = () => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
-  const [output, setOutput] = useState<string>("")  
-  const [language, setLanguage] = useState<keyof typeof supported_language_versions>("javascript")
+  const [output, setOutput] = useState<string>("")
+  const [language, setLanguage] =
+    useState<keyof typeof supported_language_versions>("javascript")
   const API = axios.create({
     baseURL: "https://emkc.org/api/v2/piston",
   })
@@ -49,11 +50,11 @@ const CodeCompletionEditor: React.FC = () => {
       }
 
       try {
-        const lang: keyof typeof supported_language_versions = language;
-        const version = supported_language_versions[lang];
+        const lang: keyof typeof supported_language_versions = language
+        const version = supported_language_versions[lang]
         if (!lang || !version) {
-          setOutput("Error: Unsupported language or missing version.");
-          return;
+          setOutput("Error: Unsupported language or missing version.")
+          return
         }
 
         const response = await API.post("/execute", {
@@ -64,9 +65,9 @@ const CodeCompletionEditor: React.FC = () => {
               content: code,
             },
           ],
-        });
+        })
 
-        setOutput(response.data.run?.output);
+        setOutput(response.data.run?.output)
       } catch (error) {
         setOutput("Error: " + error)
       }
@@ -102,12 +103,14 @@ const CodeCompletionEditor: React.FC = () => {
             { value: "java", label: "Java" },
           ]}
           value={language}
-          onChange={(e) => setLanguage(e as keyof typeof supported_language_versions)}
+          onChange={(e) =>
+            setLanguage(e as keyof typeof supported_language_versions)
+          }
         />
       </Flex>
-          
+
       <Paper style={{ display: "flex", height: "100%" }}>
-        <Paper mr={"10px"} w={"50%"}>
+        <Paper mr={"10px"} w={output ? "50%" : "100%"}>
           <Editor
             onMount={handleEditorDidMount}
             theme="vs-dark"
@@ -115,16 +118,18 @@ const CodeCompletionEditor: React.FC = () => {
           />
         </Paper>
 
-        <Paper
-          w={"50%"}
-          p={"10px"}
-          style={{
-            overflowY: "auto",
-          }}
-        >
-          <Title order={4}>Output:</Title>
-          <pre>{output || "No output yet"}</pre>
-        </Paper>
+        {output && (
+          <Paper
+            w={"50%"}
+            p={"10px"}
+            style={{
+              overflowY: "auto",
+            }}
+          >
+            <Title order={4}>Output:</Title>
+            <pre>{output || "No output yet"}</pre>
+          </Paper>
+        )}
       </Paper>
     </div>
   )
