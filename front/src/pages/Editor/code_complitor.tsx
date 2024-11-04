@@ -7,7 +7,7 @@ import axios from "axios"
 const CodeCompletionEditor: React.FC = () => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
   const [output, setOutput] = useState<string>("")  
-  const [language, setLanguage] = useState<any>("javascript")
+  const [language, setLanguage] = useState<keyof typeof supported_language_versions>("javascript")
   const API = axios.create({
     baseURL: "https://emkc.org/api/v2/piston",
   })
@@ -36,7 +36,7 @@ const CodeCompletionEditor: React.FC = () => {
 
   const runCode = async () => {
     if (editorRef.current) {
-      const code = editorRef.current.getValue();
+      const code = editorRef.current.getValue()
 
       try {
         const lang: keyof typeof supported_language_versions = language;
@@ -47,7 +47,8 @@ const CodeCompletionEditor: React.FC = () => {
         }
 
         const response = await API.post("/execute", {
-          language: lang,      
+          language: lang,
+          version,
           files: [
             {
               content: code,
@@ -91,7 +92,7 @@ const CodeCompletionEditor: React.FC = () => {
             { value: "java", label: "Java" },
           ]}
           value={language}
-          onChange={(e) => setLanguage(e as string)}
+          onChange={(e) => setLanguage(e as keyof typeof supported_language_versions)}
         />
       </Flex>
           
