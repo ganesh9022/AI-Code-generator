@@ -1,14 +1,23 @@
 import React, { useRef, useState } from "react"
 import Editor, { OnMount } from "@monaco-editor/react"
 import * as monaco from "monaco-editor"
-import { Button, Flex, Paper, Select } from "@mantine/core"
+import { Button, Flex, Paper, Select, Title } from "@mantine/core"
 import axios from "axios"
 
 const CodeCompletionEditor: React.FC = () => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
   const [output, setOutput] = useState<string>("")  
-  const [language, setLanguage] = useState<string>("javascript")
-
+  const [language, setLanguage] = useState<keyof typeof supported_language_versions>("javascript")
+  const API = axios.create({
+    baseURL: "https://emkc.org/api/v2/piston",
+  })
+  const supported_language_versions = {
+    javascript: "18.15.0",
+    typescript: "5.0.3",
+    python: "3.10.0",
+    java: "15.0.2",
+    php: "8.2.3",
+  }
   const handleCodeChange = async (currentCode: string) => {
       const trimmedCode = currentCode.trim()
       try {
@@ -25,28 +34,31 @@ const CodeCompletionEditor: React.FC = () => {
       }
     }
 
-  const runCode = () => {
+  const runCode = async () => {
     if (editorRef.current) {
       const code = editorRef.current.getValue()
-      const logs: string[] = []
-      const originalConsoleLog = console.log
-
-      console.log = function (...args) {
-        logs.push(args.join(" "))
-        originalConsoleLog.apply(console, args)
-      }
 
       try {
-        const result = eval(code);
-        console.log = originalConsoleLog;
+        const lang: keyof typeof supported_language_versions = language;
+        const version = supported_language_versions[lang];
+        if (!lang || !version) {
+          setOutput("Error: Unsupported language or missing version.");
+          return;
+        }
 
-        const finalOutput =
-          logs.join("\n") + (result !== undefined ? `\n${result}` : "")
-        setOutput(finalOutput)
+        const response = await API.post("/execute", {
+          language: lang,
+          version,
+          files: [
+            {
+              content: code,
+            },
+          ],
+        });
+
+        setOutput(response.data.run?.output);
       } catch (error) {
         setOutput("Error: " + error)
-      } finally {
-        console.log = originalConsoleLog
       }
     }
   }
@@ -76,33 +88,31 @@ const CodeCompletionEditor: React.FC = () => {
             { value: "javascript", label: "JavaScript" },
             { value: "typescript", label: "TypeScript" },
             { value: "python", label: "Python" },
-            { value: "html", label: "HTML" },
-            { value: "css", label: "CSS" },
+            { value: "php", label: "PHP" },
+            { value: "java", label: "Java" },
           ]}
           value={language}
-          onChange={(e) => setLanguage(e as string)}
+          onChange={(e) => setLanguage(e as keyof typeof supported_language_versions)}
         />
       </Flex>
           
       <Paper style={{ display: "flex", height: "100%" }}>
         <Paper mr={"10px"} w={"50%"}>
           <Editor
-            defaultValue={`// Type some Javascript code here and press Ctrl + Enter to run...`}
             onMount={handleEditorDidMount}
             theme="vs-dark"
-            language="javascript"
+            language={language}
           />
         </Paper>
 
         <Paper
           w={"50%"}
-          bg={"#f4f4f4"}
           p={"10px"}
           style={{
             overflowY: "auto",
           }}
         >
-          <h4>Output:</h4>
+          <Title order={4}>Output:</Title>
           <pre>{output || "No output yet"}</pre>
         </Paper>
       </Paper>
