@@ -1,50 +1,53 @@
-# React + TypeScript + Vite
+# Intelligent Code Completion Tool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Project Overview
 
-Currently, two official plugins are available:
+The Intelligent Code Completion Tool provides real-time, context-aware code suggestions and completions based on the context of the code being written, leveraging AI models trained on vast code repositories across multiple programming languages, helping developers write efficient code more quickly and accurately.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Technologies Used
 
-## Expanding the ESLint configuration
+- **Frontend**: Next.js, React
+- **Backend**: Python (for AI models and code analysis)
+- **Database**: PostgreSQL
+- **Testing**: Python, Playwright, Cucumber
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Getting Started
 
-- Configure the top-level `parserOptions` property like this:
+1. **Clone the project**
+   - Use below commands to clone the project repository
+      ```bash
+      git clone <repository-url>
+      cd AI-Code-generator-tool
+      ```
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+2. **Frontend Setup**
+   - Ensure you have nvm installed with Node.js version >= 18.18.0 .
+   - Install Yarn globally (if not already installed):
+      ```bash
+      npm install -g yarn
+      ```
+   - Install frontend dependencies and run the development server:
+      ```bash
+      cd front
+      yarn install
+      yarn dev
+      ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+2. **Backend Setup**
+   - Ensure pipenv is installed.
+      ```bash
+      cd backend
+      make setup
+      ```
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+   - If dependencies are not installed, then manually install each of them from `requirement.txt` file using below command:
+      ```bash
+      pip install <module_name>
+      ```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+4. **Run the Server**
+   - Use below commands to run the server
+      ```bash
+      python server.py
+      uvicorn server:app --reload --port 8001
+      ```
