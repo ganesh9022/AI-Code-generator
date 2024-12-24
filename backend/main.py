@@ -3,18 +3,34 @@ from flask_cors import CORS
 from g4f.client import Client
 from operation_predictor.operation_predictor import load_data, train_model, load_model, predict_operation, get_absolute_path
 import os
+from llm.ollama_models import ask_question, generate_code
 
 app = Flask(__name__)
 CORS(app)
 
 client = Client()
 
+@app.route('/generate-code', methods=['GET'])
+def get_generate_code():
+    prompt = request.args.get('prompt')
+    suffix = request.args.get('suffix')
+    response = generate_code(
+        prompt=prompt,
+        suffix=suffix, 
+    )   
+    return response
+
+@app.route('/ask-question', methods=['GET'])
+def get_ask_question():
+    prompt = request.args.get('prompt')
+    response = ask_question(question=prompt)  
+    return response
+
 @app.route('/operation', methods=['GET'])
 def operation():
     user_input = request.args.get('prompt')
     
     data = load_data()
-    abs_path = get_absolute_path('operation_predictor/operation_predictor_model.h5')
     if os.path.exists('operation_predictor/operation_predictor_model.h5'):
         model = load_model('operation_predictor/operation_predictor_model.h5')
     else:
