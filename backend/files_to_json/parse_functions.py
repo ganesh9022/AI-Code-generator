@@ -14,6 +14,7 @@ nlp = spacy.load("en_core_web_md")
 directory_path = ''
 
 def get_related_words_wordnet(function_name):
+    """Generate related words using WordNet."""
     synonyms = set()
     for syn in wn.synsets(function_name):
         for lemma in syn.lemmas():
@@ -22,6 +23,7 @@ def get_related_words_wordnet(function_name):
     return list(synonyms)
 
 def get_related_words_spacy(function_name):
+    """Generate related words using SpaCy."""
     token = nlp(function_name)
     related_words = set()
 
@@ -35,6 +37,7 @@ def get_related_words_spacy(function_name):
     return list(related_words)
 
 def split_function_name(function_name):
+    """Generate different variations of the function name."""
     words = function_name.split('_')
 
     camel_case = ''.join([word.capitalize() for word in words])
@@ -57,6 +60,7 @@ def split_function_name(function_name):
     return variations, phrase_combinations
 
 def get_function_details(func):
+    """Retrieve details about the function including name, source, and input examples."""
     source_code = inspect.getsource(func)
     source_code = "\n".join([line.strip() for line in source_code.splitlines()])
 
@@ -87,6 +91,7 @@ def get_function_details(func):
     }
 
 def extract_functions_from_file(file_path):
+    """Extract functions from a Python file."""
     dir_path = os.path.dirname(file_path)
 
     sys.path.append(dir_path)
@@ -99,18 +104,24 @@ def extract_functions_from_file(file_path):
 
     return functions
 
-all_function_details = []
+def parse_functions():
+    """parse_functions function to parse all Python files and save the function details to a JSON file."""
+    all_function_details = []
 
-for file_name in os.listdir(directory_path):
-    if file_name.endswith('.py'):
-        file_path = os.path.join(directory_path, file_name)
-        functions = extract_functions_from_file(file_path)
-        function_details = [get_function_details(func) for func in functions]
-        all_function_details.extend(function_details)
+    # Iterate over all Python files in the specified directory
+    for file_name in os.listdir(directory_path):
+        if file_name.endswith('.py'):
+            file_path = os.path.join(directory_path, file_name)
+            functions = extract_functions_from_file(file_path)
+            function_details = [get_function_details(func) for func in functions]
+            all_function_details.extend(function_details)
 
-# Output file for JSON
-output_file = '/home/pst-asus-a555l/Desktop/AI/AI-Code-generator-tool/backend/operation_predictor/operations_data.json'
+    # Output file for JSON
+    output_file = 'operations_data.json'
 
-# Save the details to a JSON file
-with open(output_file, 'w') as json_file:
-    json.dump(all_function_details, json_file, indent=4)
+    # Save the details to a JSON file
+    with open(output_file, 'w') as json_file:
+        json.dump(all_function_details, json_file, indent=4)
+
+if __name__ == "__main__":
+    parse_functions()
