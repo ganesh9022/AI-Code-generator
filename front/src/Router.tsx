@@ -5,10 +5,9 @@ import {
   createBrowserRouter,
 } from "react-router-dom"
 import { HomePage } from "./pages/Home"
-// import ChatPage from "./pages/ChatBot/ChatPage"
 import EditorPage from "./pages/Editor"
 import { AppLayout } from "./components/Layout/appLayout"
-
+import ChatPage from "./pages/Chat"
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route>
@@ -19,6 +18,9 @@ export const router = createBrowserRouter(
         </Route>
         <Route path="editor">
           <Route index element={<EditorPage />} />
+        </Route>
+        <Route path="chat">
+          <Route index element={<ChatPage />} />
         </Route>
       </Route>
     </Route>
