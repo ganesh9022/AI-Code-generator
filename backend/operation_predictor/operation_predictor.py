@@ -49,7 +49,7 @@ def train_model(data):
     pipeline.fit(X_train, y_train)
 
     # Save the trained model to an H5 file
-    save_model(pipeline, 'operation_predictor_model.h5')
+    save_model(pipeline, 'operation_predictor/operation_predictor_model.h5')
 
     return pipeline
 

@@ -1,17 +1,12 @@
-import React from "react"
-import { Grid, Container } from "@mantine/core"
-import CodeCompletionEditor from "./code_complitor"
+import { Grid, Container } from "@mantine/core";
+import CodeCompletionEditor from "./code_complitor";
 
 const EditorPage = () => {
   return (
-    <Container fluid>
-      <Grid>
-        <Grid.Col span={12}>
-          <CodeCompletionEditor />
-        </Grid.Col>
-      </Grid>
+    <Container fluid p={0}>
+      <CodeCompletionEditor />
     </Container>
-  )
-}
+  );
+};
 
-export default EditorPage
+export default EditorPage;
