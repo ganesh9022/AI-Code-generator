@@ -1,9 +1,17 @@
-import { Container, useMantineColorScheme, AppShell, Group, Title, Stack, ThemeIcon, } from "@mantine/core"
-import { Link, Outlet } from "react-router-dom"
-import { AppHeader } from "./appheader"
-import { SidebarLink } from "./Sidebar"
-import { IconCode, IconChevronLeftPipe } from "@tabler/icons-react"
-import { useState } from "react"
+import {
+  Container,
+  useMantineColorScheme,
+  AppShell,
+  Group,
+  Title,
+  Stack,
+  ThemeIcon,
+} from "@mantine/core";
+import { Link, Outlet } from "react-router-dom";
+import { AppHeader } from "./appheader";
+import { SidebarLink } from "./Sidebar";
+import { IconCode, IconChevronLeftPipe } from "@tabler/icons-react";
+import { useState } from "react";
 
 export const AppLayout = () => {
   const { colorScheme } = useMantineColorScheme();
@@ -25,15 +33,15 @@ export const AppLayout = () => {
       >
         <Link to="/" style={{ textDecoration: "none" }}>
           <Group p={8} wrap="nowrap">
-            <ThemeIcon size="sm" bg="transparent" style={{ textDecoration: "none" }}>
+            <ThemeIcon
+              size="sm"
+              bg="transparent"
+              style={{ textDecoration: "none" }}
+            >
               <IconCode />
             </ThemeIcon>
             {!isCollapsed && (
-              <Title
-                c="white"
-                size="h3"
-                fw={400}
-              >
+              <Title c="white" size="h3" fw={400}>
                 Code Creator
               </Title>
             )}
@@ -61,14 +69,13 @@ export const AppLayout = () => {
         <Container
           fluid
           mih="calc(100dvh - 64px)"
-          px={32}
-          pt={32}
-          pb={64}
+          p={0}
+          m={0}
           bg={colorScheme === "dark" ? "gray.9" : "gray.0"}
         >
           <Outlet />
         </Container>
       </AppShell.Main>
     </AppShell>
-  )
-}
+  );
+};
