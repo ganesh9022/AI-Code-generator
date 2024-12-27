@@ -64,26 +64,6 @@ def get_ask_question():
     return response
 
 
-@app.route("/operation", methods=["GET"])
-def operation():
-    user_input = request.args.get("prompt")
-
-    data = load_data()
-    if os.path.exists("operation_predictor/operation_predictor_model.h5"):
-        model = load_model("operation_predictor/operation_predictor_model.h5")
-    else:
-        model = train_model(data)
-
-    input_examples = []
-    for item in data:
-        for example in item["input_examples"]:
-            input_examples.append(example)
-
-    predicted_function = predict_operation(user_input, model, input_examples, data)
-
-    return predicted_function
-
-
 @app.route("/complete", methods=["POST"])
 def code_completion():
     data = request.json

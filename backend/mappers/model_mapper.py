@@ -1,5 +1,7 @@
 from enum import Enum
 
+from backend.llm.ollama_models import generate_code
+from backend.operation_predictor.operation_predictor import operation
 from groqclould.groq_response import get_groq_response
 
 
@@ -14,5 +16,9 @@ def map_models(
 ) -> Model:
     if model == Model.Groq.value:
         return get_groq_response(prefix, currentLine, suffix, language)
+    elif model == Model.Ollama.value:
+        return generate_code(currentLine, suffix) 
+    elif model == Model.ML.value:
+        return operation(currentLine)  
     else:
-        return "Model yet to be set up"
+        return "Model not found"

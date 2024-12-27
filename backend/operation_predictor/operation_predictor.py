@@ -8,6 +8,23 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import make_pipeline
 
+def operation(currentLine: str):
+
+    data = load_data()
+    if os.path.exists("operation_predictor/operation_predictor_model.h5"):
+        model = load_model("operation_predictor/operation_predictor_model.h5")
+    else:
+        model = train_model(data)
+
+    input_examples = []
+    for item in data:
+        for example in item["input_examples"]:
+            input_examples.append(example)
+
+    predicted_function = predict_operation(currentLine, model, input_examples, data)
+
+    return predicted_function
+
 def get_absolute_path(relative_path):
     abs_path=os.path.dirname(os.path.abspath(__file__))
     return os.path.join(abs_path, relative_path)

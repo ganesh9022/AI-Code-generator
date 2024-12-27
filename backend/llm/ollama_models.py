@@ -33,7 +33,6 @@ def generate_code(
     Args:
         prompt (str): The text prompt to guide the generation.
         suffix (Optional[str]): Text appended after the generation.
-        template (str): Template or programming language for code generation (e.g., 'Python').
 
     Returns:
         dict: The response formatted as { "next_line": "Generated code" }.
