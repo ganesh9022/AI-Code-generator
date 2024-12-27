@@ -1,5 +1,5 @@
-import { Grid, Container } from "@mantine/core";
-import CodeCompletionEditor from "./code_complitor";
+import { Container } from "@mantine/core";
+import CodeCompletionEditor from "./codeCompletion";
 
 const EditorPage = () => {
   return (

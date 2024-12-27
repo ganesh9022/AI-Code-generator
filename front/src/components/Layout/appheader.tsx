@@ -1,11 +1,13 @@
 import {
   AppShell,
+  Button,
   Group,
+  rem,
   ThemeIcon,
   Title,
   useMantineColorScheme,
 } from "@mantine/core";
-import { IconMoon, IconSun } from "@tabler/icons-react";
+import { IconAdjustmentsPlus, IconMoon, IconSun } from "@tabler/icons-react";
 import { useMemo } from "react";
 import { matchPath, useLocation } from "react-router-dom";
 import { SIDEBAR_ITEMS, SidebarItem } from "./constants";
@@ -19,8 +21,15 @@ interface FlattenedRoute {
 }
 export const AppHeader = () => {
   const location = useLocation();
-  const { setSelectedModel, language, setLanguage, runCode, selectedModel } =
-    useTools();
+  const {
+    setSelectedModel,
+    language,
+    setLanguage,
+    runCode,
+    selectedModel,
+    sideDrawerOpen,
+    setSideDrawerOpen,
+  } = useTools();
   const { pageTitle } = useMemo(() => {
     const flattenRoutes = (
       routes: SidebarItem[],
@@ -57,6 +66,17 @@ export const AppHeader = () => {
           </Title>
         </Group>
         <Group>
+          <Button
+            leftSection={
+              <IconAdjustmentsPlus
+                style={{ width: rem(18), height: rem(18) }}
+                stroke={1.5}
+              />
+            }
+            variant="outline"
+            children="More options"
+            onClick={() => setSideDrawerOpen(!sideDrawerOpen)}
+          />
           <Tools
             selectedModel={selectedModel}
             setSelectedModel={setSelectedModel}
