@@ -1,7 +1,7 @@
 from enum import Enum
 
-from backend.llm.ollama_models import generate_code
-from backend.operation_predictor.operation_predictor import operation
+from llm.ollama_models import generate_code
+from operation_predictor.operation_predictor import operation
 from groqclould.groq_response import get_groq_response
 
 
