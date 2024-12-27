@@ -22,4 +22,3 @@ def map_models(
         return operation(currentLine)
     else:
         return "Model not found"
-    
