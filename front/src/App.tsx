@@ -15,19 +15,17 @@ if (!PUBLISHABLE_KEY) {
 export default function App() {
   return (
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-    <header>
-      <SignedOut>
-        <SignInButton />
-      </SignedOut>
-      <SignedIn>
-        <UserButton />
-        <MantineProvider theme={theme}>
+      <MantineProvider theme={theme}>
+        <SignedOut>
+          <SignInButton />
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
           <ToolsProvider>
             <RouterProvider router={router} />
           </ToolsProvider>
-        </MantineProvider>
-      </SignedIn>
-    </header>
+        </SignedIn>
+      </MantineProvider>
     </ClerkProvider>
   );
 }
