@@ -9,7 +9,7 @@ import { IconMoon, IconSun } from "@tabler/icons-react";
 import { useMemo } from "react";
 import { matchPath, useLocation } from "react-router-dom";
 import { SIDEBAR_ITEMS, SidebarItem } from "./constants";
-import Tools, { Model } from "./Tools";
+import Tools from "./Tools";
 import { useTools } from "../CodeCompletionToolsProviders";
 
 interface FlattenedRoute {
@@ -19,7 +19,8 @@ interface FlattenedRoute {
 }
 export const AppHeader = () => {
   const location = useLocation();
-  const { setSelectedModel, language, setLanguage, runCode } = useTools();
+  const { setSelectedModel, language, setLanguage, runCode, selectedModel } =
+    useTools();
   const { pageTitle } = useMemo(() => {
     const flattenRoutes = (
       routes: SidebarItem[],
@@ -57,7 +58,7 @@ export const AppHeader = () => {
         </Group>
         <Group>
           <Tools
-            selectedModel={Model.Ollama}
+            selectedModel={selectedModel}
             setSelectedModel={setSelectedModel}
             language={language}
             setLanguage={setLanguage}
