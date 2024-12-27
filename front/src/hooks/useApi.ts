@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios, { AxiosRequestConfig } from "axios";
+import { useDebounce } from "use-debounce";
 
 interface ApiResponse<T> {
   data: T | null;
@@ -16,12 +17,13 @@ const useApi = <T>(
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [debouncedParams] = useDebounce(params, 1000);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const URL = generateUrl(url);
-        const response = await axios.get<T>(URL, { params });
+        const response = await axios.post<T>(URL, debouncedParams);
         setData(response.data);
       } catch (err) {
         if (axios.isAxiosError(err)) {
@@ -35,7 +37,7 @@ const useApi = <T>(
     };
 
     fetchData();
-  }, [url, params]);
+  }, [url, debouncedParams]);
 
   return { data, error, loading };
 };

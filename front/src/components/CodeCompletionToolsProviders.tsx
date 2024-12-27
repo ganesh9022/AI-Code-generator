@@ -36,7 +36,7 @@ const ToolsContext = createContext<ToolsProps>({
 export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [selectedModel, setSelectedModel] = useState<Model>(Model.ML);
+  const [selectedModel, setSelectedModel] = useState<Model>(Model.Groq);
   const [language, setLanguage] =
     useState<keyof typeof supported_language_versions>("javascript");
   const [output, setOutput] = useState<string>("");
