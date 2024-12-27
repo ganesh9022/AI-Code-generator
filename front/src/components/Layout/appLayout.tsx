@@ -12,11 +12,13 @@ import { AppHeader } from "./appheader";
 import { SidebarLink } from "./Sidebar";
 import { IconCode, IconChevronLeftPipe } from "@tabler/icons-react";
 import { useState } from "react";
+import SideDrawer from "../SideDrawer";
+import { useTools } from "../CodeCompletionToolsProviders";
 
 export const AppLayout = () => {
   const { colorScheme } = useMantineColorScheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
-
+  const { sideDrawerOpen, setSideDrawerOpen } = useTools();
   return (
     <AppShell
       header={{ height: 64 }}
@@ -76,6 +78,10 @@ export const AppLayout = () => {
           <Outlet />
         </Container>
       </AppShell.Main>
+      <SideDrawer
+        opened={sideDrawerOpen}
+        close={() => setSideDrawerOpen(false)}
+      />
     </AppShell>
   );
 };

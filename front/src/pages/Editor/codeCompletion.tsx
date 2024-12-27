@@ -6,7 +6,7 @@ import { CompletionFormatter } from "../../components/completion-formatter";
 import useApi from "../../hooks/useApi";
 
 const CodeCompletionEditor: React.FC = () => {
-  const { language, editorRef, output, selectedModel } = useTools();
+  const { language, editorRef, output, selectedModel, code } = useTools();
   const monaco = useMonaco();
   const [params, setParams] = useState({
     prefix: "",
@@ -75,6 +75,7 @@ const CodeCompletionEditor: React.FC = () => {
               formatOnPaste: true,
               trimAutoWhitespace: true,
             }}
+            value={code}
             onChange={(value, ev) => {
               if (value) {
                 const lineNumber = ev.changes[0].range.startLineNumber;

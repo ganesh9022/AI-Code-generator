@@ -4,6 +4,7 @@ import React, {
   useState,
   ReactNode,
   useRef,
+  useEffect,
 } from "react";
 import { Model, supported_language_versions } from "./Layout/Tools";
 import * as monaco from "monaco-editor";
@@ -19,6 +20,14 @@ interface ToolsProps {
   setOutput: (value: string) => void;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
   handleCodeChange: (currentCode: string) => void;
+  file: File | null;
+  setFile: (file: File | null) => void;
+  code: string;
+  setCode: (code: string) => void;
+  sideDrawerOpen: boolean;
+  setSideDrawerOpen: (value: boolean) => void;
+  showSelectedFileInEditor: boolean;
+  setShowSelectedFileInEditor: (value: boolean) => void;
 }
 
 const ToolsContext = createContext<ToolsProps>({
@@ -31,6 +40,14 @@ const ToolsContext = createContext<ToolsProps>({
   setOutput: () => {},
   editorRef: { current: null },
   handleCodeChange: () => {},
+  file: null,
+  setFile: () => {},
+  code: "",
+  setCode: () => {},
+  sideDrawerOpen: false,
+  setSideDrawerOpen: () => {},
+  showSelectedFileInEditor: true,
+  setShowSelectedFileInEditor: () => {},
 });
 
 export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
@@ -41,7 +58,11 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
     useState<keyof typeof supported_language_versions>("javascript");
   const [output, setOutput] = useState<string>("");
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-
+  const [file, setFile] = useState<File | null>(null);
+  const [code, setCode] = useState("");
+  const [sideDrawerOpen, setSideDrawerOpen] = useState(true);
+  const [showSelectedFileInEditor, setShowSelectedFileInEditor] =
+    useState(true);
   const API = axios.create({
     baseURL: "https://emkc.org/api/v2/piston",
   });
@@ -98,6 +119,17 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
       }
     }
   };
+
+  useEffect(() => {
+    if (file && showSelectedFileInEditor) {
+      file?.text().then((text) => {
+        setCode(text);
+      });
+    } else {
+      setCode("");
+    }
+  }, [file, showSelectedFileInEditor]);
+
   return (
     <ToolsContext.Provider
       value={{
@@ -110,6 +142,14 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
         runCode,
         editorRef,
         handleCodeChange,
+        file,
+        setFile,
+        code,
+        setCode,
+        sideDrawerOpen,
+        setSideDrawerOpen,
+        showSelectedFileInEditor,
+        setShowSelectedFileInEditor,
       }}
     >
       {children}
