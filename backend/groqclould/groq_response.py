@@ -2,7 +2,7 @@ from typing import Optional
 from flask import jsonify
 from groq import Groq
 import os
-from groqclould.system_prompt import SYSTEM_PROMPT
+from groqclould.system_prompt import instructions
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,13 +16,15 @@ client = Groq(api_key=api_key)
 MODEL = "llama3-70b-8192"
 
 
-def get_groq_response(prompt_content):
+def get_groq_response(prefix: str, currentLine: str, suffix: str, language: str) -> str:
     try:
         response = client.chat.completions.create(
             model=MODEL,
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt_content},
+                instructions(language),
+                {"role": "user", "content": prefix, "name": "prefix"},
+                {"role": "user", "content": currentLine, "name": "currentLine"},
+                {"role": "user", "content": suffix, "name": "suffix"},
             ],
             max_tokens=256,
             temperature=0.5,
@@ -30,29 +32,6 @@ def get_groq_response(prompt_content):
         return response.choices[0].message.content
     except Exception as e:
         return str(e)
-
-
-def generate_code_suggestion(
-    prompt: str,
-    suffix: Optional[str] = None,
-) -> dict:
-    print(f"prompt={prompt}, suffix={suffix}")
-    if not prompt or not suffix:
-        return (
-            jsonify({"error": "Both 'prompt' and 'suffix' parameters are required."}),
-            400,
-        )
-
-    input_prompt = f"{SYSTEM_PROMPT}\n\n**Code Context**:\nSurrounding Code:\n{prompt}\n\n### Current Line\n{suffix}"
-    generated_code = get_groq_response(input_prompt)
-
-    return jsonify(
-        {
-            "suggested_code": (
-                generated_code if generated_code else "No suggestion available."
-            )
-        }
-    )
 
 
 def answer_user_query(question: str) -> str:

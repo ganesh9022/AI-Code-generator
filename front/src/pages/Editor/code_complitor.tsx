@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import { Paper, Title } from "@mantine/core";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
@@ -6,13 +6,16 @@ import { CompletionFormatter } from "../../components/completion-formatter";
 import useApi from "../../hooks/useApi";
 
 const CodeCompletionEditor: React.FC = () => {
-  const { language, editorRef, output } = useTools();
+  const { language, editorRef, output, selectedModel } = useTools();
   const monaco = useMonaco();
-  
-  const { data, error, loading } = useApi("code-snippet", {
-    prompt: "def all_odd_numbers(a,b)",
-    suffix: "return result",
+  const [params, setParams] = useState({
+    prefix: "",
+    currentLine: "",
+    suffix: "",
+    language,
+    model: selectedModel,
   });
+  const { data } = useApi("code-snippet", params);
 
   useEffect(() => {
     if (!monaco) return;
@@ -29,12 +32,11 @@ const CodeCompletionEditor: React.FC = () => {
             };
           }
 
+          const insertText = (data as string) ?? "";
           return {
             items: [
               {
-                insertText: `console.log('Hello, world!');
-                kfdbklnf ldfbnfkj
-                fbkjfn fdkbnkj`,
+                insertText,
                 range: {
                   startLineNumber: position.lineNumber,
                   startColumn: position.column - 1,
@@ -54,7 +56,7 @@ const CodeCompletionEditor: React.FC = () => {
       }
     );
     return () => provider.dispose();
-  }, [monaco, language]);
+  }, [monaco, language, data]);
 
   return (
     <div style={{ height: "90vh" }}>
@@ -72,6 +74,15 @@ const CodeCompletionEditor: React.FC = () => {
               formatOnType: true,
               formatOnPaste: true,
               trimAutoWhitespace: true,
+            }}
+            onChange={(value, ev) => {
+              if (value) {
+                const lineNumber = ev.changes[0].range.startLineNumber;
+                const prefix = value.split("\n")[lineNumber - 2] ?? "";
+                const currentLine = value.split("\n")[lineNumber - 1] ?? "";
+                const suffix = value.split("\n")[lineNumber] ?? "";
+                setParams({ ...params, prefix, currentLine, suffix });
+              }
             }}
           />
         </Paper>
