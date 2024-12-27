@@ -6,48 +6,65 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
 
 ## Technologies Used
 
-- **Frontend**: Next.js, React
+- **Frontend**: React
 - **Backend**: Python (for AI models and code analysis)
 - **Database**: PostgreSQL
+- **Python Models**: ollama,GROQ Cloud
+- **AUTH**: Clerk
+- **API Communication**: Flask
 - **Testing**: Python, Playwright, Cucumber
 
 ## Getting Started
 
-1. **Clone the project**
+### 1. Clone the project
    - Use below commands to clone the project repository
       ```bash
       git clone <repository-url>
       cd AI-Code-generator-tool
       ```
 
-2. **Frontend Setup**
+### 2. Frontend Setup
    - Ensure you have nvm installed with Node.js version >= 18.18.0 .
    - Install Yarn globally (if not already installed):
       ```bash
       npm install -g yarn
       ```
-   - Install frontend dependencies and run the development server:
+   - Install frontend dependencies
       ```bash
       cd front
       yarn install
-      yarn dev
       ```
 
-2. **Backend Setup**
-   - Ensure pipenv is installed.
+### 2. Backend Setup
+   - Create a virtual environment
       ```bash
       cd backend
-      make setup
+      python -m venv venv
+      source venv/bin/activate
       ```
-
+   -  Install the dependencies listed in the `requirements.txt` file:
+      ```bash
+      pip install -r requirements.txt
+      ```
    - If dependencies are not installed, then manually install each of them from `requirement.txt` file using below command:
       ```bash
       pip install <module_name>
       ```
+### 3. Environment Variables
+   - To run this project, you will need to set up the following environment variables in a `backend/.env` file in the root of your project directory.
+   #### Example `backend/.env` File
+   ```
+    GROQ_API_KEY=dummygroqapikey12345
+   ```
 
-4. **Run the Server**
+### 4. Run the Backend Server
    - Use below commands to run the server
       ```bash
-      python server.py
-      uvicorn server:app --reload --port 8001
+      python main.py
+      ```
+
+### 5. Run the Development Server:
+   - Use below commands to run the development server
+      ```bash
+      yarn dev
       ```
