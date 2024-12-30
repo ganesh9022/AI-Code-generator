@@ -60,7 +60,7 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [code, setCode] = useState("");
-  const [sideDrawerOpen, setSideDrawerOpen] = useState(true);
+  const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
   const [showSelectedFileInEditor, setShowSelectedFileInEditor] =
     useState(true);
   const API = axios.create({
