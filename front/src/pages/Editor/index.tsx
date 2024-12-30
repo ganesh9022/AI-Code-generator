@@ -50,14 +50,16 @@ const EditorPage = () => {
   }, [uploadFiles, uploadFolders]);
 
   const onSelect = (file: File) => setSelectedFile(file);
-
+  const hasFiles = rootDir.dirs.length > 0 || rootDir.files.length>0;
   return (
     <Container fluid p={0}>
       <Grid gutter="md" style={{ height: "100vh" }}>
-        <Grid.Col span={3} p={10} pl={20}>
-          <FileTree rootDir={rootDir} selectedFile={selectedFile} onSelect={onSelect} />
-        </Grid.Col>
-        <Grid.Col span={9}>
+      {hasFiles && (
+          <Grid.Col span={3} p={10} pl={20}>
+            <FileTree rootDir={rootDir} selectedFile={selectedFile} onSelect={onSelect} />
+          </Grid.Col>
+        )}
+        <Grid.Col span={hasFiles ? 9 : 12}>
           <CodeCompletionEditor selectedFile={selectedFile} />
         </Grid.Col>
       </Grid>

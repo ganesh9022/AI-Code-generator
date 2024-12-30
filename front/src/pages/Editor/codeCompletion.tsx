@@ -50,9 +50,8 @@ const CodeCompletionEditor = ({ selectedFile }: { selectedFile?: File }) => {
     );
     return () => provider.dispose();
   }, [monaco, language, data, selectedFile]);
-  if (!selectedFile) return null;
 
-  const selectedFileContent = selectedFile.content;
+  const selectedFileContent = selectedFile?.content;
 
   return (
     <div style={{ height: "90vh" }}>
