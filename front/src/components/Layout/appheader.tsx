@@ -1,5 +1,6 @@
 import {
   AppShell,
+  Box,
   Button,
   Group,
   rem,
@@ -13,6 +14,7 @@ import { matchPath, useLocation } from "react-router-dom";
 import { SIDEBAR_ITEMS, SidebarItem } from "./constants";
 import Tools from "./Tools";
 import { useTools } from "../CodeCompletionToolsProviders";
+import { UserButton } from "@clerk/clerk-react";
 
 interface FlattenedRoute {
   path: string;
@@ -92,6 +94,9 @@ export const AppHeader = () => {
           >
             {colorScheme === "dark" ? <IconSun /> : <IconMoon />}
           </ThemeIcon>
+          <Box style={{ marginRight: "5px", marginTop: "5px" }}>
+            <UserButton />
+          </Box>
         </Group>
       </Group>
     </AppShell.Header>
