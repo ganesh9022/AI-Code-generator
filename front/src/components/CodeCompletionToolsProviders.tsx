@@ -10,6 +10,13 @@ import { Model, supported_language_versions } from "./Layout/Tools";
 import * as monaco from "monaco-editor";
 import axios from "axios";
 
+interface Params {
+  prefix: string;
+  currentLine: string;
+  suffix: string;
+  language: keyof typeof supported_language_versions;
+  model: Model;
+}
 interface ToolsProps {
   selectedModel: Model;
   setSelectedModel: (model: Model) => void;
@@ -28,6 +35,8 @@ interface ToolsProps {
   setSideDrawerOpen: (value: boolean) => void;
   showSelectedFileInEditor: boolean;
   setShowSelectedFileInEditor: (value: boolean) => void;
+  params: Params;
+  setParams: (params: Params) => void;
 }
 
 const ToolsContext = createContext<ToolsProps>({
@@ -48,6 +57,14 @@ const ToolsContext = createContext<ToolsProps>({
   setSideDrawerOpen: () => {},
   showSelectedFileInEditor: true,
   setShowSelectedFileInEditor: () => {},
+  params: {
+    prefix: "",
+    currentLine: "",
+    suffix: "",
+    language: "javascript",
+    model: Model.ML,
+  },
+  setParams: () => {},
 });
 
 export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
@@ -61,8 +78,15 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   const [file, setFile] = useState<File | null>(null);
   const [code, setCode] = useState("");
   const [sideDrawerOpen, setSideDrawerOpen] = useState(true);
-  const [showSelectedFileInEditor, setShowSelectedFileInEditor] =
-    useState(true);
+  const [showSelectedFileInEditor, setShowSelectedFileInEditor] = useState(true);
+  const [params, setParams] = useState({
+    prefix: "",
+    currentLine: "",
+    suffix: "",
+    language: language,
+    model: selectedModel,
+  });
+
   const API = axios.create({
     baseURL: "https://emkc.org/api/v2/piston",
   });
@@ -150,6 +174,8 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
         setSideDrawerOpen,
         showSelectedFileInEditor,
         setShowSelectedFileInEditor,
+        params,
+        setParams,
       }}
     >
       {children}

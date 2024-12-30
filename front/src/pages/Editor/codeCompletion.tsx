@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import { Paper, Title } from "@mantine/core";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
@@ -6,15 +6,8 @@ import { CompletionFormatter } from "../../components/completion-formatter";
 import useApi from "../../hooks/useApi";
 
 const CodeCompletionEditor: React.FC = () => {
-  const { language, editorRef, output, selectedModel, code } = useTools();
+  const { language, editorRef, output, params, setParams,code } = useTools();
   const monaco = useMonaco();
-  const [params, setParams] = useState({
-    prefix: "",
-    currentLine: "",
-    suffix: "",
-    language,
-    model: selectedModel,
-  });
   const { data } = useApi("code-snippet", params);
 
   useEffect(() => {
@@ -57,13 +50,6 @@ const CodeCompletionEditor: React.FC = () => {
     );
     return () => provider.dispose();
   }, [monaco, language, data]);
-  useEffect(() => {
-    setParams((prevParams) => ({
-      ...prevParams,
-      language: language,
-      model: selectedModel,
-    }));
-  }, [language, selectedModel]);
   return (
     <div style={{ height: "90vh" }}>
       <Paper style={{ display: "flex", height: "100%" }}>
