@@ -1,11 +1,15 @@
 from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from dotenv import load_dotenv
+import os
 
-db = create_engine('sqlite:///mydb.db', echo=True)
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+db = create_engine(DATABASE_URL)
 
 Session = sessionmaker(bind=db)
 Base = declarative_base()
-
 
 class User(Base):
     __tablename__ = "users"
