@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import { Paper, Title } from "@mantine/core";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
@@ -6,16 +6,9 @@ import { CompletionFormatter } from "../../components/completion-formatter";
 import useApi from "../../hooks/useApi";
 import { File } from "../../utils/file-manager";
 const CodeCompletionEditor = ({ selectedFile }: { selectedFile?: File }) => {
-  const { language, editorRef, output, selectedModel, code } = useTools();
+  const { language, editorRef, output, params, setParams,code } = useTools();
   const monaco = useMonaco();
-  const [params, setParams] = useState({
-    prefix: "",
-    currentLine: "",
-    suffix: "",
-    language,
-    model: selectedModel,
-  });
-  const { data } = useApi("code-snippet", params)
+  const { data } = useApi("code-snippet", params);
 
   useEffect(() => {
     if (!monaco || !selectedFile) return;
