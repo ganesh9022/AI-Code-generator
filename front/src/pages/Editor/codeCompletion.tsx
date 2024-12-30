@@ -4,8 +4,8 @@ import { Paper, Title } from "@mantine/core";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
 import { CompletionFormatter } from "../../components/completion-formatter";
 import useApi from "../../hooks/useApi";
-
-const CodeCompletionEditor: React.FC = () => {
+import { File } from "../../utils/file-manager";
+const CodeCompletionEditor = ({ selectedFile }: { selectedFile?: File }) => {
   const { language, editorRef, output, selectedModel, code } = useTools();
   const monaco = useMonaco();
   const [params, setParams] = useState({
@@ -15,10 +15,10 @@ const CodeCompletionEditor: React.FC = () => {
     language,
     model: selectedModel,
   });
-  const { data } = useApi("code-snippet", params);
+  const { data } = useApi("code-snippet", params)
 
   useEffect(() => {
-    if (!monaco) return;
+    if (!monaco || !selectedFile) return;
 
     const provider = monaco.languages.registerInlineCompletionsProvider(
       language,
@@ -52,11 +52,14 @@ const CodeCompletionEditor: React.FC = () => {
             ),
           };
         },
-        freeInlineCompletions: () => {},
+        freeInlineCompletions: () => { },
       }
     );
     return () => provider.dispose();
-  }, [monaco, language, data]);
+  }, [monaco, language, data, selectedFile]);
+  if (!selectedFile) return null;
+
+  const selectedFileContent = selectedFile.content;
 
   return (
     <div style={{ height: "90vh" }}>
@@ -75,7 +78,7 @@ const CodeCompletionEditor: React.FC = () => {
               formatOnPaste: true,
               trimAutoWhitespace: true,
             }}
-            value={code}
+            value={selectedFileContent || code}
             onChange={(value, ev) => {
               if (value) {
                 const lineNumber = ev.changes[0].range.startLineNumber;

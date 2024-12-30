@@ -9,6 +9,7 @@ import React, {
 import { Model, supported_language_versions } from "./Layout/Tools";
 import * as monaco from "monaco-editor";
 import axios from "axios";
+import { Directory } from "../utils/file-manager";
 
 interface ToolsProps {
   selectedModel: Model;
@@ -28,6 +29,10 @@ interface ToolsProps {
   setSideDrawerOpen: (value: boolean) => void;
   showSelectedFileInEditor: boolean;
   setShowSelectedFileInEditor: (value: boolean) => void;
+  uploadFiles: File[] | null;
+  setUploadFiles: (file: File[] | null) => void;
+  setUploadFolders: (directory: Directory | null) => void;
+  uploadFolders: Directory | null;
 }
 
 const ToolsContext = createContext<ToolsProps>({
@@ -48,21 +53,25 @@ const ToolsContext = createContext<ToolsProps>({
   setSideDrawerOpen: () => {},
   showSelectedFileInEditor: true,
   setShowSelectedFileInEditor: () => {},
+  setUploadFiles: () => {},
+  uploadFiles: null,
+  setUploadFolders: () => {},
+  uploadFolders: null,
 });
 
 export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [selectedModel, setSelectedModel] = useState<Model>(Model.Groq);
-  const [language, setLanguage] =
-    useState<keyof typeof supported_language_versions>("javascript");
+  const [language, setLanguage] = useState<keyof typeof supported_language_versions>("javascript");
   const [output, setOutput] = useState<string>("");
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [code, setCode] = useState("");
   const [sideDrawerOpen, setSideDrawerOpen] = useState(true);
-  const [showSelectedFileInEditor, setShowSelectedFileInEditor] =
-    useState(true);
+  const [showSelectedFileInEditor, setShowSelectedFileInEditor] = useState(true);
+  const [uploadFiles, setUploadFiles] = useState<File[] | null>(null);
+  const [uploadFolders, setUploadFolders] = useState<Directory | null>(null);
   const API = axios.create({
     baseURL: "https://emkc.org/api/v2/piston",
   });
@@ -150,6 +159,10 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
         setSideDrawerOpen,
         showSelectedFileInEditor,
         setShowSelectedFileInEditor,
+        setUploadFiles,
+        uploadFiles,
+        setUploadFolders,
+        uploadFolders,
       }}
     >
       {children}
