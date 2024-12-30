@@ -77,8 +77,9 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [code, setCode] = useState("");
-  const [sideDrawerOpen, setSideDrawerOpen] = useState(true);
-  const [showSelectedFileInEditor, setShowSelectedFileInEditor] = useState(true);
+  const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
+  const [showSelectedFileInEditor, setShowSelectedFileInEditor] =
+    useState(true);
   const [params, setParams] = useState({
     prefix: "",
     currentLine: "",
@@ -86,7 +87,6 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
     language: language,
     model: selectedModel,
   });
-
   const API = axios.create({
     baseURL: "https://emkc.org/api/v2/piston",
   });

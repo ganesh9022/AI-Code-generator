@@ -66,6 +66,7 @@ const Tools: React.FC<ToolsProps> = ({
             language: newLanguage,
           }));
         }}
+        searchable
       />
       <Select
         data={modelOptions}
@@ -78,6 +79,7 @@ const Tools: React.FC<ToolsProps> = ({
             model: newModel,
           }));
         }}
+        searchable
       />
     </Flex>
   );

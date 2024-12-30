@@ -4,7 +4,8 @@ import { router } from "./Router";
 import { theme } from "./theme";
 import { RouterProvider } from "react-router-dom";
 import { ToolsProvider } from "./components/CodeCompletionToolsProviders";
-import { ClerkProvider, SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-react";
+import { WelcomePage } from "./components/authentication/WelcomePage";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -17,10 +18,9 @@ export default function App() {
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
       <MantineProvider theme={theme}>
         <SignedOut>
-          <SignInButton />
+          <WelcomePage/> 
         </SignedOut>
         <SignedIn>
-          <UserButton />
           <ToolsProvider>
             <RouterProvider router={router} />
           </ToolsProvider>

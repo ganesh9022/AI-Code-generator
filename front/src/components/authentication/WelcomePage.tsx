@@ -1,8 +1,7 @@
+import { SignInButton, SignUpButton } from "@clerk/clerk-react"
 import { Button, Flex, Title } from "@mantine/core"
-import { useNavigate } from "react-router-dom"
 
-export function HomePage() {
-  const navigate = useNavigate()
+export function WelcomePage() {
 
   return (
       <Flex
@@ -23,16 +22,26 @@ export function HomePage() {
         >
           Welcome to Code Creator
         </Title>
-
+        <Flex direction="row" gap="md">
+        <SignInButton>
         <Button
-          mt="lg"
-          variant="gradient"
-          gradient={{ from: "yellow", to: "green" }}
-          size="md"
-          onClick={() => navigate("/editor")}
-        >
-          Generate Code
+            mt="lg"
+            variant="gradient"
+            gradient={{ from: "yellow", to: "green" }}
+            size="md"
+        >Sign In
         </Button>
+        </SignInButton>
+        <SignUpButton>
+        <Button
+            mt="lg"
+            variant="gradient"
+            gradient={{ from: "yellow", to: "green" }}
+            size="md"
+        >Sign Up
+        </Button>
+        </SignUpButton>
+        </Flex>
       </Flex>
   )
 }
