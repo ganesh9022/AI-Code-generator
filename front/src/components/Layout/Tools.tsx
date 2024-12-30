@@ -1,6 +1,7 @@
 import React from "react";
 import { Flex, Button, Select, rem } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons-react";
+import { useTools, Params } from "../CodeCompletionToolsProviders";
 
 export enum Model {
   Ollama = "ollama",
@@ -48,6 +49,7 @@ const Tools: React.FC<ToolsProps> = ({
   const icon = (
     <IconPlayerPlay style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
   );
+  const { setParams } = useTools();
   return (
     <Flex justify="center" align="flex-end" gap="md" m={10}>
       <Button leftSection={icon} variant="filled" onClick={runCode}>
@@ -56,15 +58,27 @@ const Tools: React.FC<ToolsProps> = ({
       <Select
         data={options}
         value={language}
-        onChange={(e) =>
-          setLanguage(e as keyof typeof supported_language_versions)
-        }
+        onChange={(e) => {
+          const newLanguage = e as keyof typeof supported_language_versions;
+          setLanguage(newLanguage);
+          setParams((prevParams: Params) => ({
+            ...prevParams,
+            language: newLanguage,
+          }));
+        }}
         searchable
       />
       <Select
         data={modelOptions}
         value={selectedModel}
-        onChange={(e) => setSelectedModel(e as Model)}
+        onChange={(e) => {
+          const newModel = e as Model;
+          setSelectedModel(newModel);
+          setParams((prevParams: Params) => ({
+            ...prevParams,
+            model: newModel,
+          }));
+        }}
         searchable
       />
     </Flex>
