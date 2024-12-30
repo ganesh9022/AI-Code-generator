@@ -57,7 +57,13 @@ const CodeCompletionEditor: React.FC = () => {
     );
     return () => provider.dispose();
   }, [monaco, language, data]);
-
+  useEffect(() => {
+    setParams((prevParams) => ({
+      ...prevParams,
+      language: language,
+      model: selectedModel,
+    }));
+  }, [language, selectedModel]);
   return (
     <div style={{ height: "90vh" }}>
       <Paper style={{ display: "flex", height: "100%" }}>
