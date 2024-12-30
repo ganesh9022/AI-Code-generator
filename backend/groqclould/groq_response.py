@@ -33,12 +33,3 @@ def get_groq_response(prefix: str, currentLine: str, suffix: str, language: str)
     except Exception as e:
         return str(e)
 
-
-def answer_user_query(question: str) -> str:
-    if not question:
-        return jsonify({"error": "'question' parameter is required."}), 400
-
-    input_prompt = f"Answer the following question:\n{question}"
-    answer = get_groq_response(input_prompt)
-
-    return jsonify({"answer": answer if answer else "No answer available."})
