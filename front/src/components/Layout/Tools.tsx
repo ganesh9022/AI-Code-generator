@@ -59,11 +59,13 @@ const Tools: React.FC<ToolsProps> = ({
         onChange={(e) =>
           setLanguage(e as keyof typeof supported_language_versions)
         }
+        searchable
       />
       <Select
         data={modelOptions}
         value={selectedModel}
         onChange={(e) => setSelectedModel(e as Model)}
+        searchable
       />
     </Flex>
   );

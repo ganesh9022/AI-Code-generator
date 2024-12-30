@@ -61,13 +61,13 @@ export const AppHeader = () => {
 
   return (
     <AppShell.Header h={64} bg={colorScheme === "dark" ? "gray.8" : "white"}>
-      <Group justify="space-between" align="center" h={64}>
+      <Group justify="space-between" align="center" h={64} wrap="nowrap">
         <Group gap={0} align="center" ml={10}>
           <Title size="h3" mr="xs" fw={600}>
             {pageTitle}
           </Title>
         </Group>
-        <Group>
+        <Group gap={0} wrap="nowrap">
           <Button
             leftSection={
               <IconAdjustmentsPlus
