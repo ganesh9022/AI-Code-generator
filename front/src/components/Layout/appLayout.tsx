@@ -7,11 +7,11 @@ import {
   Stack,
   ThemeIcon,
 } from "@mantine/core";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { AppHeader } from "./appheader";
 import { SidebarLink } from "./Sidebar";
 import { IconCode, IconChevronLeftPipe } from "@tabler/icons-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SideDrawer from "../SideDrawer";
 import { useTools } from "../CodeCompletionToolsProviders";
 
@@ -19,6 +19,17 @@ export const AppLayout = () => {
   const { colorScheme } = useMantineColorScheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { sideDrawerOpen, setSideDrawerOpen } = useTools();
+  const location = useLocation();
+
+  useEffect(() => {
+    const titles: { [key: string]: string } = {
+      "/": "AI code generator",
+      "/editor": "AI code generator - Editor",
+      "/chat": "AI code generator - Chat",
+    };
+    document.title = titles[location.pathname] || "AI code generator - 404";
+  }, [location]);
+
   return (
     <AppShell
       header={{ height: 64 }}
