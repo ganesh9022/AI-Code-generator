@@ -42,6 +42,8 @@ interface ToolsProps {
   uploadFolders: Directory | null;
   params: Params;
   setParams: (params: Params) => void;
+  isEditorVisible: boolean;
+  setIsEditorVisible: (value: boolean) => void; 
 }
 
 const ToolsContext = createContext<ToolsProps>({
@@ -74,6 +76,8 @@ const ToolsContext = createContext<ToolsProps>({
     model: Model.ML,
   },
   setParams: () => {},
+  isEditorVisible: true,
+  setIsEditorVisible: () => {},
 });
 
 export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
@@ -96,6 +100,7 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
     language: language,
     model: selectedModel,
   });
+  const [isEditorVisible, setIsEditorVisible] = useState(false);
   const API = axios.create({
     baseURL: "https://emkc.org/api/v2/piston",
   });
@@ -189,6 +194,8 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
         uploadFolders,
         params,
         setParams,
+        isEditorVisible,
+        setIsEditorVisible,
       }}
     >
       {children}

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Directory, File, sortDir, sortFile } from '../../src/utils/file-manager'
 import styled from "@emotion/styled";
 import { getIcon } from './icon';
+import { useTools } from './CodeCompletionToolsProviders';
 
 interface FileTreeProps {
   rootDir: Directory;
@@ -20,6 +21,7 @@ interface SubTreeProps {
 }
 
 const SubTree = (props: SubTreeProps) => {
+  const { isEditorVisible, setIsEditorVisible } = useTools();
   console.log(props)
   return (
     <div>
@@ -43,7 +45,9 @@ const SubTree = (props: SubTreeProps) => {
               <FileDiv
                 file={file}
                 selectedFile={props.selectedFile}
-                onClick={() => props.onSelect(file)} />
+                onClick={() => {props.onSelect(file)
+                  setIsEditorVisible(true)}
+                } />
             </React.Fragment>
           ))
       }
@@ -81,7 +85,7 @@ const Div = styled.div<{
   display: flex;
   align-items: center;
   padding-left: ${props => props.depth * 16}px;
-  background-color: ${props => props.isSelected ? "#add8e6" : "transparent"};
+  background-color: ${props => props.isSelected ? "#4a90e2" : "transparent"};
 
   :hover {
     cursor: pointer;

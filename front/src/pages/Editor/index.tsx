@@ -23,7 +23,7 @@ const EditorPage = () => {
   };
 
   const [rootDir, setRootDir] = useState<Directory>(dummyDir);
-  const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
+  const [selectedFile, setSelectedFile] = useState<File | undefined >(undefined);
 
   useEffect(() => {
     const updateDir = async () => {
@@ -56,11 +56,11 @@ const EditorPage = () => {
 
   return (
     <Container fluid p={0}>
-      <Grid gutter="md" style={{ height: "90vh" }} pt={10}>
+      <Grid gutter="md" style={{ height: "90vh"  }} pt={10}>
         <>
-          <Grid.Col style={{ height: "90vh", display: "flex", flexDirection: "column", justifyContent: "space-between" }} span={0.5} p={10} pl={20}>
+          <Grid.Col style={{ height: "90vh", backgroundColor:"#121212" ,display: "flex", flexDirection: "column", justifyContent: "space-between" }} span={0.5} p={10} pl={20}>
             <Box>
-              <IconFiles onClick={() => setCollapsed(!collapsed)} stroke={2} size={30} />
+              <IconFiles style={{cursor:'pointer'}} onClick={() => setCollapsed(!collapsed)} stroke={2} size={30} />
             </Box>
             <Box mt="auto">
               <Upload collapsed={collapsed} />
@@ -83,7 +83,7 @@ const EditorPage = () => {
           )}
         </>
         <Grid.Col span={collapsed ? 11.5 : 9}>
-          <CodeCompletionEditor selectedFile={selectedFile} />
+          <CodeCompletionEditor selectedFile={selectedFile} setSelectedFile={setSelectedFile}/>
         </Grid.Col>
       </Grid>
     </Container>
