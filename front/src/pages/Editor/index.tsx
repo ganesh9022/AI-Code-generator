@@ -1,10 +1,12 @@
-import { Container, Grid } from "@mantine/core";
+import { Box, Container, Grid, Text } from "@mantine/core";
 import CodeCompletionEditor from "./codeCompletion";
 import { FileTree } from "../../components/file-tree";
 import { Directory, Type, File } from "../../utils/file-manager";
 import { useState, useEffect } from "react";
 import { v4 as gen_random_uuid } from "uuid";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
+import { IconFiles } from "@tabler/icons-react";
+import { Upload } from "./upload";
 
 
 const EditorPage = () => {
@@ -50,16 +52,37 @@ const EditorPage = () => {
   }, [uploadFiles, uploadFolders]);
 
   const onSelect = (file: File) => setSelectedFile(file);
-  const hasFiles = rootDir.dirs.length > 0 || rootDir.files.length>0;
+  const [collapsed, setCollapsed] = useState(false)
+
   return (
     <Container fluid p={0}>
-      <Grid gutter="md" style={{ height: "100vh" }}>
-      {hasFiles && (
-          <Grid.Col span={3} p={10} pl={20}>
-            <FileTree rootDir={rootDir} selectedFile={selectedFile} onSelect={onSelect} />
+      <Grid gutter="md" style={{ height: "90vh" }} pt={10}>
+        <>
+          <Grid.Col style={{ height: "90vh", display: "flex", flexDirection: "column", justifyContent: "space-between" }} span={0.5} p={10} pl={20}>
+            <Box>
+              <IconFiles onClick={() => setCollapsed(!collapsed)} stroke={2} size={30} />
+            </Box>
+            <Box mt="auto">
+              <Upload collapsed={collapsed} />
+            </Box>
           </Grid.Col>
-        )}
-        <Grid.Col span={hasFiles ? 9 : 12}>
+
+          {!collapsed && (
+            <Grid.Col span={2.5} style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <Box>
+                <Text pb={10} pl={20} >EXPLORER</Text>
+                <Box p={0} m={0}>
+                  <FileTree rootDir={rootDir} selectedFile={selectedFile} onSelect={onSelect} />
+                </Box>
+              </Box>
+              <Box mt="auto" pb={30}>
+
+              </Box>
+            </Grid.Col>
+
+          )}
+        </>
+        <Grid.Col span={collapsed ? 11.5 : 9}>
           <CodeCompletionEditor selectedFile={selectedFile} />
         </Grid.Col>
       </Grid>

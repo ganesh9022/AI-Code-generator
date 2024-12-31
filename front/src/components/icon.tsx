@@ -2,17 +2,18 @@ import React, { ReactNode } from "react";
 import {
   SiHtml5,
   SiCss3,
-  SiJavascript,
   SiTypescript,
   SiJson,
 } from "react-icons/si";
-import { FcFolder, FcOpenedFolder, FcPicture, FcFile } from "react-icons/fc";
+import {FcPicture, FcFile } from "react-icons/fc";
 import { AiFillFileText } from "react-icons/ai";
+import { IconChevronDown,IconChevronLeft } from "@tabler/icons-react";
+import { DiJavascript } from "react-icons/di";
 
 function getIconHelper() {
   const cache = new Map<string, ReactNode>();
-  cache.set("js", <SiJavascript color="#fbcb38" />);
-  cache.set("jsx", <SiJavascript color="#fbcb38" />);
+  cache.set("js", <DiJavascript size={20} color="#fbcb38" />);
+  cache.set("jsx", <DiJavascript color="#fbcb38" />);
   cache.set("ts", <SiTypescript color="#378baa" />);
   cache.set("tsx", <SiTypescript color="#378baa" />);
   cache.set("css", <SiCss3 color="purple" />);
@@ -22,8 +23,8 @@ function getIconHelper() {
   cache.set("jpg", <FcPicture />);
   cache.set("ico", <FcPicture />);
   cache.set("txt", <AiFillFileText color="white" />);
-  cache.set("closedDirectory", <FcFolder />);
-  cache.set("openDirectory", <FcOpenedFolder />);
+  cache.set("closedDirectory", <IconChevronLeft />);
+  cache.set("openDirectory", <IconChevronDown />);
   return function (extension: string, name: string): ReactNode {
     if (cache.has(extension)) return cache.get(extension);
     else if (cache.has(name)) return cache.get(name);

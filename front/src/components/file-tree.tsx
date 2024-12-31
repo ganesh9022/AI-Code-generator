@@ -67,7 +67,7 @@ const FileDiv = ({ file, icon, selectedFile, onClick }: {
       <FileIcon
         name={icon}
         extension={file.name.split('.').pop() || ""} />
-      <span style={{ marginLeft: 1 }}>
+      <span color="var(--mantine-color-text)" style={{ marginLeft: 1 }}>
         {file.name}
       </span>
     </Div>
@@ -81,11 +81,11 @@ const Div = styled.div<{
   display: flex;
   align-items: center;
   padding-left: ${props => props.depth * 16}px;
-  background-color: ${props => props.isSelected ? "#242424" : "transparent"};
+  background-color: ${props => props.isSelected ? "#add8e6" : "transparent"};
 
   :hover {
     cursor: pointer;
-    background-color: #242424;
+    background-color:#808080;
   }
 `
 
