@@ -9,6 +9,7 @@ import React, {
 import { Model, supported_language_versions } from "./Layout/Tools";
 import * as monaco from "monaco-editor";
 import axios from "axios";
+import { Directory } from "../utils/file-manager";
 
 interface Params {
   prefix: string;
@@ -35,6 +36,10 @@ interface ToolsProps {
   setSideDrawerOpen: (value: boolean) => void;
   showSelectedFileInEditor: boolean;
   setShowSelectedFileInEditor: (value: boolean) => void;
+  uploadFiles: File[] | null;
+  setUploadFiles: (file: File[] | null) => void;
+  setUploadFolders: (directory: Directory | null) => void;
+  uploadFolders: Directory | null;
   params: Params;
   setParams: (params: Params) => void;
 }
@@ -57,6 +62,10 @@ const ToolsContext = createContext<ToolsProps>({
   setSideDrawerOpen: () => {},
   showSelectedFileInEditor: true,
   setShowSelectedFileInEditor: () => {},
+  setUploadFiles: () => {},
+  uploadFiles: null,
+  setUploadFolders: () => {},
+  uploadFolders: null,
   params: {
     prefix: "",
     currentLine: "",
@@ -71,15 +80,15 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [selectedModel, setSelectedModel] = useState<Model>(Model.Groq);
-  const [language, setLanguage] =
-    useState<keyof typeof supported_language_versions>("javascript");
+  const [language, setLanguage] = useState<keyof typeof supported_language_versions>("javascript");
   const [output, setOutput] = useState<string>("");
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [code, setCode] = useState("");
-  const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
-  const [showSelectedFileInEditor, setShowSelectedFileInEditor] =
-    useState(true);
+  const [sideDrawerOpen, setSideDrawerOpen] = useState(true);
+  const [showSelectedFileInEditor, setShowSelectedFileInEditor] = useState(true);
+  const [uploadFiles, setUploadFiles] = useState<File[] | null>(null);
+  const [uploadFolders, setUploadFolders] = useState<Directory | null>(null);
   const [params, setParams] = useState({
     prefix: "",
     currentLine: "",
@@ -174,6 +183,10 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
         setSideDrawerOpen,
         showSelectedFileInEditor,
         setShowSelectedFileInEditor,
+        setUploadFiles,
+        uploadFiles,
+        setUploadFolders,
+        uploadFolders,
         params,
         setParams,
       }}

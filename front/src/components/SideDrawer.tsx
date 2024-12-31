@@ -2,6 +2,7 @@ import React from "react";
 import { Checkbox, Drawer, FileInput, rem } from "@mantine/core";
 import { IconFileText } from "@tabler/icons-react";
 import { useTools } from "./CodeCompletionToolsProviders";
+import CustomFileInput from "./CustomFileInput";
 
 interface SideDrawerProps {
   opened: boolean;
@@ -18,6 +19,7 @@ const SideDrawer: React.FC<SideDrawerProps> = ({ opened, close }) => {
   const icon = (
     <IconFileText style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
   );
+
   return (
     <Drawer
       opened={opened}
@@ -45,6 +47,7 @@ const SideDrawer: React.FC<SideDrawerProps> = ({ opened, close }) => {
           setShowSelectedFileInEditor(event.currentTarget.checked);
         }}
       />
+      <CustomFileInput />
     </Drawer>
   );
 };
