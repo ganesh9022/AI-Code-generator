@@ -44,22 +44,20 @@ export const AppLayout = () => {
         p={12}
         style={{ transition: "width 200ms" }}
       >
-        <Link to="/" style={{ textDecoration: "none" }}>
-          <Group p={8} wrap="nowrap">
-            <ThemeIcon
-              size="sm"
-              bg="transparent"
-              style={{ textDecoration: "none" }}
-            >
-              <IconCode />
-            </ThemeIcon>
-            {!isCollapsed && (
-              <Title c="white" size="h3" fw={400}>
-                Code Creator
-              </Title>
-            )}
-          </Group>
-        </Link>
+        <Group p={8} wrap="nowrap">
+          <ThemeIcon
+            size="sm"
+            bg="transparent"
+            style={{ textDecoration: "none" }}
+          >
+            <IconCode />
+          </ThemeIcon>
+          {!isCollapsed && (
+            <Title c="white" size="h3" fw={400} style={{ fontSize: "initial" }}>
+              AI code generator
+            </Title>
+          )}
+        </Group>
         <Stack h="100%" justify="space-between" mt={32}>
           <Stack py={16} gap={8}>
             <SidebarLink isCollapsed={isCollapsed} />

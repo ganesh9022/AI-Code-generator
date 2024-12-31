@@ -17,7 +17,7 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   },
   {
     path: "editor",
-    name: "Code Editor",
+    name: "Editor",
     position: "top",
     tooltip: "Explore multi-cloud spend, correlate it to your business growth",
     icon: IconEdit,
