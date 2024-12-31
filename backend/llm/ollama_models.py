@@ -12,27 +12,29 @@ def get_absolute_path(relative_path) -> str:
 def generate_code(
     prompt: str,
     suffix: Optional[str] = None,
-) -> dict:
+    language: str = '',
+) -> str:
     """
     Args:
         prompt (str): The text prompt to guide the generation.
         suffix (Optional[str]): Text appended after the generation.
+        language (str): The programming language for the code generation.
 
     Returns:
-        dict: The response formatted as { "next_line": "Generated code" }.
+        str: The response generated code as a formatted string.
     """
     try:
         # Load configuration from JSON file
         with open(get_absolute_path('ollama.config.json'), "r") as config_file:
             config = json.load(config_file)
 
+        enhanced_prompt = f"Write a program in {language} for :\n{prompt}"
         response = generate(
             model=config["model"],
-            prompt=prompt,
+            prompt=enhanced_prompt,
             suffix=suffix,
             options=config.get("options"),
         )
-
-        return {"next_line": response['response']}
+        return response['response']
     except Exception as e:
         return {"next_line": f"An error occurred: {str(e)}"}
