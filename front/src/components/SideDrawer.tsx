@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Checkbox, Drawer, FileButton, FileInput, rem } from "@mantine/core";
+import { Box, Button, Checkbox, Drawer, FileButton, FileInput, Text, rem } from "@mantine/core";
 import { IconFileText } from "@tabler/icons-react";
 import { useTools } from "./CodeCompletionToolsProviders";
 import { Directory, File } from "../utils/file-manager";
@@ -99,41 +99,55 @@ const SideDrawer: React.FC<SideDrawerProps> = ({ opened, close }) => {
       title="More options"
       position="right"
     >
-      <FileInput
-        leftSection={icon}
-        placeholder="Upload your context file"
-        leftSectionPointerEvents="none"
-        accept=".zip,.txt,.js,.ts,.jsx,.tsx,.json,.py,.java,.php"
-        value={file}
-        onChange={(files) => {
-          if (files) {
-            setFile(files);
-          }
-        }}
-        mb={10}
-      />
-      <Checkbox
-        label="Show selected file in editor"
-        checked={showSelectedFileInEditor}
-        onChange={(event) => {
-          setShowSelectedFileInEditor(event.currentTarget.checked);
-        }}
-      />
-      <FileButton multiple onChange={(files) => setUploadFiles(files)}>
-        {(props) => <Button m={10} {...props}>Upload File</Button>}
-      </FileButton>
-      <input
-        type="file"
-        name="file"
-        multiple
-        ref={(input) => {
-          if (input) {
-            input.setAttribute("webkitdirectory", "true");
-            input.setAttribute("directory", "true");
-          }
-        }}
-        onChange={handleFolderUpload}
-      />
+      <Box style={{ display: 'flex', flexDirection: 'column', gap: rem(15) }}>
+        <FileInput
+          leftSection={icon}
+          placeholder="Upload your context file"
+          leftSectionPointerEvents="none"
+          accept=".zip,.txt,.js,.ts,.jsx,.tsx,.json,.py,.java,.php"
+          value={file}
+          onChange={(files) => {
+            if (files) {
+              setFile(files);
+            }
+          }}
+        />
+        <Checkbox
+          label="Show selected file in editor"
+          checked={showSelectedFileInEditor}
+          onChange={(event) => {
+            setShowSelectedFileInEditor(event.currentTarget.checked);
+          }}
+        />
+        <FileButton multiple onChange={(files) => setUploadFiles(files)}>
+          {(props) => <Button radius='md' {...props}><Text>Upload Files</Text></Button>}
+        </FileButton>
+        <Button
+          component="label"
+          color="blue"
+          radius="md"
+          styles={{
+            root: {
+              cursor: 'pointer',
+            },
+          }}
+        >
+          <Text> Upload Folders</Text>
+          <input
+            type="file"
+            name="file"
+            multiple
+            style={{ display: 'none' }}
+            ref={(input) => {
+              if (input) {
+                input.setAttribute("webkitdirectory", "true");
+                input.setAttribute("directory", "true");
+              }
+            }}
+            onChange={handleFolderUpload}
+          />
+        </Button>
+      </Box>
     </Drawer>
   );
 };
