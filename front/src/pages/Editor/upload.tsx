@@ -1,0 +1,115 @@
+import { Box, Button, FileButton, Text } from "@mantine/core";
+import { useTools } from "../../components/CodeCompletionToolsProviders";
+import { v4 as gen_random_uuid } from "uuid";
+import { Directory, File } from "../../utils/file-manager";
+import { IconFolderUp, IconFileUpload } from '@tabler/icons-react';
+export const Upload = ({ collapsed }: { collapsed: boolean }) => {
+    const {
+        setUploadFiles,
+        setUploadFolders
+    } = useTools();
+    const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+
+        if (files && files.length > 0) {
+            const dirMap: { [path: string]: Directory } = {}
+            const filesArray: File[] = [];
+
+            for (const file of Array.from(files)) {
+                const relativePath = file.webkitRelativePath;
+                const pathParts = relativePath.split('/');
+
+                const fileName = pathParts.pop() as string;
+                let currentPath = '';
+                let parentDir: Directory | undefined;
+                pathParts.forEach((part, index) => {
+                    currentPath = currentPath ? `${currentPath}/${part}` : part;
+
+                    if (!dirMap[currentPath]) {
+                        const newDir: Directory = {
+                            id: gen_random_uuid(),
+                            name: part,
+                            parentId: parentDir?.id || '',
+                            type: 1,
+                            depth: index + 1,
+                            dirs: [],
+                            files: [],
+                        };
+
+                        dirMap[currentPath] = newDir;
+                        if (parentDir) {
+                            parentDir.dirs.push(newDir);
+                        }
+
+                        parentDir = newDir;
+                    } else {
+                        parentDir = dirMap[currentPath];
+                    }
+                });
+                const content = await file.text();
+
+                const fileObject: File = {
+                    id: gen_random_uuid(),
+                    name: fileName,
+                    parentId: parentDir?.id || '',
+                    depth: pathParts.length + 1,
+                    content,
+                    type: 2,
+                };
+
+                parentDir?.files.push(fileObject);
+                filesArray.push(fileObject);
+            }
+            const rootDirectory: Directory = {
+                id: gen_random_uuid(),
+                name: 'root',
+                parentId: '',
+                type: 1,
+                depth: 0,
+                dirs: Object.values(dirMap).filter((dir) => dir.depth === 1),
+                files: [],
+            };
+
+            setUploadFolders(rootDirectory)
+        }
+    };
+    return (
+        <Box mt='auto' >
+            <FileButton multiple onChange={(files) => setUploadFiles(files)}>
+                {(props) => <Button bg='none' pl={5} radius='md' {...props}><Box display='flex'>
+                    <IconFileUpload color="var(--mantine-color-text)" stroke={2} />
+                    {!collapsed && <Text c="var(--mantine-color-text)" pl={20}>Upload Files</Text>}
+                </Box></Button>}
+            </FileButton>
+            <Button
+                component="label"
+                pl={5}
+                color="var(--mantine-color-text)"
+                bg='none'
+                styles={{
+                    root: {
+                        cursor: 'pointer',
+                    },
+                }}
+            >
+                <Box display='flex'>
+                    <IconFolderUp color="var(--mantine-color-text)" stroke={2} />
+                    {!collapsed && <Text c="var(--mantine-color-text)" pl={20}>Upload Folders</Text>}
+                </Box>
+                <input
+                    type="file"
+                    name="file"
+                    multiple
+                    style={{ display: 'none' }}
+                    ref={(input) => {
+                        if (input) {
+                            input.setAttribute("webkitdirectory", "true");
+                            input.setAttribute("directory", "true");
+                        }
+                    }}
+                    onChange={handleFolderUpload}
+                />
+            </Button>
+        </Box>
+    )
+}
