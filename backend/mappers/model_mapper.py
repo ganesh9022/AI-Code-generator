@@ -17,7 +17,7 @@ def map_models(
     if model == Model.Groq.value:
         return get_groq_response(prefix, currentLine, suffix, language)
     elif model == Model.Ollama.value:
-        return generate_code(currentLine, suffix)
+        return generate_code(prompt=currentLine, suffix=suffix, language=language)
     elif model == Model.ML.value:
         return operation(currentLine)
     else:
