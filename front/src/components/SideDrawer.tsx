@@ -1,7 +1,8 @@
 import React from "react";
-import { Checkbox, Drawer, FileInput,rem } from "@mantine/core";
+import { Checkbox, Drawer, FileInput, rem } from "@mantine/core";
 import { IconFileText } from "@tabler/icons-react";
 import { useTools } from "./CodeCompletionToolsProviders";
+import CustomFileInput from "./CustomFileInput";
 
 interface SideDrawerProps {
   opened: boolean;
@@ -19,7 +20,6 @@ const SideDrawer: React.FC<SideDrawerProps> = ({ opened, close }) => {
     <IconFileText style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
   );
 
-
   return (
     <Drawer
       opened={opened}
@@ -27,26 +27,27 @@ const SideDrawer: React.FC<SideDrawerProps> = ({ opened, close }) => {
       title="More options"
       position="right"
     >
-        <FileInput
-          leftSection={icon}
-          placeholder="Upload your context file"
-          leftSectionPointerEvents="none"
-          accept=".zip,.txt,.js,.ts,.jsx,.tsx,.json,.py,.java,.php"
-          value={file}
-          onChange={(files) => {
-            if (files) {
-              setFile(files);
-            }
-          }}
-          mb={10}
-        />
-        <Checkbox
-          label="Show selected file in editor"
-          checked={showSelectedFileInEditor}
-          onChange={(event) => {
-            setShowSelectedFileInEditor(event.currentTarget.checked);
-          }}
-        />
+      <FileInput
+        leftSection={icon}
+        placeholder="Upload your context file"
+        leftSectionPointerEvents="none"
+        accept=".zip,.txt,.js,.ts,.jsx,.tsx,.json,.py,.java,.php"
+        value={file}
+        onChange={(files) => {
+          if (files) {
+            setFile(files);
+          }
+        }}
+        mb={10}
+      />
+      <Checkbox
+        label="Show selected file in editor"
+        checked={showSelectedFileInEditor}
+        onChange={(event) => {
+          setShowSelectedFileInEditor(event.currentTarget.checked);
+        }}
+      />
+      <CustomFileInput />
     </Drawer>
   );
 };
