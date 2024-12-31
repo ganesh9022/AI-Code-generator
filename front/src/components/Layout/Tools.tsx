@@ -7,12 +7,14 @@ export enum Model {
   Ollama = "ollama",
   Groq = "groq",
   ML = "ml",
+  Groq_RAG = "groq_rag",
 }
 
 const modelOptions = [
   { value: Model.Ollama, label: "Ollama (codellama:7b-code)" },
   { value: Model.Groq, label: "Groq (llama3-8b-8192)" },
   { value: Model.ML, label: "ML model" },
+  { value: Model.Groq_RAG, label: "Groq RAG model" },
 ];
 
 export const supported_language_versions = {
