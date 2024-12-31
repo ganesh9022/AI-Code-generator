@@ -14,6 +14,7 @@ interface CommonProps {
 
 export interface File extends CommonProps {
   content: string;
+  path?:string;
 }
 
 export interface Directory extends CommonProps {

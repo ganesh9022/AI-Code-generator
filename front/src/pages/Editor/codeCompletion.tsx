@@ -1,15 +1,15 @@
 import React, { useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
-import { Paper, Title } from "@mantine/core";
+import { Box, Divider, Paper, Title } from "@mantine/core";
+import { MdClose } from "react-icons/md";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
 import { CompletionFormatter } from "../../components/completion-formatter";
 import useApi from "../../hooks/useApi";
 import { File } from "../../utils/file-manager";
-const CodeCompletionEditor = ({ selectedFile }: { selectedFile?: File }) => {
-  const { language, editorRef, output, params, setParams,code } = useTools();
+const CodeCompletionEditor = ({ selectedFile, setSelectedFile }: { selectedFile?: File, setSelectedFile: (file: File | undefined) => void; }) => {
+  const { language, editorRef, output, params, setParams, code, isEditorVisible, setIsEditorVisible } = useTools();
   const monaco = useMonaco();
   const { data } = useApi("code-snippet", params);
-
   useEffect(() => {
     if (!monaco || !selectedFile) return;
 
@@ -50,11 +50,57 @@ const CodeCompletionEditor = ({ selectedFile }: { selectedFile?: File }) => {
     );
     return () => provider.dispose();
   }, [monaco, language, data, selectedFile]);
-
+  const handleClose = () => {
+    setIsEditorVisible(false);
+  };
   const selectedFileContent = selectedFile?.content;
-
+  const breadcrumbItems = selectedFile?.path?.split("/");
+  if (!isEditorVisible) {
+    setSelectedFile(undefined)
+  }
   return (
     <div style={{ height: "90vh" }}>
+      {isEditorVisible && (
+        <div style={{ height: "3.5vh" }}>
+          <div style={{ display: "flex" }}>
+            <Box
+              style={{
+                backgroundColor: "#1e1e1e",
+                color: "#ffffff",
+                padding: "8px 16px",
+                fontWeight: "bold",
+              }}
+            >
+              {selectedFile?.name}
+            </Box>
+            <MdClose onClick={handleClose} style={{ cursor: "pointer", marginTop: "10px" }} />
+          </div>
+          <Divider />
+          
+        </div>
+      )}
+
+    {breadcrumbItems && breadcrumbItems.length > 0 && (
+        <Box
+          style={{
+            backgroundColor: "#1e1e1e",
+            color: "#ffffff",
+            padding: "8px 16px",
+            fontSize: "13px",
+          }}
+        >
+          {breadcrumbItems.map((segment, index) => (
+            <React.Fragment key={index}>
+              <span>{segment}</span>
+              {index < breadcrumbItems.length - 1 && (
+                <span style={{ margin: "0 8px" }}>&gt;</span>
+              )}
+            </React.Fragment>
+          ))}
+        </Box>
+      )}
+
+      <Divider />
       <Paper style={{ display: "flex", height: "100%" }}>
         <Paper w={output ? "50%" : "100%"}>
           <Editor

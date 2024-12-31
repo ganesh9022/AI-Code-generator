@@ -54,6 +54,7 @@ export const Upload = ({ collapsed }: { collapsed: boolean }) => {
                     parentId: parentDir?.id || '',
                     depth: pathParts.length + 1,
                     content,
+                    path: relativePath,
                     type: 2,
                 };
 
@@ -78,7 +79,7 @@ export const Upload = ({ collapsed }: { collapsed: boolean }) => {
             <FileButton multiple onChange={(files) => setUploadFiles(files)}>
                 {(props) => <Button bg='none' pl={5} radius='md' {...props}><Box display='flex'>
                     <IconFileUpload color="var(--mantine-color-text)" stroke={2} />
-                    {!collapsed && <Text c="var(--mantine-color-text)" pl={20}>Upload Files</Text>}
+                    {!collapsed && <Text c="var(--mantine-color-text)" pl={30}>Open Files</Text>}
                 </Box></Button>}
             </FileButton>
             <Button
@@ -94,7 +95,7 @@ export const Upload = ({ collapsed }: { collapsed: boolean }) => {
             >
                 <Box display='flex'>
                     <IconFolderUp color="var(--mantine-color-text)" stroke={2} />
-                    {!collapsed && <Text c="var(--mantine-color-text)" pl={20}>Upload Folders</Text>}
+                    {!collapsed && <Text c="var(--mantine-color-text)" pl={30}>Open Folders</Text>}
                 </Box>
                 <input
                     type="file"
