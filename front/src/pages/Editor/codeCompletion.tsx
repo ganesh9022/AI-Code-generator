@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
-import { Box, Divider, Paper, Title, useMantineColorScheme } from "@mantine/core";
+import { Box, Divider, Paper, Title, useMantineColorScheme, Text, Group } from "@mantine/core";
 import { MdClose } from "react-icons/md";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
 import { CompletionFormatter } from "../../components/completion-formatter";
@@ -60,48 +60,41 @@ const CodeCompletionEditor = ({ selectedFile, setSelectedFile }: { selectedFile?
     setSelectedFile(undefined)
   }
   return (
-    <div style={{ height: "calc(100vh - 70px)" }}>
-      {isEditorVisible && (
-        <div style={{ height: "3.5vh" }}>
-          <div style={{ display: "flex" }}>
-            <Box
-              style={{
-                backgroundColor: "#1e1e1e",
-                color: "#ffffff",
-                padding: "8px 16px",
-                fontWeight: "bold",
-              }}
-            >
-              {selectedFile?.name}
+    <Box style={{ height: "calc(100vh - 70px)" }}>
+      <Box p={5}>
+        {isEditorVisible && (
+          <Box >
+            <Box style={{ display: "flex" }}>
+              <Box>
+                <Text fw={700}>{selectedFile?.name} </Text>
+              </Box>
+              <MdClose size={22} onClick={handleClose} style={{ cursor: "pointer", alignSelf: 'center', paddingLeft: '5px' }} />
             </Box>
-            <MdClose onClick={handleClose} style={{ cursor: "pointer", marginTop: "10px" }} />
-          </div>
-          <Divider />
+            <Divider />
+          </Box>
+        )}
 
-        </div>
-      )}
+        {breadcrumbItems && breadcrumbItems.length > 0 && (
+          <Box
+            style={{
+              alignContent: 'center',
+              fontSize: "13px",
+            }}
+          >
+            <Group display="flex">
+              {breadcrumbItems.map((segment, index) => (
+                <React.Fragment key={index}>
+                  <Text size="sm">{segment}</Text>
+                  {index < breadcrumbItems.length - 1 && (
+                    <Text size="sm">&gt;</Text>
+                  )}
+                </React.Fragment>
+              ))}
+            </Group>
+          </Box>
+        )}
 
-      {breadcrumbItems && breadcrumbItems.length > 0 && (
-        <Box
-          style={{
-            backgroundColor: "#1e1e1e",
-            color: "#ffffff",
-            padding: "8px 16px",
-            fontSize: "13px",
-          }}
-        >
-          {breadcrumbItems.map((segment, index) => (
-            <React.Fragment key={index}>
-              <span>{segment}</span>
-              {index < breadcrumbItems.length - 1 && (
-                <span style={{ margin: "0 8px" }}>&gt;</span>
-              )}
-            </React.Fragment>
-          ))}
-        </Box>
-      )}
-
-      <Divider />
+      </Box>
       <Paper style={{ display: "flex", height: isEditorVisible ? "calc(96.5vh - 104px)" : "calc(100vh - 70px)", overflow: 'auto' }}>
         <Paper w={output ? "50%" : "100%"}>
           <Editor
@@ -143,7 +136,7 @@ const CodeCompletionEditor = ({ selectedFile, setSelectedFile }: { selectedFile?
           </Paper>
         )}
       </Paper>
-    </div>
+    </Box>
   );
 };
 

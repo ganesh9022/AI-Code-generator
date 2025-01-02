@@ -63,7 +63,7 @@ const EditorPage = () => {
               <IconFiles style={{ cursor: 'pointer' }} color="white" onClick={() => setCollapsed(!collapsed)} stroke={2} size={30} />
             </Box>
             <Box mt="auto">
-              <Upload collapsed={collapsed} />
+              <Upload />
             </Box>
           </Grid.Col>
 
