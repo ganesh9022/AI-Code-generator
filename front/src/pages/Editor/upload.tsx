@@ -1,9 +1,9 @@
-import { Box, Button, FileButton, Text } from "@mantine/core";
+import { Box, Button, FileButton } from "@mantine/core";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
 import { v4 as gen_random_uuid } from "uuid";
 import { Directory, File } from "../../utils/file-manager";
 import { IconFolderUp, IconFileUpload } from '@tabler/icons-react';
-export const Upload = ({ collapsed }: { collapsed: boolean }) => {
+export const Upload = () => {
     const {
         setUploadFiles,
         setUploadFolders
