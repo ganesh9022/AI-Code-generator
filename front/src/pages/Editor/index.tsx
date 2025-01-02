@@ -51,8 +51,8 @@ const EditorPage = () => {
   }, [uploadFiles, uploadFolders]);
 
   const onSelect = (file: File) => setSelectedFile(file);
-  const [collapsed, setCollapsed] = useState(false);
-
+  const [collapsed, setCollapsed] = useState(false)
+  const hasFiles = rootDir.files.length > 0|| rootDir.dirs.length > 0;
   return (
     <Container fluid p={0} m={0} style={{ overflow: "hidden" }}>
       <Grid gutter="md" h="calc(100vh - 64px)" m={0} p={0} pt={10}>
@@ -110,11 +110,13 @@ const EditorPage = () => {
                     overflowX: "auto",
                   }}
                 >
+                  {hasFiles ?
                   <FileTree
                     rootDir={rootDir}
                     selectedFile={selectedFile}
                     onSelect={onSelect}
-                  />
+                  />:
+                  <Text pl={20} p={10}>No files / folders to display</Text>}
                 </Box>
               </Box>
             </Grid.Col>

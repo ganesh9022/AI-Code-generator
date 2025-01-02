@@ -7,7 +7,7 @@ import {
 } from "react-icons/si";
 import {FcPicture, FcFile } from "react-icons/fc";
 import { AiFillFileText } from "react-icons/ai";
-import { IconChevronDown,IconChevronLeft } from "@tabler/icons-react";
+import { IconChevronDown, IconChevronRight } from "@tabler/icons-react";
 import { DiJavascript } from "react-icons/di";
 
 function getIconHelper() {
@@ -23,7 +23,7 @@ function getIconHelper() {
   cache.set("jpg", <FcPicture />);
   cache.set("ico", <FcPicture />);
   cache.set("txt", <AiFillFileText color="white" />);
-  cache.set("closedDirectory", <IconChevronLeft />);
+  cache.set("closedDirectory", <IconChevronRight />);
   cache.set("openDirectory", <IconChevronDown />);
   return function (extension: string, name: string): ReactNode {
     if (cache.has(extension)) return cache.get(extension);
