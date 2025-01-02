@@ -70,7 +70,7 @@ const EditorPage = () => {
           {!collapsed && (
             <Grid.Col p={0} span={2.3} style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <Box>
-                <Text pb={10} pl={20} >EXPLORER</Text>
+                <Text p={12} >EXPLORER</Text>
                 <Box mr={10} style={{ height:"calc(90vh - 100px)" , maxWidth: "100%", overflowY: 'auto', overflowX: 'auto' }}>
                   <FileTree rootDir={rootDir} selectedFile={selectedFile} onSelect={onSelect} />
                 </Box>
