@@ -34,17 +34,17 @@ export const AppLayout = () => {
     <AppShell
       header={{ height: 64 }}
       footer={{ height: 0 }}
-      navbar={{ width: isCollapsed ? 70 : 220, breakpoint: "sm" }}
+      navbar={{ width: isCollapsed ? 70 : 200, breakpoint: "sm" }}
       layout="alt"
     >
       <AppHeader />
       <AppShell.Navbar
         withBorder={false}
         bg="gray.7"
-        p={12}
+        p={8}
         style={{ transition: "width 200ms" }}
       >
-        <Group p={8} wrap="nowrap">
+        <Group p={8} mt={3} wrap="nowrap">
           <ThemeIcon
             size="sm"
             bg="transparent"
@@ -58,7 +58,7 @@ export const AppLayout = () => {
             </Title>
           )}
         </Group>
-        <Stack h="100%" justify="space-between" mt={32}>
+        <Stack h="100%" justify="space-between" mt={6}>
           <Stack py={16} gap={8}>
             <SidebarLink isCollapsed={isCollapsed} />
           </Stack>

@@ -1,4 +1,4 @@
-import { Box, Group, Flex, UnstyledButton, ThemeIcon } from "@mantine/core"
+import { Box, Group, Flex, UnstyledButton, ThemeIcon,Badge } from "@mantine/core"
 import { NavLink } from "react-router-dom"
 import { SIDEBAR_ITEMS } from "./constants"
 
@@ -26,6 +26,15 @@ export const SidebarLink = ({ isCollapsed }: { isCollapsed: boolean }) => {
                   </Box>
                 )}
               </Flex>
+              {!isCollapsed && route.badge && (
+                <Badge
+                  color={route.badge.color}
+                  size={route.badge.size}
+                  mr="3.3rem"
+                >
+                  {route.badge.label}
+                </Badge>
+              )}
             </Group>
           </NavLink>
         </UnstyledButton>
