@@ -14,8 +14,8 @@ function getIconHelper() {
   const cache = new Map<string, ReactNode>();
   cache.set("js", <DiJavascript size={20} color="#fbcb38" />);
   cache.set("jsx", <DiJavascript color="#fbcb38" />);
-  cache.set("ts", <SiTypescript color="#378baa" />);
-  cache.set("tsx", <SiTypescript color="#378baa" />);
+  cache.set("ts", <SiTypescript size={15} color="#378baa" />);
+  cache.set("tsx", <SiTypescript size={15} color="#378baa" />);
   cache.set("css", <SiCss3 color="purple" />);
   cache.set("json", <SiJson color="#5656e6" />);
   cache.set("html", <SiHtml5 color="#e04e2c" />);

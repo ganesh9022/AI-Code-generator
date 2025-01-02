@@ -82,11 +82,12 @@ const Div = styled.div<{
   depth: number;
   isSelected: boolean;
 }>`
+  width:fit-content;
   display: flex;
   align-items: center;
   padding-left: ${props => props.depth * 16}px;
-  background-color: ${props => props.isSelected ? "#4a90e2" : "transparent"};
-
+  background-color: ${props => props.isSelected ? "red" : "transparent"};
+  padding-right:10px;
   :hover {
     cursor: pointer;
     background-color:#808080;
@@ -156,6 +157,7 @@ const Span = styled.span`
   display: flex;
   width: 32px;
   height: 32px;
+  padding-right:10px
   justify-content: center;
   align-items: center;
 `

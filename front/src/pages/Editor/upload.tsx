@@ -77,15 +77,12 @@ export const Upload = ({ collapsed }: { collapsed: boolean }) => {
     return (
         <Box mt='auto' >
             <FileButton multiple onChange={(files) => setUploadFiles(files)}>
-                {(props) => <Button bg='none' pl={5} radius='md' {...props}><Box display='flex'>
-                    <IconFileUpload color="var(--mantine-color-text)" stroke={2} />
-                    {!collapsed && <Text c="var(--mantine-color-text)" pl={30}>Open Files</Text>}
+                {(props) => <Button bg='none' radius='md' {...props}><Box display='flex'>
+                    <IconFileUpload stroke={2} />
                 </Box></Button>}
             </FileButton>
             <Button
                 component="label"
-                pl={5}
-                color="var(--mantine-color-text)"
                 bg='none'
                 styles={{
                     root: {
@@ -94,8 +91,7 @@ export const Upload = ({ collapsed }: { collapsed: boolean }) => {
                 }}
             >
                 <Box display='flex'>
-                    <IconFolderUp color="var(--mantine-color-text)" stroke={2} />
-                    {!collapsed && <Text c="var(--mantine-color-text)" pl={30}>Open Folders</Text>}
+                    <IconFolderUp stroke={2} />
                 </Box>
                 <input
                     type="file"
