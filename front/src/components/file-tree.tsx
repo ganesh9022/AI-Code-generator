@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { Directory, File, sortDir, sortFile } from '../../src/utils/file-manager'
+import React, { useState } from 'react';
+import { Directory, File, sortDir, sortFile } from '../../src/utils/file-manager';
 import styled from "@emotion/styled";
 import { getIcon } from './icon';
-import { useTools } from './CodeCompletionToolsProviders';
+import { useTools, Params } from './CodeCompletionToolsProviders';
 
 interface FileTreeProps {
   rootDir: Directory;
@@ -21,8 +21,30 @@ interface SubTreeProps {
 }
 
 const SubTree = (props: SubTreeProps) => {
-  const { isEditorVisible, setIsEditorVisible } = useTools();
-  console.log(props)
+  const { isEditorVisible, setIsEditorVisible, setLanguage, setParams } = useTools();
+
+  const extensionToLanguageMap: { [key: string]: "javascript" | "typescript" | "python" | "java" | "php" } = {
+    js: "javascript",
+    ts: "typescript",
+    jsx: "javascript",
+    tsx: "typescript",
+    py: "python",
+    java: "java",
+    php: "php",
+  };
+
+  const handleFileSelect = (file: File) => {
+    props.onSelect(file);
+    setIsEditorVisible(true);
+    const fileExtension = file.name.split(".").pop();
+    const language = fileExtension && extensionToLanguageMap[fileExtension] ? extensionToLanguageMap[fileExtension] : "javascript";
+    setLanguage(language);
+    setParams((prevParams: Params) => ({
+      ...prevParams,
+      language: language,
+    }));
+  };
+
   return (
     <div>
       {
@@ -45,9 +67,7 @@ const SubTree = (props: SubTreeProps) => {
               <FileDiv
                 file={file}
                 selectedFile={props.selectedFile}
-                onClick={() => {props.onSelect(file)
-                  setIsEditorVisible(true)}
-                } />
+                onClick={() => handleFileSelect(file)} />
             </React.Fragment>
           ))
       }
