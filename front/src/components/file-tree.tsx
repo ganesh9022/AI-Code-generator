@@ -86,7 +86,7 @@ const Div = styled.div<{
   display: flex;
   align-items: center;
   padding-left: ${props => props.depth * 16}px;
-  background-color: ${props => props.isSelected ? "red" : "transparent"};
+  background-color: ${props => props.isSelected ? "#4a90e2" : "transparent"};
   padding-right:10px;
   :hover {
     cursor: pointer;
