@@ -12,7 +12,7 @@ const CodeCompletionEditor = ({ selectedFile, setSelectedFile }: { selectedFile?
   const { data } = useApi("code-snippet", params);
   const { colorScheme } = useMantineColorScheme()
   useEffect(() => {
-    if (!monaco || !selectedFile) return;
+    if (!monaco) return;
 
     const provider = monaco.languages.registerInlineCompletionsProvider(
       language,
