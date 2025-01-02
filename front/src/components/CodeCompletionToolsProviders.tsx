@@ -11,7 +11,7 @@ import * as monaco from "monaco-editor";
 import axios from "axios";
 import { Directory } from "../utils/file-manager";
 
-interface Params {
+export interface Params {
   prefix: string;
   currentLine: string;
   suffix: string;
@@ -43,7 +43,7 @@ interface ToolsProps {
   params: Params;
   setParams: (params: Params) => void;
   isEditorVisible: boolean;
-  setIsEditorVisible: (value: boolean) => void; 
+  setIsEditorVisible: (value: boolean) => void;
 }
 
 const ToolsContext = createContext<ToolsProps>({
