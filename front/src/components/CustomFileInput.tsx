@@ -65,7 +65,7 @@ const CustomFileInput: React.FC = () => {
     formData.append("contextualResponse", JSON.stringify(contextualResponse));
 
     try {
-      await axios.post("http://localhost:8000/train-model", formData, {
+      await axios.post(`${import.meta.env.VITE_SERVER_URL}/train-model`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -109,14 +109,14 @@ const CustomFileInput: React.FC = () => {
           <Button
             variant="outline"
             onClick={() => document.getElementById("fileInput")?.click()}
-            disabled={!contextualResponse} 
+            disabled={!contextualResponse}
           >
             Open file
           </Button>
           <Button
             variant="filled"
             onClick={() => document.getElementById("folderInput")?.click()}
-            disabled={!contextualResponse} 
+            disabled={!contextualResponse}
           >
             Open folder
           </Button>
@@ -168,7 +168,7 @@ const CustomFileInput: React.FC = () => {
         </>
       ) : null}
       <TrainModelButton
-        onTrainModel={() => submitTrainingData(true)}  
+        onTrainModel={() => submitTrainingData(true)}
         filesSelected={file || (folder && folder.length > 0)}
       />
     </div>
