@@ -1,4 +1,4 @@
-import { Box, Container, Grid, Text } from "@mantine/core";
+import { Box, Container, Grid, Stack, Text } from "@mantine/core";
 import CodeCompletionEditor from "./codeCompletion";
 import { FileTree } from "../../components/file-tree";
 import { Directory, Type, File } from "../../utils/file-manager";
@@ -23,7 +23,7 @@ const EditorPage = () => {
   };
 
   const [rootDir, setRootDir] = useState<Directory>(dummyDir);
-  const [selectedFile, setSelectedFile] = useState<File | undefined >(undefined);
+  const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
 
   useEffect(() => {
     const updateDir = async () => {
@@ -55,12 +55,12 @@ const EditorPage = () => {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <Container fluid p={0}>
-      <Grid gutter="md" style={{ height: "90vh"  }} pt={10}>
+    <Container fluid p={0} m={0} style={{overflow:'hidden'}}>
+      <Grid gutter="md" h="calc(100vh - 64px)" m={0} p={0} pt={10} >
         <>
-          <Grid.Col style={{ height: "90vh", backgroundColor:"#121212" ,display: "flex", flexDirection: "column", justifyContent: "space-between" }} span={0.5} p={10} pl={20}>
+          <Grid.Col m={0} style={{ height: "calc(100vh - 64px)", alignContent: 'center', alignItems: 'center', backgroundColor: "#121212", display: "flex", flexDirection: "column", justifyContent: "space-between" }} span={0.7} p={10} pl={20}>
             <Box>
-              <IconFiles style={{cursor:'pointer'}} onClick={() => setCollapsed(!collapsed)} stroke={2} size={30} />
+              <IconFiles style={{ cursor: 'pointer' }} color="white" onClick={() => setCollapsed(!collapsed)} stroke={2} size={30} />
             </Box>
             <Box mt="auto">
               <Upload collapsed={collapsed} />
@@ -68,22 +68,26 @@ const EditorPage = () => {
           </Grid.Col>
 
           {!collapsed && (
-            <Grid.Col span={2.5} style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <Grid.Col p={0} span={2.3} style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <Box>
                 <Text pb={10} pl={20} >EXPLORER</Text>
-                <Box p={0} m={0}>
+                <Box mr={10} style={{ height:"calc(90vh - 100px)" , maxWidth: "100%", overflowY: 'auto', overflowX: 'auto' }}>
                   <FileTree rootDir={rootDir} selectedFile={selectedFile} onSelect={onSelect} />
                 </Box>
               </Box>
-              <Box mt="auto" pb={30}>
+              {!collapsed && (
+                <Stack pb={15} gap={5} m={0} pl={20} style={{position: 'sticky', bottom: 0}}>
+                  <Text c="var(--mantine-color-text)">Open Files</Text>
+                  <Text c="var(--mantine-color-text)">Open Folders</Text>
+                </Stack>
+              )}
 
-              </Box>
             </Grid.Col>
 
           )}
         </>
-        <Grid.Col span={collapsed ? 11.5 : 9}>
-          <CodeCompletionEditor selectedFile={selectedFile} setSelectedFile={setSelectedFile}/>
+        <Grid.Col p={0} span={collapsed ? 11.3 : 9}>
+          <CodeCompletionEditor selectedFile={selectedFile} setSelectedFile={setSelectedFile} />
         </Grid.Col>
       </Grid>
     </Container>
