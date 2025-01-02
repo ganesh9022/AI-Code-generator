@@ -1,14 +1,15 @@
-import { Box, Button, FileButton, Tooltip } from "@mantine/core";
+import { Box, Button, FileButton,Tooltip } from "@mantine/core";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
 import { v4 as gen_random_uuid } from "uuid";
 import { Directory, File } from "../../utils/file-manager";
-import { IconFolderUp, IconFileUpload } from "@tabler/icons-react";
-export const Upload = ({ collapsed }: { collapsed: boolean }) => {
-  const { setUploadFiles, setUploadFolders } = useTools();
-  const handleFolderUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = event.target.files;
+import { IconFolderUp, IconFileUpload } from '@tabler/icons-react';
+export const Upload = () => {
+    const {
+        setUploadFiles,
+        setUploadFolders
+    } = useTools();
+    const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
 
     if (files && files.length > 0) {
       const dirMap: { [path: string]: Directory } = {};

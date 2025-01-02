@@ -85,7 +85,7 @@ const EditorPage = () => {
             </Tooltip>
 
             <Box mt="auto">
-              <Upload collapsed={collapsed} />
+              <Upload />
             </Box>
           </Grid.Col>
 
