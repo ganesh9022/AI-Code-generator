@@ -53,7 +53,7 @@ const EditorPage = () => {
 
   const onSelect = (file: File) => setSelectedFile(file);
   const [collapsed, setCollapsed] = useState(false)
-
+  const hasFiles = rootDir.files.length > 0|| rootDir.dirs.length > 0;
   return (
     <Container fluid p={0} m={0} style={{overflow:'hidden'}}>
       <Grid gutter="md" h="calc(100vh - 64px)" m={0} p={0} pt={10} >
@@ -72,7 +72,8 @@ const EditorPage = () => {
               <Box>
                 <Text pb={10} pl={20} >EXPLORER</Text>
                 <Box mr={10} style={{ height:"calc(90vh - 100px)" , maxWidth: "100%", overflowY: 'auto', overflowX: 'auto' }}>
-                  <FileTree rootDir={rootDir} selectedFile={selectedFile} onSelect={onSelect} />
+                {hasFiles ?  <FileTree rootDir={rootDir} selectedFile={selectedFile} onSelect={onSelect} /> :
+                  <Text pl={20} p={10}>No files / folders to display</Text>}
                 </Box>
               </Box>
               {!collapsed && (
