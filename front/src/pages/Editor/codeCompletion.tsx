@@ -11,7 +11,7 @@ const CodeCompletionEditor = ({ selectedFile }: { selectedFile?: File }) => {
   const { data } = useApi("code-snippet", params);
 
   useEffect(() => {
-    if (!monaco || !selectedFile) return;
+    if (!monaco) return;
 
     const provider = monaco.languages.registerInlineCompletionsProvider(
       language,

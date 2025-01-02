@@ -11,19 +11,18 @@ class Model(Enum):
     Ollama = "ollama"
     Groq = "groq"
     ML = "ml"
-    Groq_RAG = "groq_rag"
-
 
 def map_models(
-    model: Model, prefix: str, currentLine: str, suffix: str, language: str
+    model: Model, prefix: str, currentLine: str, suffix: str, language: str, folderpath: str, contextual_response: bool
 ) -> Model:
     if model == Model.Groq.value:
-        return get_groq_response(prefix, currentLine, suffix, language)
+        if contextual_response and folderpath:
+            return asyncio.run(main(currentLine, folderpath))
+        else:
+            return get_groq_response(prefix, currentLine, suffix, language)
     elif model == Model.Ollama.value:
         return generate_code(prompt=currentLine, suffix=suffix, language=language)
     elif model == Model.ML.value:
         return operation(currentLine)
-    elif model == Model.Groq_RAG.value:
-        return asyncio.run(main(currentLine))
     else:
         return "Model not found"
