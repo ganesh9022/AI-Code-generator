@@ -1,16 +1,41 @@
 import React, { useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
-import { Box, Divider, Paper, Title, useMantineColorScheme, Text, Group } from "@mantine/core";
+import {
+  Box,
+  Divider,
+  Paper,
+  Title,
+  useMantineColorScheme,
+  Text,
+  Group,
+  rem,
+} from "@mantine/core";
 import { MdClose } from "react-icons/md";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
 import { CompletionFormatter } from "../../components/completion-formatter";
 import useApi from "../../hooks/useApi";
 import { File } from "../../utils/file-manager";
-const CodeCompletionEditor = ({ selectedFile, setSelectedFile }: { selectedFile?: File, setSelectedFile: (file: File | undefined) => void; }) => {
-  const { language, editorRef, output, params, setParams, code, isEditorVisible, setIsEditorVisible } = useTools();
+import { IconChevronRight } from "@tabler/icons-react";
+const CodeCompletionEditor = ({
+  selectedFile,
+  setSelectedFile,
+}: {
+  selectedFile?: File;
+  setSelectedFile: (file: File | undefined) => void;
+}) => {
+  const {
+    language,
+    editorRef,
+    output,
+    params,
+    setParams,
+    code,
+    isEditorVisible,
+    setIsEditorVisible,
+  } = useTools();
   const monaco = useMonaco();
   const { data } = useApi("code-snippet", params);
-  const { colorScheme } = useMantineColorScheme()
+  const { colorScheme } = useMantineColorScheme();
   useEffect(() => {
     if (!monaco) return;
 
@@ -46,7 +71,7 @@ const CodeCompletionEditor = ({ selectedFile, setSelectedFile }: { selectedFile?
             ),
           };
         },
-        freeInlineCompletions: () => { },
+        freeInlineCompletions: () => {},
       }
     );
     return () => provider.dispose();
@@ -57,18 +82,26 @@ const CodeCompletionEditor = ({ selectedFile, setSelectedFile }: { selectedFile?
   const selectedFileContent = selectedFile?.content;
   const breadcrumbItems = selectedFile?.path?.split("/");
   if (!isEditorVisible) {
-    setSelectedFile(undefined)
+    setSelectedFile(undefined);
   }
   return (
     <Box style={{ height: "calc(100vh - 70px)" }}>
       <Box p={5}>
         {isEditorVisible && (
-          <Box >
+          <Box>
             <Box style={{ display: "flex" }}>
               <Box>
                 <Text fw={700}>{selectedFile?.name} </Text>
               </Box>
-              <MdClose size={22} onClick={handleClose} style={{ cursor: "pointer", alignSelf: 'center', paddingLeft: '5px' }} />
+              <MdClose
+                size={22}
+                onClick={handleClose}
+                style={{
+                  cursor: "pointer",
+                  alignSelf: "center",
+                  paddingLeft: "5px",
+                }}
+              />
             </Box>
             <Divider />
           </Box>
@@ -77,25 +110,35 @@ const CodeCompletionEditor = ({ selectedFile, setSelectedFile }: { selectedFile?
         {breadcrumbItems && breadcrumbItems.length > 0 && (
           <Box
             style={{
-              alignContent: 'center',
+              alignContent: "center",
               fontSize: "13px",
             }}
           >
-            <Group display="flex">
+            <Group display="flex" gap={2}>
               {breadcrumbItems.map((segment, index) => (
                 <React.Fragment key={index}>
                   <Text size="sm">{segment}</Text>
                   {index < breadcrumbItems.length - 1 && (
-                    <Text size="sm">&gt;</Text>
+                    <IconChevronRight
+                      style={{ width: rem(18), height: rem(18) }}
+                      stroke={1.5}
+                    />
                   )}
                 </React.Fragment>
               ))}
             </Group>
           </Box>
         )}
-
       </Box>
-      <Paper style={{ display: "flex", height: isEditorVisible ? "calc(96.5vh - 104px)" : "calc(100vh - 70px)", overflow: 'auto' }}>
+      <Paper
+        style={{
+          display: "flex",
+          height: isEditorVisible
+            ? "calc(96.5vh - 104px)"
+            : "calc(100vh - 70px)",
+          overflow: "auto",
+        }}
+      >
         <Paper w={output ? "50%" : "100%"}>
           <Editor
             onMount={(editor) => {
