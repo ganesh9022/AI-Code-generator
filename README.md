@@ -51,33 +51,50 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
       pip install <module_name>
       ```
 ### 3. Database Setup
+   - For Ubuntu
+      1. Install PostgreSQL:
+         ```bash
+         sudo apt install postgresql
+         ```
+      2. Start PostgreSQL Service:
+         ```bash
+         sudo service postgresql start
+         ```
+      3. Switch to PostgreSQL user and connect:
+         ```bash
+         sudo -i -u postgres
+         psql -U postgres
+         ```
 
-   1. Install PostgreSQL:
-      ```bash
-      sudo apt install postgresql
-      ```
-   2. Start PostgreSQL Service:
-      ```bash
-      sudo service postgresql start
-      ```
-   3. Switch to PostgreSQL User:
-      ```bash
-      sudo -i -u postgres
-      ```
-   4. Connect to PostgreSQL:
-      ```bash
-      psql -U postgres
-      ```
-   5. Create the Database and User:
-      ```sql
-      CREATE DATABASE codedb;
-      CREATE USER codedb WITH LOGIN PASSWORD 'codedb' SUPERUSER;
-      GRANT ALL PRIVILEGES ON DATABASE codedb TO codedb;
-      ```
-   6. Connect to the New Database:
-      ```bash
-      \c codedb
-      ```
+   - For Mac-OS
+      1. Install PostgreSQL using Homebrew :
+         ```bash
+         brew install postgresql
+         ```
+
+      2. Start PostgreSQL service :
+         ``` bash
+         brew services start postgresql
+         ```
+
+      3. Switch to the 'postgres' user :
+         ```bash
+         psql postgres
+         ```
+
+   - Common Steps for Both Operating Systems:
+
+      4. Create the Database and User:
+         ```sql
+         CREATE DATABASE codedb;
+         CREATE USER codedb WITH PASSWORD 'codedb' SUPERUSER;
+         GRANT ALL PRIVILEGES ON DATABASE codedb TO codedb;
+         ```
+
+      5. Connect to the New Database:
+         ```bash
+         \c codedb
+         ```
 
 ### 4. Environment Variables
    - To run this project, you will need to set up the following environment variables in a `backend/.env` file in the root of your project directory.
