@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_cors import CORS
 from g4f.client import Client
+from db.sqlalchemy_orm import get_user_details
 from mappers.model_mapper import map_models
 
 app = Flask(__name__)
@@ -23,6 +24,15 @@ def generate_code_snippet():
         suffix,
         language,
     )
+    return response
+
+@app.route("/saveUser", methods=["POST"])
+def save_user():
+    data = request.json
+    user_id = data.get("userId")
+    userName = data.get("userName")
+    email = data.get("email")
+    response = get_user_details(user_id, userName, email) 
     return response
 
 if __name__ == "__main__":
