@@ -17,7 +17,7 @@ const useApi = <T>(
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [debouncedParams] = useDebounce(params, 1000);
+  const [debouncedParams] = useDebounce(params, 2000);
 
   useEffect(() => {
     const fetchData = async () => {

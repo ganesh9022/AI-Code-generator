@@ -1,4 +1,5 @@
 import os
+import chromadb
 import nest_asyncio
 from typing import List
 from dotenv import load_dotenv
@@ -17,6 +18,7 @@ load_dotenv()
 nest_asyncio.apply()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 if not GROQ_API_KEY:
     raise ValueError("GROQ_API_KEY environment variable is not set.")
 os.environ["GROQ_API_KEY"] = GROQ_API_KEY
@@ -47,6 +49,9 @@ def load_files(directory: str, embed_model: HuggingFaceEmbeddings):
     vectorstore = Chroma.from_documents(
         documents, embedding=embed_model, collection_name="groq_rag"
     )
+
+    chromadb.api.client.SharedSystemClient.clear_system_cache()
+
     return vectorstore.as_retriever()
 
 
@@ -72,7 +77,7 @@ def setup_rag_chain(retriever, rag_llm):
     return rag_chain
 
 
-async def main(question: str, folderpath:str) -> str:
+async def get_contextual_response(question: str, folderpath:str) -> str:
     embed_model, rag_llm = initialize_models()
 
     directory = folderpath

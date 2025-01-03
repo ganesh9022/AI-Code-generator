@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Button,
   Group,
@@ -13,30 +13,26 @@ import {
 } from "@mantine/core";
 import axios from "axios";
 import { IconFile } from "@tabler/icons-react";
+import { useTools, Params } from "./CodeCompletionToolsProviders";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const TrainModelButton = ({ onTrainModel, filesSelected }) => {
-  return (
-    filesSelected ? (
-      <Center mt={20}>
-        <Button variant="gradient" onClick={onTrainModel}>
-          Train Model
-        </Button>
-      </Center>
-    ) : null
-  );
+  return filesSelected ? (
+    <Center mt={20}>
+      <Button variant="gradient" onClick={onTrainModel}>
+        Train Model
+      </Button>
+    </Center>
+  ) : null;
 };
 
-
 const CustomFileInput: React.FC = () => {
-  const [contextualResponse, setContextualResponse] = useState<boolean>(
-    () => JSON.parse(localStorage.getItem("contextualResponse") || "true")
-  );
   const [file, setFile] = useState<File | null>(null);
   const [folder, setFolder] = useState<FileList | null>(null);
 
-  useEffect(() => {
-    localStorage.setItem("contextualResponse", JSON.stringify(contextualResponse));
-  }, [contextualResponse]);
+  const { toggle, setToggle, setParams } = useTools();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -50,39 +46,50 @@ const CustomFileInput: React.FC = () => {
     }
   };
 
-  const submitTrainingData = useCallback(async (contextualResponse: boolean) => {
-    const formData = new FormData();
-
-    if (file) {
-      formData.append("files", file);
-    }
-    if (folder) {
-      Array.from(folder).forEach((file) => {
-        formData.append("files", file);
-      });
-    }
-
-    formData.append("contextualResponse", JSON.stringify(contextualResponse));
-
-    try {
-      await axios.post(`${import.meta.env.VITE_SERVER_URL}/train-model`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-    } catch (error) {
-      console.error("Error training model:", error);
-    }
-  }, [file, folder]);
-
   const handleToggleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newContextualResponse = event.currentTarget.checked;
-    setContextualResponse(newContextualResponse);
-    if (!newContextualResponse) {
-      submitTrainingData(false);
-    }
+    const newToggleValue = event.currentTarget.checked;
+    setToggle(newToggleValue);
+
+    setParams((prevParams: Params) => ({
+      ...prevParams,
+      toggle: newToggleValue,
+    }));
   };
 
+  const submitTrainingData = useCallback(
+    async () => {
+      const formData = new FormData();
+
+      if (file) {
+        formData.append("files", file);
+      }
+      if (folder) {
+        Array.from(folder).forEach((file) => {
+          formData.append("files", file);
+        });
+      }
+
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_SERVER_URL}/train-model`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        
+        if (response.status === 200) {
+          toast.success("Model trained successfully!");
+        }
+      } catch (error) {
+        toast.error("Error training model. Please try again.");
+        console.error("Error training model:", error);
+      }
+    },
+    [file, folder]
+  );
 
   return (
     <div>
@@ -94,7 +101,7 @@ const CustomFileInput: React.FC = () => {
               BETA
             </Badge>
             <Switch
-              checked={contextualResponse}
+              checked={toggle}
               onChange={handleToggleChange}
               size="md"
               style={{ marginLeft: "auto" }}
@@ -109,14 +116,14 @@ const CustomFileInput: React.FC = () => {
           <Button
             variant="outline"
             onClick={() => document.getElementById("fileInput")?.click()}
-            disabled={!contextualResponse}
+            disabled={!toggle}
           >
             Open file
           </Button>
           <Button
             variant="filled"
             onClick={() => document.getElementById("folderInput")?.click()}
-            disabled={!contextualResponse}
+            disabled={!toggle}
           >
             Open folder
           </Button>
@@ -168,7 +175,7 @@ const CustomFileInput: React.FC = () => {
         </>
       ) : null}
       <TrainModelButton
-        onTrainModel={() => submitTrainingData(true)}
+        onTrainModel={submitTrainingData}
         filesSelected={file || (folder && folder.length > 0)}
       />
     </div>

@@ -11,16 +11,19 @@ import * as monaco from "monaco-editor";
 import axios from "axios";
 import { Directory } from "../utils/file-manager";
 
-interface Params {
+export interface Params {
   prefix: string;
   currentLine: string;
   suffix: string;
   language: keyof typeof supported_language_versions;
   model: Model;
+  toggle: boolean;
 }
 interface ToolsProps {
   selectedModel: Model;
   setSelectedModel: (model: Model) => void;
+  toggle: boolean;
+  setToggle: (toggle: boolean) => void;
   language: keyof typeof supported_language_versions;
   setLanguage: (language: keyof typeof supported_language_versions) => void;
   runCode: () => void;
@@ -66,12 +69,15 @@ const ToolsContext = createContext<ToolsProps>({
   uploadFiles: null,
   setUploadFolders: () => {},
   uploadFolders: null,
+  toggle: false,
+  setToggle: () => {},
   params: {
     prefix: "",
     currentLine: "",
     suffix: "",
     language: "javascript",
     model: Model.ML,
+    toggle: false,
   },
   setParams: () => {},
 });
@@ -89,12 +95,14 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   const [showSelectedFileInEditor, setShowSelectedFileInEditor] = useState(true);
   const [uploadFiles, setUploadFiles] = useState<File[] | null>(null);
   const [uploadFolders, setUploadFolders] = useState<Directory | null>(null);
+  const [toggle, setToggle] = useState(false);
   const [params, setParams] = useState({
     prefix: "",
     currentLine: "",
     suffix: "",
     language: language,
     model: selectedModel,
+    toggle: false,
   });
   const API = axios.create({
     baseURL: "https://emkc.org/api/v2/piston",
@@ -166,6 +174,8 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <ToolsContext.Provider
       value={{
+        toggle,
+        setToggle,
         selectedModel,
         setSelectedModel,
         language,
