@@ -16,9 +16,6 @@ import { CompletionFormatter } from "../../components/completion-formatter";
 import useApi from "../../hooks/useApi";
 import { File } from "../../utils/file-manager";
 import { IconChevronRight } from "@tabler/icons-react";
-import { useUser } from "@clerk/clerk-react";
-import useLazyApi from "../../hooks/useLazyApi";
-import { useDetails } from "../../components/UserDetailsProviders";
 const CodeCompletionEditor = ({
   selectedFile,
   setSelectedFile,
@@ -39,27 +36,6 @@ const CodeCompletionEditor = ({
   const monaco = useMonaco();
   const { data } = useApi("code-snippet", params);
   const { colorScheme } = useMantineColorScheme();
-  const { isLoaded, user, isSignedIn } = useUser();
-  const {userData, setUserData} = useDetails();
-  const { fetchData } = userData ? useLazyApi<{ userId: string; userName: string; email: string }>("saveUser") : { fetchData: () => {} };
-
-  if (!isLoaded) {
-    return null
-  }
-
-  useEffect(() => {
-    if (isSignedIn && userData) {
-      const userId = user.id;
-      const userName = user.username ?? "";
-      const email = user.emailAddresses[0].emailAddress;
-      if (userData.email !== email)
-      {
-        setUserData({ ...userData, userId, userName, email });
-        fetchData({ userId, userName, email });
-      }
-    }
-  }, [isSignedIn, user, userData]);
-
   useEffect(() => {
     if (!monaco) return;
 
