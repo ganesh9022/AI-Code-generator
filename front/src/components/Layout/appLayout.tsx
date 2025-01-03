@@ -40,7 +40,7 @@ export const AppLayout = () => {
       <AppHeader />
       <AppShell.Navbar
         withBorder={false}
-        bg="gray.7"
+        bg={colorScheme === "dark" ? "gray.9" : "#134B70"}
         p={8}
         style={{ transition: "width 200ms" }}
       >

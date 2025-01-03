@@ -1,4 +1,4 @@
-import { Box, Container, Grid, Text, Tooltip } from "@mantine/core";
+import { Box, Container, Grid, Text, Tooltip, useMantineColorScheme } from "@mantine/core";
 import CodeCompletionEditor from "./codeCompletion";
 import { FileTree } from "../../components/file-tree";
 import { Directory, Type, File } from "../../utils/file-manager";
@@ -10,7 +10,7 @@ import { Upload } from "./upload";
 
 const EditorPage = () => {
   const { uploadFiles, uploadFolders } = useTools();
-
+  const { colorScheme } = useMantineColorScheme();
   const dummyDir: Directory = {
     id: "1",
     name: "Dummy",
@@ -58,12 +58,12 @@ const EditorPage = () => {
       <Grid gutter="md" h="calc(100vh - 64px)" m={0} p={0} pt={10}>
         <>
           <Grid.Col
-            m={0}
+            m={0} 
+            bg={colorScheme === "dark" ? "#121212" : "#4D7FA0"}
             style={{
               height: "calc(100vh - 64px)",
               alignContent: "center",
               alignItems: "center",
-              backgroundColor: "#121212",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
