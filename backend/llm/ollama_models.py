@@ -38,3 +38,15 @@ def generate_code(
         return response['response']
     except Exception as e:
         return {"next_line": f"An error occurred: {str(e)}"}
+
+def ask_question(question: str) -> str:
+    with open(get_absolute_path('ollama.config.json'), "r") as config_file:
+        config = json.load(config_file)
+    response = ollama.chat(model=config["model"], messages=[
+        {
+            'role': 'user',
+            'content': question,
+        },
+    ])
+    return response['message']['content']
+

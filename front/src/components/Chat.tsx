@@ -2,9 +2,11 @@ import { useState } from "react"
 import { ActionIcon, Box, Flex, TextInput, rem, useMantineTheme } from "@mantine/core"
 import { IconArrowRight, IconSearch } from "@tabler/icons-react"
 import axios from "axios"
+import { useTools } from "./CodeCompletionToolsProviders"
 
 export const    Chat = () => {
     const [inputValue, setInputValue] = useState("")
+    const {selectedModel} =useTools()
     const theme = useMantineTheme();
     const [message, setMessage] = useState<string>("")
     const handleSendMessage = async () => {
@@ -12,9 +14,11 @@ export const    Chat = () => {
 
         try {
             console.log(inputValue)
-            const response = await axios.get(`http://127.0.0.1:5000//operation?prompt=${inputValue.trim()}`);
-            setMessage(response.data || "No completion found");
-            console.log(response.data)
+            const response = await axios.get(
+              `http://127.0.0.1:8000/ask-query?model=${selectedModel}&prompt=${inputValue.trim()}`
+            );
+            const answer = response.data.answer || "No answer received."
+            setMessage(answer)
         } catch (error) {
             console.error("Error fetching completion:", error);
             setMessage("Error fetching completion. Please try again.");
