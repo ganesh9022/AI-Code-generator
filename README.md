@@ -46,24 +46,53 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
       ```bash
       pip install -r requirements.txt
       ```
-   - If dependencies are not installed, then manually install each of them from `requirement.txt` file using below command:
+   - If dependencies are not installed, then manually install each of them from `requirements.txt` file using below command:
       ```bash
       pip install <module_name>
       ```
-### 3. Environment Variables
+### 3. Database Setup
+
+   1. Install PostgreSQL:
+      ```bash
+      sudo apt install postgresql
+      ```
+   2. Start PostgreSQL Service:
+      ```bash
+      sudo service postgresql start
+      ```
+   3. Switch to PostgreSQL User:
+      ```bash
+      sudo -i -u postgres
+      ```
+   4. Connect to PostgreSQL:
+      ```bash
+      psql -U postgres
+      ```
+   5. Create the Database and User:
+      ```sql
+      CREATE DATABASE codedb;
+      CREATE USER codedb WITH LOGIN PASSWORD 'codedb' SUPERUSER;
+      GRANT ALL PRIVILEGES ON DATABASE codedb TO codedb;
+      ```
+   6. Connect to the New Database:
+      ```bash
+      \c codedb
+      ```
+
+### 4. Environment Variables
    - To run this project, you will need to set up the following environment variables in a `backend/.env` file in the root of your project directory.
    #### Example `backend/.env` File
    ```
     GROQ_API_KEY=dummygroqapikey12345
    ```
 
-### 4. Run the Backend Server
+### 5. Run the Backend Server
    - Use below commands to run the server
       ```bash
       python main.py
       ```
 
-### 5. Run the Development Server:
+### 6. Run the Development Server:
    - Use below commands to run the development server
       ```bash
       yarn dev
