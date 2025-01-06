@@ -17,10 +17,13 @@ export interface Params {
   suffix: string;
   language: keyof typeof supported_language_versions;
   model: Model;
+  toggle: boolean;
 }
 interface ToolsProps {
   selectedModel: Model;
   setSelectedModel: (model: Model) => void;
+  toggle: boolean;
+  setToggle: (toggle: boolean) => void;
   language: keyof typeof supported_language_versions;
   setLanguage: (language: keyof typeof supported_language_versions) => void;
   runCode: () => void;
@@ -68,12 +71,15 @@ const ToolsContext = createContext<ToolsProps>({
   uploadFiles: null,
   setUploadFolders: () => {},
   uploadFolders: null,
+  toggle: false,
+  setToggle: () => {},
   params: {
     prefix: "",
     currentLine: "",
     suffix: "",
     language: "javascript",
     model: Model.ML,
+    toggle: false,
   },
   setParams: () => {},
   isEditorVisible: true,
@@ -93,12 +99,14 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   const [showSelectedFileInEditor, setShowSelectedFileInEditor] = useState(true);
   const [uploadFiles, setUploadFiles] = useState<File[] | null>(null);
   const [uploadFolders, setUploadFolders] = useState<Directory | null>(null);
+  const [toggle, setToggle] = useState(false);
   const [params, setParams] = useState({
     prefix: "",
     currentLine: "",
     suffix: "",
     language: language,
     model: selectedModel,
+    toggle: false,
   });
   const [isEditorVisible, setIsEditorVisible] = useState(false);
   const API = axios.create({
@@ -171,6 +179,8 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <ToolsContext.Provider
       value={{
+        toggle,
+        setToggle,
         selectedModel,
         setSelectedModel,
         language,

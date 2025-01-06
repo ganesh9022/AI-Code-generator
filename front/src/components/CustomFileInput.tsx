@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Group,
@@ -13,11 +13,44 @@ import {
 } from "@mantine/core";
 import axios from "axios";
 import { IconFile } from "@tabler/icons-react";
+import { useTools, Params } from "./CodeCompletionToolsProviders";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import useApi from "../hooks/useApi";
+
+
+const TrainModelButton = ({ onTrainModel, filesSelected }) => {
+  return filesSelected ? (
+    <Center mt={20}>
+      <Button variant="gradient" onClick={onTrainModel}>
+        Train Model
+      </Button>
+    </Center>
+  ) : null;
+};
 
 const CustomFileInput: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [folder, setFolder] = useState<FileList | null>(null);
-  const [contextualResponse, setContextualResponse] = useState<boolean>(true);
+  const [shouldTrainModel, setShouldTrainModel] = useState<boolean>(false);
+
+  const { toggle, setToggle, setParams } = useTools();
+  const [formData, setFormData] = useState<FormData | null>(null);
+  const { data, error } = useApi(
+    "train-model",
+    formData,
+    shouldTrainModel
+  );
+
+  useEffect(() => {
+    if (data) {
+      toast.success("Model trained successfully!");
+      setShouldTrainModel(false);
+    } else if (error) {
+      toast.error("Failed to train model.");
+      setShouldTrainModel(false);
+    }
+  }, [data, error]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -31,27 +64,32 @@ const CustomFileInput: React.FC = () => {
     }
   };
 
-  const handleTrainModel = async () => {
-    const formData = new FormData();
-    if (file) {
-      formData.append("files", file);
-    }
-    if (folder) {
-      Array.from(folder).forEach((file) => {
-        formData.append("files", file);
-      });
-    }
+  const handleToggleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newToggleValue = event.currentTarget.checked;
+    setToggle(newToggleValue);
 
-    try {
-      await axios.post("/train-model", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-    } catch (error) {
-      console.error("Error training model:", error);
-    }
+    setParams((prevParams: Params) => ({
+      ...prevParams,
+      toggle: newToggleValue,
+    }));
   };
+
+  const submitTrainingData =
+    async () => {
+      const newFormData = new FormData();
+
+      if (file) {
+        newFormData.append("files", file);
+      }
+      if (folder) {
+        Array.from(folder).forEach((file) => {
+          newFormData.append("files", file);
+        });
+      }
+      setFormData(newFormData);
+      setShouldTrainModel(true);
+
+    }
 
   return (
     <div>
@@ -63,10 +101,8 @@ const CustomFileInput: React.FC = () => {
               BETA
             </Badge>
             <Switch
-              checked={contextualResponse}
-              onChange={(event) =>
-                setContextualResponse(event.currentTarget.checked)
-              }
+              checked={toggle}
+              onChange={handleToggleChange}
               size="md"
               style={{ marginLeft: "auto" }}
             />
@@ -80,12 +116,14 @@ const CustomFileInput: React.FC = () => {
           <Button
             variant="outline"
             onClick={() => document.getElementById("fileInput")?.click()}
+            disabled={!toggle}
           >
             Open file
           </Button>
           <Button
             variant="filled"
             onClick={() => document.getElementById("folderInput")?.click()}
+            disabled={!toggle}
           >
             Open folder
           </Button>
@@ -134,13 +172,12 @@ const CustomFileInput: React.FC = () => {
                 ))}
             </List>
           </Paper>
-          <Center mt={20}>
-            <Button variant="gradient" onClick={handleTrainModel}>
-              Train Model
-            </Button>
-          </Center>
         </>
       ) : null}
+      <TrainModelButton
+        onTrainModel={submitTrainingData}
+        filesSelected={file || (folder && folder.length > 0)}
+      />
     </div>
   );
 };
