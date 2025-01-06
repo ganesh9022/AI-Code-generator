@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
-import { Directory, File, sortDir, sortFile } from '../../src/utils/file-manager'
+import React, { useState } from 'react';
+import { Directory, File, sortDir, sortFile } from '../../src/utils/file-manager';
 import styled from "@emotion/styled";
 import { getIcon } from './icon';
+import { useTools, Params } from './CodeCompletionToolsProviders';
 
 interface FileTreeProps {
   rootDir: Directory;
@@ -20,7 +21,30 @@ interface SubTreeProps {
 }
 
 const SubTree = (props: SubTreeProps) => {
-  console.log(props)
+  const { isEditorVisible, setIsEditorVisible, setLanguage, setParams } = useTools();
+
+  const extensionToLanguageMap: { [key: string]: "javascript" | "typescript" | "python" | "java" | "php" } = {
+    js: "javascript",
+    ts: "typescript",
+    jsx: "javascript",
+    tsx: "typescript",
+    py: "python",
+    java: "java",
+    php: "php",
+  };
+
+  const handleFileSelect = (file: File) => {
+    props.onSelect(file);
+    setIsEditorVisible(true);
+    const fileExtension = file.name.split(".").pop();
+    const language = fileExtension && extensionToLanguageMap[fileExtension] ? extensionToLanguageMap[fileExtension] : "javascript";
+    setLanguage(language);
+    setParams((prevParams: Params) => ({
+      ...prevParams,
+      language: language,
+    }));
+  };
+
   return (
     <div>
       {
@@ -43,7 +67,7 @@ const SubTree = (props: SubTreeProps) => {
               <FileDiv
                 file={file}
                 selectedFile={props.selectedFile}
-                onClick={() => props.onSelect(file)} />
+                onClick={() => handleFileSelect(file)} />
             </React.Fragment>
           ))
       }
@@ -78,11 +102,12 @@ const Div = styled.div<{
   depth: number;
   isSelected: boolean;
 }>`
+  width:fit-content;
   display: flex;
   align-items: center;
   padding-left: ${props => props.depth * 16}px;
-  background-color: ${props => props.isSelected ? "#add8e6" : "transparent"};
-
+  background-color: ${props => props.isSelected ? "#4a90e2" : "transparent"};
+  padding-right:10px;
   :hover {
     cursor: pointer;
     background-color:#808080;
@@ -152,6 +177,7 @@ const Span = styled.span`
   display: flex;
   width: 32px;
   height: 32px;
+  padding-right:10px
   justify-content: center;
   align-items: center;
 `

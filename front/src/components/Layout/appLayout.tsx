@@ -34,33 +34,31 @@ export const AppLayout = () => {
     <AppShell
       header={{ height: 64 }}
       footer={{ height: 0 }}
-      navbar={{ width: isCollapsed ? 70 : 220, breakpoint: "sm" }}
+      navbar={{ width: isCollapsed ? 70 : 200, breakpoint: "sm" }}
       layout="alt"
     >
       <AppHeader />
       <AppShell.Navbar
         withBorder={false}
-        bg="gray.7"
-        p={12}
+        bg={colorScheme === "dark" ? "gray.9" : "#134B70"}
+        p={8}
         style={{ transition: "width 200ms" }}
       >
-        <Link to="/" style={{ textDecoration: "none" }}>
-          <Group p={8} wrap="nowrap">
-            <ThemeIcon
-              size="sm"
-              bg="transparent"
-              style={{ textDecoration: "none" }}
-            >
-              <IconCode />
-            </ThemeIcon>
-            {!isCollapsed && (
-              <Title c="white" size="h3" fw={400}>
-                Code Creator
-              </Title>
-            )}
-          </Group>
-        </Link>
-        <Stack h="100%" justify="space-between" mt={32}>
+        <Group p={8} mt={3} wrap="nowrap">
+          <ThemeIcon
+            size="sm"
+            bg="transparent"
+            style={{ textDecoration: "none" }}
+          >
+            <IconCode />
+          </ThemeIcon>
+          {!isCollapsed && (
+            <Title c="white" size="h3" fw={400} style={{ fontSize: "initial" }}>
+              AI code generator
+            </Title>
+          )}
+        </Group>
+        <Stack h="100%" justify="space-between" mt={6}>
           <Stack py={16} gap={8}>
             <SidebarLink isCollapsed={isCollapsed} />
           </Stack>

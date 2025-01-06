@@ -1,4 +1,4 @@
-import { Box, Container, Grid, Text } from "@mantine/core";
+import { Box, Container, Grid, Text, Tooltip, useMantineColorScheme } from "@mantine/core";
 import CodeCompletionEditor from "./codeCompletion";
 import { FileTree } from "../../components/file-tree";
 import { Directory, Type, File } from "../../utils/file-manager";
@@ -8,10 +8,9 @@ import { useTools } from "../../components/CodeCompletionToolsProviders";
 import { IconFiles } from "@tabler/icons-react";
 import { Upload } from "./upload";
 
-
 const EditorPage = () => {
   const { uploadFiles, uploadFolders } = useTools();
-
+  const { colorScheme } = useMantineColorScheme();
   const dummyDir: Directory = {
     id: "1",
     name: "Dummy",
@@ -53,37 +52,81 @@ const EditorPage = () => {
 
   const onSelect = (file: File) => setSelectedFile(file);
   const [collapsed, setCollapsed] = useState(false)
-
+  const hasFiles = rootDir.files.length > 0|| rootDir.dirs.length > 0;
   return (
-    <Container fluid p={0}>
-      <Grid gutter="md" style={{ height: "90vh" }} pt={10}>
+    <Container fluid p={0} m={0} style={{ overflow: "hidden" }}>
+      <Grid gutter="md" h="calc(100vh - 64px)" m={0} p={0} pt={10}>
         <>
-          <Grid.Col style={{ height: "90vh", display: "flex", flexDirection: "column", justifyContent: "space-between" }} span={0.5} p={10} pl={20}>
-            <Box>
-              <IconFiles onClick={() => setCollapsed(!collapsed)} stroke={2} size={30} />
-            </Box>
+          <Grid.Col
+            m={0} 
+            bg={colorScheme === "dark" ? "#121212" : "#4D7FA0"}
+            style={{
+              height: "calc(100vh - 64px)",
+              alignContent: "center",
+              alignItems: "center",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+            span={0.7}
+            p={10}
+            pl={20}
+          >
+            <Tooltip label={collapsed ? "Show files" : "Hide files"}>
+              <Box>
+                <IconFiles
+                  style={{ cursor: "pointer" }}
+                  color="white"
+                  onClick={() => setCollapsed(!collapsed)}
+                  stroke={2}
+                  size={30}
+                />
+              </Box>
+            </Tooltip>
+
             <Box mt="auto">
-              <Upload collapsed={collapsed} />
+              <Upload />
             </Box>
           </Grid.Col>
 
           {!collapsed && (
-            <Grid.Col span={2.5} style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <Grid.Col
+              p={0}
+              span={2.3}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
               <Box>
-                <Text pb={10} pl={20} >EXPLORER</Text>
-                <Box p={0} m={0}>
-                  <FileTree rootDir={rootDir} selectedFile={selectedFile} onSelect={onSelect} />
+                <Text p={12}>EXPLORER</Text>
+                <Box
+                  mr={10}
+                  style={{
+                    height: "calc(100vh - 100px)",
+                    maxWidth: "100%",
+                    overflowY: "auto",
+                    overflowX: "auto",
+                  }}
+                >
+                  {hasFiles ?
+                  <FileTree
+                    rootDir={rootDir}
+                    selectedFile={selectedFile}
+                    onSelect={onSelect}
+                  />:
+                  <Text pl={20} p={10}>No files / folders to display</Text>}
                 </Box>
               </Box>
-              <Box mt="auto" pb={30}>
-
-              </Box>
             </Grid.Col>
-
           )}
         </>
-        <Grid.Col span={collapsed ? 11.5 : 9}>
-          <CodeCompletionEditor selectedFile={selectedFile} />
+        <Grid.Col p={0} span={collapsed ? 11.3 : 9}>
+          <CodeCompletionEditor
+            selectedFile={selectedFile}
+            setSelectedFile={setSelectedFile}
+          />
         </Grid.Col>
       </Grid>
     </Container>

@@ -45,6 +45,8 @@ interface ToolsProps {
   uploadFolders: Directory | null;
   params: Params;
   setParams: (params: Params) => void;
+  isEditorVisible: boolean;
+  setIsEditorVisible: (value: boolean) => void;
 }
 
 const ToolsContext = createContext<ToolsProps>({
@@ -80,6 +82,8 @@ const ToolsContext = createContext<ToolsProps>({
     toggle: false,
   },
   setParams: () => {},
+  isEditorVisible: true,
+  setIsEditorVisible: () => {},
 });
 
 export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
@@ -91,7 +95,7 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [code, setCode] = useState("");
-  const [sideDrawerOpen, setSideDrawerOpen] = useState(true);
+  const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
   const [showSelectedFileInEditor, setShowSelectedFileInEditor] = useState(true);
   const [uploadFiles, setUploadFiles] = useState<File[] | null>(null);
   const [uploadFolders, setUploadFolders] = useState<Directory | null>(null);
@@ -104,6 +108,7 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
     model: selectedModel,
     toggle: false,
   });
+  const [isEditorVisible, setIsEditorVisible] = useState(false);
   const API = axios.create({
     baseURL: "https://emkc.org/api/v2/piston",
   });
@@ -199,6 +204,8 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
         uploadFolders,
         params,
         setParams,
+        isEditorVisible,
+        setIsEditorVisible,
       }}
     >
       {children}

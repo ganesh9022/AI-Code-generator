@@ -6,6 +6,11 @@ export type SidebarItem = {
   links?: SidebarItem[]
   tooltip?: string
   icon: React.ElementType
+  badge?: {
+    label: string
+    color: string
+    size?: "xs" | "sm" | "md" | "lg" | "xl"
+  };
 }
 
 export const SIDEBAR_ITEMS: SidebarItem[] = [
@@ -14,10 +19,11 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     name: "Chat",
     position: "top",
     icon: IconBrandHipchat,
+    badge: { label: "BETA", color: "gray", size: "sm" },
   },
   {
     path: "editor",
-    name: "Code Editor",
+    name: "Editor",
     position: "top",
     tooltip: "Explore multi-cloud spend, correlate it to your business growth",
     icon: IconEdit,
