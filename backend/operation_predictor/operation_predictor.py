@@ -36,6 +36,8 @@ def load_data():
 
 # Function to save model to an .h5 file
 def save_model(model, filename):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    # Now save the model
     joblib.dump(model, filename)
 
 # Function to load model from an .h5 file
