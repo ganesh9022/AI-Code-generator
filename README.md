@@ -102,14 +102,21 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
    ```
     GROQ_API_KEY=dummygroqapikey12345
    ```
+### 5. Ollama Setup
+   - Install ollama from https://ollama.com/
+   - Run below command on new terminal 
+      ```bash
+      ollama run codellama:7b-code
+      ```
+   - Start Backend server
 
-### 5. Run the Backend Server
+### 6. Run the Backend Server
    - Use below commands to run the server
       ```bash
       python main.py
       ```
 
-### 6. Run the Development Server:
+### 7. Run the Development Server:
    - Use below commands to run the development server
       ```bash
       yarn dev
