@@ -1,6 +1,5 @@
 from enum import Enum
 
-from constants import FOLDERPATH
 from llm.ollama_models import generate_code
 from operation_predictor.operation_predictor import operation
 from groqclould.groq_response import get_groq_response
@@ -16,12 +15,12 @@ def map_models(
     model: Model, prefix: str, currentLine: str, suffix: str, language: str, enableContextualResponse: bool
 ) -> Model:
     if model == Model.Groq.value:
-        if enableContextualResponse and FOLDERPATH:
+        if enableContextualResponse:
             loop = asyncio.get_event_loop()
             if loop.is_running():
-                return loop.create_task(get_contextual_response(currentLine, FOLDERPATH))
+                return loop.create_task(get_contextual_response(currentLine))
             else:
-                return asyncio.run(get_contextual_response(currentLine, FOLDERPATH))
+                return asyncio.run(get_contextual_response(currentLine))
         else:
             return get_groq_response(prefix, currentLine, suffix, language)
     elif model == Model.Ollama.value:

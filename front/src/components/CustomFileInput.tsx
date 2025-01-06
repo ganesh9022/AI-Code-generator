@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Group,
@@ -16,6 +16,7 @@ import { IconFile } from "@tabler/icons-react";
 import { useTools, Params } from "./CodeCompletionToolsProviders";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import useApi from "../hooks/useApi";
 
 
 const TrainModelButton = ({ onTrainModel, filesSelected }) => {
@@ -31,8 +32,25 @@ const TrainModelButton = ({ onTrainModel, filesSelected }) => {
 const CustomFileInput: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [folder, setFolder] = useState<FileList | null>(null);
+  const [shouldTrainModel, setShouldTrainModel] = useState<boolean>(false);
 
   const { toggle, setToggle, setParams } = useTools();
+  const [formData, setFormData] = useState<FormData | null>(null);
+  const { data, error } = useApi(
+    "train-model",
+    formData,
+    shouldTrainModel
+  );
+
+  useEffect(() => {
+    if (data) {
+      toast.success("Model trained successfully!");
+      setShouldTrainModel(false);
+    } else if (error) {
+      toast.error("Failed to train model.");
+      setShouldTrainModel(false);
+    }
+  }, [data, error]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -56,40 +74,22 @@ const CustomFileInput: React.FC = () => {
     }));
   };
 
-  const submitTrainingData = useCallback(
+  const submitTrainingData =
     async () => {
-      const formData = new FormData();
+      const newFormData = new FormData();
 
       if (file) {
-        formData.append("files", file);
+        newFormData.append("files", file);
       }
       if (folder) {
         Array.from(folder).forEach((file) => {
-          formData.append("files", file);
+          newFormData.append("files", file);
         });
       }
+      setFormData(newFormData);
+      setShouldTrainModel(true);
 
-      try {
-        const response = await axios.post(
-          `${import.meta.env.VITE_SERVER_URL}/train-model`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        
-        if (response.status === 200) {
-          toast.success("Model trained successfully!");
-        }
-      } catch (error) {
-        toast.error("Error training model. Please try again.");
-        console.error("Error training model:", error);
-      }
-    },
-    [file, folder]
-  );
+    }
 
   return (
     <div>

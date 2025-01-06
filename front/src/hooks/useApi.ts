@@ -12,7 +12,8 @@ const generateUrl = (url: string): string => {
 };
 const useApi = <T>(
   url: string,
-  params?: AxiosRequestConfig["params"]
+  params?: AxiosRequestConfig["params"],
+  trigger: boolean = true
 ): ApiResponse<T> => {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,8 +37,10 @@ const useApi = <T>(
       }
     };
 
-    fetchData();
-  }, [url, debouncedParams]);
+    if (trigger && url) {
+      fetchData();
+    }
+  }, [url, debouncedParams, trigger]);
 
   return { data, error, loading };
 };
