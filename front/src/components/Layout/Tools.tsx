@@ -37,6 +37,7 @@ interface ToolsProps {
   language: keyof typeof supported_language_versions;
   setLanguage: (language: keyof typeof supported_language_versions) => void;
   runCode: () => void;
+  pageTitle: string
 }
 
 const Tools: React.FC<ToolsProps> = ({
@@ -45,6 +46,7 @@ const Tools: React.FC<ToolsProps> = ({
   language,
   setLanguage,
   runCode,
+  pageTitle
 }) => {
   const icon = (
     <IconPlayerPlay style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
@@ -55,19 +57,20 @@ const Tools: React.FC<ToolsProps> = ({
       <Button leftSection={icon} variant="filled" onClick={runCode}>
         Run Code
       </Button>
-      <Select
-        data={options}
-        value={language}
-        onChange={(e) => {
-          const newLanguage = e as keyof typeof supported_language_versions;
-          setLanguage(newLanguage);
-          setParams((prevParams: Params) => ({
-            ...prevParams,
-            language: newLanguage,
-          }));
-        }}
-        searchable
-      />
+      {pageTitle !== 'Chat' &&
+        <Select
+          data={options}
+          value={language}
+          onChange={(e) => {
+            const newLanguage = e as keyof typeof supported_language_versions;
+            setLanguage(newLanguage);
+            setParams((prevParams: Params) => ({
+              ...prevParams,
+              language: newLanguage,
+            }));
+          }}
+          searchable
+        />}
       <Select
         data={modelOptions}
         value={selectedModel}

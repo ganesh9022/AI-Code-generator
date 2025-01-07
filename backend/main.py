@@ -4,7 +4,7 @@ from flask_cors import CORS
 from g4f.client import Client
 from constants import FOLDERPATH
 from db.sqlalchemy_orm import get_user_details
-from mappers.model_mapper import map_models
+from mappers.model_mapper import map_models,map_chat_models
 import nest_asyncio
 app = Flask(__name__)
 CORS(app)
@@ -49,6 +49,15 @@ def generate_code_snippet():
         enableContextualResponse
     )
     return response
+
+@app.route("/ask-query", methods=["POST"])
+def provide_answer():
+    data = request.json
+    question = data.get("prompt")
+    model = data.get("model")
+    response = map_chat_models(model,question)
+    return response
+
 
 @app.route("/saveUser", methods=["POST"])
 def save_user():

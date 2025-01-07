@@ -85,6 +85,7 @@ export const AppHeader = () => {
             language={language}
             setLanguage={setLanguage}
             runCode={runCode}
+            pageTitle={pageTitle}
           />
           <ThemeIcon
             bg={colorScheme === "dark" ? "gray.8" : "white"}

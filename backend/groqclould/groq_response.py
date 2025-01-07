@@ -2,7 +2,7 @@ from typing import Optional
 from flask import jsonify
 from groq import Groq
 import os
-from groqclould.system_prompt import instructions
+from groqclould.system_prompt import instructions,chatInstructions
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -32,4 +32,31 @@ def get_groq_response(prefix: str, currentLine: str, suffix: str, language: str)
         return response.choices[0].message.content
     except Exception as e:
         return str(e)
+
+
+def answer_user_query(question: str) -> str:
+    if not question:
+        return jsonify({"error": "'question' parameter is required."}), 400
+
+    try:
+        chat_completion = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                chatInstructions(),
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant."
+                },
+                {
+                    "role": "user",
+                    "content": question,
+                }
+            ],
+            temperature=0.5,
+            max_tokens=1024,
+        )
+        answer = chat_completion.choices[0].message.content.strip() if chat_completion.choices else None
+        return jsonify({"answer": answer})
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
