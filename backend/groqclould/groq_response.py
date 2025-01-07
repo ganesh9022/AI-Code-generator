@@ -56,7 +56,7 @@ def answer_user_query(question: str) -> str:
             max_tokens=1024,
         )
         answer = chat_completion.choices[0].message.content.strip() if chat_completion.choices else None
-        return jsonify({"answer": answer if answer else "No answer available."})
+        return jsonify({"answer": answer})
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 

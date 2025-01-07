@@ -27,10 +27,11 @@ def generate_code_snippet():
     )
     return response
 
-@app.route("/ask-query", methods=["GET"])
+@app.route("/ask-query", methods=["POST"])
 def provide_answer():
-    question = request.args.get("prompt")
-    model = request.args.get("model")
+    data = request.json
+    question = data.get("prompt")
+    model = data.get("model")
     response = map_chat_models(model,question)
     return response
 

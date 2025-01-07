@@ -37,8 +37,11 @@ export const Chat = () => {
         setChatHistory((prev) => [...prev, userMessage])
         setInputValue("")
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/ask-query?model=${selectedModel}&prompt=${inputValue.trim()}`)
-            const answer = response.data.answer || response.data || "No answer received."
+            const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/ask-query`, {
+                model: selectedModel,
+                prompt: inputValue.trim(),
+            })
+            const answer = response.data.answer || "No answer received."
             const receivedMessage: ChatMessage = { type: "received", content: answer }
             setChatHistory((prev) => [...prev, receivedMessage])
         } catch (error) {
@@ -83,7 +86,7 @@ export const Chat = () => {
                                 borderRadius: 8,
                             }}
                         >
-                            <Text w={700}>{language || "Code"}</Text>
+                            <Text w={700}>{language || "text"}</Text>
                             <Tooltip label={tooltipText} withArrow>
                                 <ActionIcon
                                     size="sm"
@@ -96,7 +99,7 @@ export const Chat = () => {
                         </Box>
                         <Editor
                             value={code}
-                            language={language.toLowerCase()}
+                            language={language||"text"}
                             theme={colorScheme === "dark" ? "vs-dark" : "vs"}
                             options={{
                                 readOnly: true,
