@@ -6,7 +6,6 @@ from constants import FOLDERPATH
 from db.sqlalchemy_orm import get_user_details
 from mappers.model_mapper import map_models,map_chat_models
 import nest_asyncio
-from 
 app = Flask(__name__)
 CORS(app)
 
