@@ -12,18 +12,18 @@ const generateUrl = (url: string): string => {
 };
 const useApi = <T>(
   url: string,
-  params?: AxiosRequestConfig["params"]
+  params?: AxiosRequestConfig["params"],
 ): ApiResponse<T> => {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [debouncedParams] = useDebounce(params, 1000);
+  const [debouncedParams] = useDebounce(params, 2000);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const URL = generateUrl(url);
-        const response = await axios.post<T>(URL, debouncedParams);
+        const response = debouncedParams && await axios.post<T>(URL, debouncedParams);
         setData(response.data);
       } catch (err) {
         if (axios.isAxiosError(err)) {
@@ -36,7 +36,9 @@ const useApi = <T>(
       }
     };
 
-    fetchData();
+    if (url) {
+      fetchData();
+    }
   }, [url, debouncedParams]);
 
   return { data, error, loading };

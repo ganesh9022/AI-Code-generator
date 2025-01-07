@@ -4,6 +4,7 @@ import json
 import os
 import nltk
 import spacy
+import textwrap
 from nltk.corpus import wordnet as wn
 
 nltk.download('wordnet')
@@ -62,7 +63,7 @@ def split_function_name(function_name):
 def get_function_details(func):
     """Retrieve details about the function including name, source, and input examples."""
     source_code = inspect.getsource(func)
-    source_code = "\n".join([line.strip() for line in source_code.splitlines()])
+    source_code = textwrap.dedent(source_code)
 
     operation_name = func.__name__
     related_words = get_related_words_wordnet(func.__name__)

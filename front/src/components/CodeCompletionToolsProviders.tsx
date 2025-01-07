@@ -4,7 +4,6 @@ import React, {
   useState,
   ReactNode,
   useRef,
-  useEffect,
 } from "react";
 import { Model, supported_language_versions } from "./Layout/Tools";
 import * as monaco from "monaco-editor";
@@ -17,10 +16,13 @@ export interface Params {
   suffix: string;
   language: keyof typeof supported_language_versions;
   model: Model;
+  toggle: boolean;
 }
 interface ToolsProps {
   selectedModel: Model;
   setSelectedModel: (model: Model) => void;
+  toggle: boolean;
+  setToggle: (toggle: boolean) => void;
   language: keyof typeof supported_language_versions;
   setLanguage: (language: keyof typeof supported_language_versions) => void;
   runCode: () => void;
@@ -28,14 +30,10 @@ interface ToolsProps {
   setOutput: (value: string) => void;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
   handleCodeChange: (currentCode: string) => void;
-  file: File | null;
-  setFile: (file: File | null) => void;
   code: string;
   setCode: (code: string) => void;
   sideDrawerOpen: boolean;
   setSideDrawerOpen: (value: boolean) => void;
-  showSelectedFileInEditor: boolean;
-  setShowSelectedFileInEditor: (value: boolean) => void;
   uploadFiles: File[] | null;
   setUploadFiles: (file: File[] | null) => void;
   setUploadFolders: (directory: Directory | null) => void;
@@ -56,24 +54,23 @@ const ToolsContext = createContext<ToolsProps>({
   setOutput: () => {},
   editorRef: { current: null },
   handleCodeChange: () => {},
-  file: null,
-  setFile: () => {},
   code: "",
   setCode: () => {},
   sideDrawerOpen: false,
   setSideDrawerOpen: () => {},
-  showSelectedFileInEditor: true,
-  setShowSelectedFileInEditor: () => {},
   setUploadFiles: () => {},
   uploadFiles: null,
   setUploadFolders: () => {},
   uploadFolders: null,
+  toggle: false,
+  setToggle: () => {},
   params: {
     prefix: "",
     currentLine: "",
     suffix: "",
     language: "javascript",
     model: Model.ML,
+    toggle: false,
   },
   setParams: () => {},
   isEditorVisible: true,
@@ -87,18 +84,18 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   const [language, setLanguage] = useState<keyof typeof supported_language_versions>("javascript");
   const [output, setOutput] = useState<string>("");
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const [file, setFile] = useState<File | null>(null);
   const [code, setCode] = useState("");
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
-  const [showSelectedFileInEditor, setShowSelectedFileInEditor] = useState(true);
   const [uploadFiles, setUploadFiles] = useState<File[] | null>(null);
   const [uploadFolders, setUploadFolders] = useState<Directory | null>(null);
+  const [toggle, setToggle] = useState(false);
   const [params, setParams] = useState({
     prefix: "",
     currentLine: "",
     suffix: "",
     language: language,
     model: selectedModel,
+    toggle: false,
   });
   const [isEditorVisible, setIsEditorVisible] = useState(false);
   const API = axios.create({
@@ -157,20 +154,11 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
       }
     }
   };
-
-  useEffect(() => {
-    if (file && showSelectedFileInEditor) {
-      file?.text().then((text) => {
-        setCode(text);
-      });
-    } else {
-      setCode("");
-    }
-  }, [file, showSelectedFileInEditor]);
-
   return (
     <ToolsContext.Provider
       value={{
+        toggle,
+        setToggle,
         selectedModel,
         setSelectedModel,
         language,
@@ -180,14 +168,10 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
         runCode,
         editorRef,
         handleCodeChange,
-        file,
-        setFile,
         code,
         setCode,
         sideDrawerOpen,
         setSideDrawerOpen,
-        showSelectedFileInEditor,
-        setShowSelectedFileInEditor,
         setUploadFiles,
         uploadFiles,
         setUploadFolders,
