@@ -138,8 +138,6 @@ async def get_contextual_response(question: str) -> str:
 
     # Set up the RAG chain
     rag_chain = setup_rag_chain(retriever, rag_llm)
-    print("question", question)
     # Generate and return the response
     answer = await rag_chain.ainvoke(question)
-    print("answer", answer) 
     return answer
