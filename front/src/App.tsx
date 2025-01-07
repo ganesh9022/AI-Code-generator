@@ -17,7 +17,15 @@ if (!PUBLISHABLE_KEY) {
 
 export default function App() {
   return (
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+    <ClerkProvider
+      publishableKey={PUBLISHABLE_KEY}
+      afterSignOutUrl="/"
+      appearance={{
+        layout: {
+          unsafe_disableDevelopmentModeWarnings: true,
+        },
+      }}
+    >
       <MantineProvider theme={theme}>
         <SignedOut>
           <WelcomePage/> 

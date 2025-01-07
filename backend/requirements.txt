@@ -61,3 +61,4 @@ sentence-transformers==3.3.1
 nltk==3.9.1
 spacy==3.8.3
 tf_keras==2.18.0
+nest-asyncio==1.6.0

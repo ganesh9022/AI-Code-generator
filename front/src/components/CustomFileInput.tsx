@@ -32,25 +32,21 @@ const TrainModelButton = ({ onTrainModel, filesSelected }) => {
 const CustomFileInput: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [folder, setFolder] = useState<FileList | null>(null);
-  const [shouldTrainModel, setShouldTrainModel] = useState<boolean>(false);
-
   const { toggle, setToggle, setParams } = useTools();
   const [formData, setFormData] = useState<FormData | null>(null);
   const { data, error } = useApi(
     "train-model",
     formData,
-    shouldTrainModel
   );
 
   useEffect(() => {
-    if (data) {
+    if (formData) {
       toast.success("Model trained successfully!");
-      setShouldTrainModel(false);
     } else if (error) {
       toast.error("Failed to train model.");
-      setShouldTrainModel(false);
     }
-  }, [data, error]);
+  },[formData] );
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -87,7 +83,6 @@ const CustomFileInput: React.FC = () => {
         });
       }
       setFormData(newFormData);
-      setShouldTrainModel(true);
 
     }
 
