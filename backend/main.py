@@ -16,7 +16,6 @@ client = Client()
 def train_model():
 
     uploaded_files = request.files.getlist("files")
-
     save_directory = os.path.join(FOLDERPATH)
 
     os.makedirs(save_directory, exist_ok=True)
