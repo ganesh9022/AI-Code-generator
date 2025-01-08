@@ -1,10 +1,8 @@
-from flask import jsonify
 import ollama
 import json
 from typing import Optional
-from ollama import generate,create
-# olllma.create.code_generator("ollama")
 import os
+from flask import jsonify
 from .system_prompt import ollama_instructions
 def get_absolute_path(relative_path) -> str:
     abs_path=os.path.dirname(os.path.abspath(__file__))
