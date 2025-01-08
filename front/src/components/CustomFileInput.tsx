@@ -144,7 +144,8 @@ const CustomFileInput: React.FC = () => {
       />
       {file || (folder && folder.length > 0) ? (
         <>
-          <Paper shadow="xs" withBorder style={{ marginTop: 20, padding: 10 }}>
+          <Paper shadow="xs" withBorder style={{ marginTop: 20, padding: 10 , maxWidth: "100%", 
+    overflow: "hidden"}}>
             <List
               spacing="xs"
               size="sm"
