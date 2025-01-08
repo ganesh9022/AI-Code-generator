@@ -99,7 +99,7 @@ export const Chat = () => {
                         </Box>
                         <Editor
                             value={code}
-                            language={language||"text"}
+                            language={language?.toLocaleLowerCase() || "text"}
                             theme={colorScheme === "dark" ? "vs-dark" : "vs"}
                             options={{
                                 readOnly: true,
@@ -115,6 +115,17 @@ export const Chat = () => {
                                     width: editor.getLayoutInfo().width,
                                     height: contentHeight,
                                 });
+                                const editorElement = editor.getDomNode();
+                                if (editorElement) {
+                                    editorElement.addEventListener(
+                                        "wheel",
+                                        (event) => {
+                                            const deltaY = event.deltaY
+                                            const scrollContainer = document.querySelector(".mantine-ScrollArea-viewport")
+                                            scrollContainer?.scrollBy({ top:deltaY})
+                                        },
+                                    )
+                                }
                             }}
                         />
                     </Box>
