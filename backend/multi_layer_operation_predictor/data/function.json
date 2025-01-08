@@ -1,0 +1,7 @@
+{
+    "addition": "const addition=(a,b)=>a+b;",
+    "subtraction": "const subtraction=(a,b)=>a-b;",
+    "multiplication": "const multiplication=(a,b)=>a*b;",
+    "division": "const division=(a,b)=>a/b;",
+    "factorial": "const factorial=n=>n<=0?1:n*factorial(n-1);"
+}
