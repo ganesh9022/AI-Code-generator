@@ -10,7 +10,7 @@ export const Upload = () => {
     } = useTools();
     const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
-
+        
     if (files && files.length > 0) {
       const dirMap: { [path: string]: Directory } = {};
       const filesArray: File[] = [];
@@ -70,7 +70,7 @@ export const Upload = () => {
         dirs: Object.values(dirMap).filter((dir) => dir.depth === 1),
         files: [],
       };
-
+      
       setUploadFolders(rootDirectory);
     }
   };
@@ -87,7 +87,9 @@ export const Upload = () => {
         }}
       >
         <div>
-          <FileButton multiple onChange={(files) => setUploadFiles(files)}>
+          <FileButton multiple onChange={(files) => {
+            setUploadFolders(null);
+            setUploadFiles(files)}}>
             {(props) => (
               <Button bg="none" radius="md" {...props} mb={15}>
                 <Box display="flex">
@@ -131,7 +133,10 @@ export const Upload = () => {
                 input.setAttribute("directory", "true");
               }
             }}
-            onChange={handleFolderUpload}
+            onChange={(event) => {
+              setUploadFiles(null);
+              handleFolderUpload(event);
+            }}
           />
         </Button>
       </Tooltip>
