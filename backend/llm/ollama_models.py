@@ -1,10 +1,11 @@
+from flask import jsonify
 import ollama
 import json
 from typing import Optional
-from ollama import generate
+from ollama import generate,create
+# olllma.create.code_generator("ollama")
 import os
-from flask import jsonify
-
+from .system_prompt import ollama_instructions
 def get_absolute_path(relative_path) -> str:
     abs_path=os.path.dirname(os.path.abspath(__file__))
     return os.path.join(abs_path, relative_path)
@@ -13,12 +14,14 @@ def get_absolute_path(relative_path) -> str:
 def generate_code(
     prompt: str,
     suffix: Optional[str] = None,
+    prefix: Optional[str] = None,
     language: str = '',
 ) -> str:
     """
     Args:
         prompt (str): The text prompt to guide the generation.
-        suffix (Optional[str]): Text appended after the generation.
+        suffix (Optional[str]): A suffix to guide the code generation, if applicable.
+        prefix (Optional[str]): A prefix to guide the code generation, if applicable.
         language (str): The programming language for the code generation.
 
     Returns:
@@ -29,14 +32,16 @@ def generate_code(
         with open(get_absolute_path('ollama.config.json'), "r") as config_file:
             config = json.load(config_file)
 
-        enhanced_prompt = f"Write a program in {language} for :\n{prompt}"
-        response = generate(
+        response = ollama.chat(
             model=config["model"],
-            prompt=enhanced_prompt,
-            suffix=suffix,
-            options=config.get("options"),
+            messages=[
+                ollama_instructions(language),
+                {"role": "user", "content": prompt},
+                {"role": "user", "content": suffix},
+                {"role":"user","content":prefix}
+            ],
         )
-        return response['response']
+        return response['message']['content']
     except Exception as e:
         return {"next_line": f"An error occurred: {str(e)}"}
 
