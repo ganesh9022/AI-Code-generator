@@ -9,8 +9,7 @@ export const Upload = () => {
         setUploadFolders
     } = useTools();
     const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        
+        const files = event.target.files;    
     if (files && files.length > 0) {
       const dirMap: { [path: string]: Directory } = {};
       const filesArray: File[] = [];
@@ -69,8 +68,7 @@ export const Upload = () => {
         depth: 0,
         dirs: Object.values(dirMap).filter((dir) => dir.depth === 1),
         files: [],
-      };
-      
+      }; 
       setUploadFolders(rootDirectory);
     }
   };
