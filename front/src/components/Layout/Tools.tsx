@@ -10,7 +10,7 @@ export enum Model {
 }
 
 const modelOptions = [
-  { value: Model.Ollama, label: "Ollama (codellama:7b-code)" },
+  { value: Model.Ollama, label: "Ollama (granite-code:3b-instruct-128k-q2_K)" },
   { value: Model.Groq, label: "Groq (llama3-8b-8192)" },
   { value: Model.ML, label: "ML model" },
 ];

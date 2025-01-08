@@ -106,7 +106,7 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
    - Install ollama from https://ollama.com/
    - Run below command on new terminal 
       ```bash
-      ollama run codellama:7b-code
+      ollama run granite-code:3b-instruct-128k-q2_K
       ```
    - Start Backend server
 
