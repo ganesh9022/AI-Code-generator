@@ -2,6 +2,7 @@ from enum import Enum
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
+from multi_layer_operation_predictor.operation_predictor import get_operation_definition
 from llm.ollama_models import generate_code, ask_question
 from operation_predictor.operation_predictor import operation
 from groqclould.groq_response import get_groq_response,  answer_user_query
@@ -11,6 +12,7 @@ class Model(Enum):
     Ollama = "ollama"
     Groq = "groq"
     ML = "ml"
+    MULTI_LAYER = "multi_layer"
 
 
 def get_event_loop():
@@ -43,6 +45,9 @@ def map_models(
         return generate_code(prompt=currentLine, suffix=suffix, prefix=prefix, language=language)
     elif model == Model.ML.value:
         return operation(currentLine)
+    elif model == Model.MULTI_LAYER.value:
+        return get_operation_definition(currentLine)
+
     else:
         return "Model not found"
 

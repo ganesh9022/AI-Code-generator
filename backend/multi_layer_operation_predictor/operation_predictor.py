@@ -104,12 +104,12 @@ def get_operation_definition(user_input):
     # First, try exact match
     closest_match, method = find_closest_operation_substring(preprocessed_input, operations)
     if closest_match:
-        return operations[closest_match], method
+        return operations[closest_match]
         
     # Next, try fuzzy matching
     closest_match, method = find_closest_operation_fuzzy(preprocessed_input, operations)
     if closest_match:
-        return operations[closest_match], method
+        return operations[closest_match]
     # Finally, try ML model
     knn_model, vectorizer = load_ml_model()
     if not knn_model:
@@ -118,9 +118,9 @@ def get_operation_definition(user_input):
     try:
         closest_match, method = predict_operation_name_ml(preprocessed_input, knn_model, vectorizer)
         if closest_match:
-            return operations[closest_match], method
+            return operations[closest_match]
     except Exception as e:
         print(f"Error during ML prediction: {e}")
-        return None, MatchMethod.ML_ERROR
+        return ""
     
-    return None, MatchMethod.ML_ERROR
+    return ""
