@@ -12,7 +12,7 @@ class Model(Enum):
     Ollama = "ollama"
     Groq = "groq"
     ML = "ml"
-    MULTI_LAYER = "multi-layer ml model"
+    MULTI_LAYER = "multi-layer-ml-model"
 
 
 def get_event_loop():
@@ -46,8 +46,7 @@ def map_models(
     elif model == Model.ML.value:
         return operation(currentLine)
     elif model == Model.MULTI_LAYER.value:
-        return get_operation_definition(currentLine)
-
+        return get_operation_definition(currentLine, language)
     else:
         return "Model not found"
 

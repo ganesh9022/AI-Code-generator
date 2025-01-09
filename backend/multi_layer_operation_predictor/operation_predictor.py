@@ -20,8 +20,19 @@ def get_absolute_path(relative_path):
     abs_path=os.path.dirname(os.path.abspath(__file__))
     return os.path.join(abs_path, relative_path)
 
-MODEL_PATH = get_absolute_path(r'model/knn_model.h5')
-DATA_PATH = get_absolute_path(r'data/function.json')
+def get_model_path(language):
+    """Returns the path to the KNN model file based on language."""
+    return get_absolute_path(f'model/{language}_knn_model.h5')
+
+def load_functions(language):
+    lang_dir = get_absolute_path(f"data/{language}")
+    file_path = os.path.join(lang_dir, 'functions.json')
+    
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            return json.load(file)
+    else:
+        raise FileNotFoundError(f"Function definitions for language '{language}' not found.")
 
 def clean_function_name(function_name):
   """
@@ -46,9 +57,11 @@ def preprocess_text(text):
     lemmatized_words = [lemmatizer.lemmatize(word) for word in words]
     return " ".join(lemmatized_words)
 
-def load_functions():
-    """Loads functions from a JSON file."""
-    with open(DATA_PATH, 'r') as file:
+def load_functions(language):
+    """Loads functions from a JSON file based on the language."""
+    file_name = f'{language}_functions.json' 
+    file_path = get_absolute_path(f'data/{file_name}')
+    with open(file_path, 'r') as file:
         return json.load(file)
 
 def find_closest_operation_fuzzy(user_input, operations):
@@ -69,20 +82,22 @@ def find_closest_operation_substring(user_input, operations):
             return operation_name, MatchMethod.SUBSTRING
     return None, MatchMethod.SUBSTRING
 
-def train_ml_model(operations):
+def train_ml_model(operations, language):
     """Trains a KNN model on operation names."""
     operation_names = list(operations.keys())
     vectorizer = TfidfVectorizer()
     X = vectorizer.fit_transform(operation_names)
     knn_model = KNeighborsClassifier(n_neighbors=3)
     knn_model.fit(X, operation_names)
-    joblib.dump((knn_model, vectorizer), MODEL_PATH)
+    model_path = get_model_path(language)
+    joblib.dump((knn_model, vectorizer), model_path)
     return knn_model, vectorizer
 
-def load_ml_model():
+def load_ml_model(language):
     """Loads the trained KNN model and vectorizer."""
-    if os.path.exists(MODEL_PATH):
-        return joblib.load(MODEL_PATH)
+    model_path = get_model_path(language)
+    if os.path.exists(model_path):
+        return joblib.load(model_path)
     else:
         return None, None
 
@@ -96,8 +111,8 @@ def predict_operation_name_ml(user_input, knn_model, vectorizer):
         return "", MatchMethod.ML
     return knn_model.predict(input_vector)[0], MatchMethod.ML
 
-def get_operation_definition(user_input):
-    operations = load_functions()
+def get_operation_definition(user_input, language):
+    operations = load_functions(language)
     cleaned_input = clean_function_name(user_input)
     preprocessed_input = preprocess_text(cleaned_input)
 
@@ -111,9 +126,9 @@ def get_operation_definition(user_input):
     if closest_match:
         return operations[closest_match]
     # Finally, try ML model
-    knn_model, vectorizer = load_ml_model()
+    knn_model, vectorizer = load_ml_model(language)
     if not knn_model:
-        knn_model, vectorizer = train_ml_model(operations)
+        knn_model, vectorizer = train_ml_model(operations, language)
 
     try:
         closest_match, method = predict_operation_name_ml(preprocessed_input, knn_model, vectorizer)
