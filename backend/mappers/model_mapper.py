@@ -12,7 +12,7 @@ class Model(Enum):
     Ollama = "ollama"
     Groq = "groq"
     ML = "ml"
-    MULTI_LAYER = "multi_layer"
+    MULTI_LAYER = "multi-layer ml model"
 
 
 def get_event_loop():
