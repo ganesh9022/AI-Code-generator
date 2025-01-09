@@ -62,7 +62,7 @@ const Tools: React.FC<ToolsProps> = ({
       {pageTitle !== 'Chat' &&
         <Select
           data={options}
-          value={language}
+          value={language || 'javascript'}
           onChange={(e) => {
             const newLanguage = e as keyof typeof supported_language_versions;
             setLanguage(newLanguage);
@@ -71,11 +71,10 @@ const Tools: React.FC<ToolsProps> = ({
               language: newLanguage,
             }));
           }}
-          searchable
         />}
       <Select
         data={modelOptions}
-        value={selectedModel}
+        value={selectedModel || 'Ollama (codellama:7b-code)'}
         onChange={(e) => {
           const newModel = e as Model;
           setSelectedModel(newModel);
@@ -84,7 +83,6 @@ const Tools: React.FC<ToolsProps> = ({
             model: newModel,
           }));
         }}
-        searchable
       />
     </Flex>
   );

@@ -1,6 +1,8 @@
+from functools import lru_cache
 import json
 from enum import Enum
 import os
+import re
 from fuzzywuzzy import fuzz
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neighbors import KNeighborsClassifier
@@ -34,22 +36,30 @@ def load_functions(language):
     else:
         raise FileNotFoundError(f"Function definitions for language '{language}' not found.")
 
-def clean_function_name(function_name):
-  """
-  Removes keywords like "def", "class", etc., and strips leading/trailing whitespace.
+def clean_function_name(function_name, language):
+    """
+    Removes language-specific keywords and strips leading/trailing whitespace using regex.
+    
+    Args:
+        function_name: The original function name.
+        language: The programming language of the function.
+    Returns:
+        The cleaned function name.
+    """
+    keywords_dict = {
+        "python": r"\b(def|class|async|await|for|while|if|else|try|except|finally)\b",
+        "javascript": r"\b(function|class|async|await|const|let|var|if|else|for|while)\b",
+        "typescript": r"\b(function|class|async|await|const|let|var|interface|type|enum|if|else|for|while)\b",
+        "php": r"\b(function|class|public|private|protected|if|else|foreach|while|try|catch|finally)\b",
+        "java": r"\b(class|public|private|protected|static|final|if|else|for|while|try|catch|finally)\b"
+    }
+    pattern = keywords_dict.get(language)
+    if pattern:
+        # Remove all language-specific keywords using regex
+        function_name = re.sub(pattern, "", function_name)
+    return function_name.strip()
 
-  Args:
-      function_name: The original function name.
-
-  Returns:
-      The cleaned function name.
-  """
-  keywords = ["def", "class", "async", "await", "for", "while", "if", "else", "try", "except", "finally"]
-  for keyword in keywords:
-    function_name = function_name.replace(keyword, "")
-  return function_name.strip()
-
-
+@lru_cache(maxsize=1000)
 def preprocess_text(text):
     """Preprocesses the text by converting to lowercase and lemmatizing."""
     lemmatizer = WordNetLemmatizer()
@@ -113,7 +123,7 @@ def predict_operation_name_ml(user_input, knn_model, vectorizer):
 
 def get_operation_definition(user_input, language):
     operations = load_functions(language)
-    cleaned_input = clean_function_name(user_input)
+    cleaned_input = clean_function_name(user_input,language)
     preprocessed_input = preprocess_text(cleaned_input)
 
     # First, try exact match
