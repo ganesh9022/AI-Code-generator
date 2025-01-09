@@ -1,16 +1,28 @@
 import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_caching import Cache
 from g4f.client import Client
 from constants import FOLDERPATH
 from db.sqlalchemy_orm import get_user_details
 from mappers.model_mapper import map_models,map_chat_models
+from config import get_cache_config
 import nest_asyncio
 app = Flask(__name__)
 CORS(app)
 
+app.config.from_mapping(get_cache_config())
+cache = Cache(app)
+
 client = Client()
 
+
+def make_key():
+    """Generate a cache key from request data"""
+    user_data = request.get_json()
+    sorted_items = sorted(user_data.items())
+    endpoint = request.endpoint
+    return f"{endpoint}:{','.join([f'{k}={v}' for k, v in sorted_items])}"
 
 @app.route("/train-model", methods=["POST"])
 def train_model():
@@ -31,6 +43,7 @@ def train_model():
 
 
 @app.route("/code-snippet", methods=["POST"])
+@cache.cached(timeout=600, make_cache_key=make_key)
 def generate_code_snippet():
 
     data = request.json
@@ -51,6 +64,7 @@ def generate_code_snippet():
     return response
 
 @app.route("/ask-query", methods=["POST"])
+@cache.cached(timeout=600, make_cache_key=make_key)
 def provide_answer():
     data = request.json
     question = data.get("prompt")
@@ -65,7 +79,7 @@ def save_user():
     user_id = data.get("userId")
     userName = data.get("userName")
     email = data.get("email")
-    response = get_user_details(user_id, userName, email) 
+    response = get_user_details(user_id, userName, email)
     return response
 
 if __name__ == "__main__":
