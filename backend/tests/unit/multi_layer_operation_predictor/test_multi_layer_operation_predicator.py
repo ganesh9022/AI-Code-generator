@@ -10,15 +10,15 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 
 from multi_layer_operation_predictor.operation_predictor import (
-    MatchMethod, 
-    clean_function_name, 
-    preprocess_text, 
-    load_functions, 
-    find_closest_operation_fuzzy, 
-    find_closest_operation_substring, 
-    train_ml_model, 
-    load_ml_model, 
-    predict_operation_name_ml, 
+    MatchMethod,
+    clean_function_name,
+    preprocess_text,
+    load_functions,
+    find_closest_operation_fuzzy,
+    find_closest_operation_substring,
+    train_ml_model,
+    load_ml_model,
+    predict_operation_name_ml,
     get_operation_definition
 )
 
@@ -190,4 +190,4 @@ class TestOperationFunctions(unittest.TestCase):
         self.assertEqual(result, MOCKED_OPERATIONS["substract_numbers"])
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()
