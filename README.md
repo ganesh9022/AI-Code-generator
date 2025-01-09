@@ -120,4 +120,9 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
    - Use below commands to run the development server
       ```bash
       yarn dev
+ 
+### 8. Run the Unit test:
+   - Use below commands to run unit test
+      ```bash
+         python3 -m pytest backend/tests/unit    
       ```
