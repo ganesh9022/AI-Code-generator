@@ -124,5 +124,5 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
 ### 8. Run the Unit test:
    - Use below commands to run unit test
       ```bash
-         python3 -m pytest multi_layer_operation_predictor/test_multi_layer_operation_predicator.py    
+         python3 -m pytest backend/tests/unit    
       ```
