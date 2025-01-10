@@ -4,7 +4,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 from multi_layer_operation_predictor.operation_predictor import get_operation_definition
 from llm.ollama_models import generate_code, ask_question
-from operation_predictor.operation_predictor import operation
 from groqclould.groq_response import get_groq_response, answer_user_query
 from groqclould.contextual_response import get_contextual_response
 
@@ -12,7 +11,6 @@ from groqclould.contextual_response import get_contextual_response
 class Model(Enum):
     Ollama = "ollama"
     Groq = "groq"
-    ML = "ml"
     MULTI_LAYER = "multi-layer-ml-model"
 
 
@@ -54,8 +52,6 @@ def map_models(
         return generate_code(
             prompt=currentLine, suffix=suffix, prefix=prefix, language=language
         )
-    elif model == Model.ML.value:
-        return operation(currentLine)
     elif model == Model.MULTI_LAYER.value:
         closest_match = get_operation_definition(currentLine, language)
         return closest_match.replace(currentLine, "")

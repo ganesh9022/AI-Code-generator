@@ -45,7 +45,7 @@ interface ToolsProps {
 }
 
 const ToolsContext = createContext<ToolsProps>({
-  selectedModel: Model.ML,
+  selectedModel: Model.MULTI_LAYER,
   setSelectedModel: () => {},
   language: "javascript",
   setLanguage: () => {},
@@ -69,7 +69,7 @@ const ToolsContext = createContext<ToolsProps>({
     currentLine: "",
     suffix: "",
     language: "javascript",
-    model: Model.ML,
+    model: Model.MULTI_LAYER,
     toggle: false,
   },
   setParams: () => {},
@@ -80,7 +80,7 @@ const ToolsContext = createContext<ToolsProps>({
 export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [selectedModel, setSelectedModel] = useState<Model>(Model.Groq);
+  const [selectedModel, setSelectedModel] = useState<Model>(Model.MULTI_LAYER);
   const [language, setLanguage] = useState<keyof typeof supported_language_versions>("javascript");
   const [output, setOutput] = useState<string>("");
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);

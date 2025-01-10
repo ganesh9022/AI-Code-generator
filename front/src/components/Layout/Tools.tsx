@@ -6,14 +6,12 @@ import { useTools, Params } from "../CodeCompletionToolsProviders";
 export enum Model {
   Ollama = "ollama",
   Groq = "groq",
-  ML = "ml",
   MULTI_LAYER = "multi-layer-ml-model"
 }
 
 const modelOptions = [
   { value: Model.Ollama, label: "Ollama (granite-code:3b-instruct-128k-q2_K)" },
   { value: Model.Groq, label: "Groq (llama3-8b-8192)" },
-  { value: Model.ML, label: "ML model" },
   { value: Model.MULTI_LAYER, label: "Multi-Layer ML model" }
 ];
 

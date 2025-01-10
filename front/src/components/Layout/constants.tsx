@@ -19,7 +19,6 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     name: "Chat",
     position: "top",
     icon: IconBrandHipchat,
-    badge: { label: "BETA", color: "gray", size: "sm" },
   },
   {
     path: "editor",
