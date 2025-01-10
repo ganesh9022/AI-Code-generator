@@ -28,7 +28,7 @@ joblib==1.4.2
 Jinja2==3.1.5
 MarkupSafe==3.0.2
 multidict==6.1.0
-numpy==2.2.1
+numpy==1.26.4
 ollama==0.4.4
 packaging==24.2
 propcache==0.2.1

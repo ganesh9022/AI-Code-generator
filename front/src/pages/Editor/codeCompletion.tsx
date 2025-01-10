@@ -19,6 +19,7 @@ import { IconChevronRight } from "@tabler/icons-react";
 import { useUser } from "@clerk/clerk-react";
 import useLazyApi from "../../hooks/useLazyApi";
 import { useDetails } from "../../components/UserDetailsProviders";
+import { Model } from "../../components/Layout/Tools";
 const CodeCompletionEditor = ({
   selectedFile,
   setSelectedFile,
@@ -35,16 +36,22 @@ const CodeCompletionEditor = ({
     code,
     isEditorVisible,
     setIsEditorVisible,
+    selectedModel,
   } = useTools();
   const monaco = useMonaco();
-  const { data } = useApi("code-snippet", params);
+  const useDebounceFlag = selectedModel != Model.MULTI_LAYER;
+  const { data } = useApi("code-snippet", params, useDebounceFlag);
   const { colorScheme } = useMantineColorScheme();
   const { isLoaded, user, isSignedIn } = useUser();
-  const {userData, setUserData} = useDetails();
-  const { fetchData } = userData ? useLazyApi<{ userId: string; userName: string; email: string }>("saveUser") : { fetchData: () => {} };
+  const { userData, setUserData } = useDetails();
+  const { fetchData } = userData
+    ? useLazyApi<{ userId: string; userName: string; email: string }>(
+        "saveUser"
+      )
+    : { fetchData: () => {} };
 
   if (!isLoaded) {
-    return null
+    return null;
   }
 
   useEffect(() => {
@@ -52,8 +59,7 @@ const CodeCompletionEditor = ({
       const userId = user.id;
       const userName = user.username ?? "";
       const email = user.emailAddresses[0].emailAddress;
-      if (userData.email !== email)
-      {
+      if (userData.email !== email) {
         setUserData({ ...userData, userId, userName, email });
         fetchData({ userId, userName, email });
       }

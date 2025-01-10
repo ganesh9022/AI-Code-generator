@@ -13,17 +13,19 @@ const generateUrl = (url: string): string => {
 const useApi = <T>(
   url: string,
   params?: AxiosRequestConfig["params"],
+  useDebounceFlag?: boolean
 ): ApiResponse<T> => {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [debouncedParams] = useDebounce(params, 2000);
+  const [debouncedParams] = useDebounce(params, useDebounceFlag ? 1000 : 0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const URL = generateUrl(url);
-        const response = debouncedParams && await axios.post<T>(URL, debouncedParams);
+        const response =
+          debouncedParams && (await axios.post<T>(URL, debouncedParams));
         setData(response.data);
       } catch (err) {
         if (axios.isAxiosError(err)) {
