@@ -92,9 +92,6 @@ const CustomFileInput: React.FC = () => {
         <Stack align="flex-start" gap={0}>
           <Group>
             <Text size="xl">Contextual responses</Text>
-            <Badge color="gray" size="sm">
-              BETA
-            </Badge>
             <Switch
               checked={toggle}
               onChange={handleToggleChange}
