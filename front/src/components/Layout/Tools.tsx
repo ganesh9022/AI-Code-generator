@@ -1,27 +1,14 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Flex, Button, Select, rem } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons-react";
 import { useTools, Params } from "../CodeCompletionToolsProviders";
-
-export enum Model {
-  Ollama = "ollama",
-  Groq = "groq",
-  MULTI_LAYER = "multi-layer-ml-model"
-}
+import { Model, PageTitle, supported_language_versions } from "./types";
 
 const modelOptions = [
   { value: Model.Ollama, label: "Ollama (granite-code:3b-instruct-128k-q2_K)" },
   { value: Model.Groq, label: "Groq (llama3-8b-8192)" },
-  { value: Model.MULTI_LAYER, label: "Multi-Layer ML model" }
+  { value: Model.MULTI_LAYER, label: "Multi-Layer ML model" },
 ];
-
-export const supported_language_versions = {
-  javascript: "18.15.0",
-  typescript: "5.0.3",
-  python: "3.10.0",
-  java: "15.0.2",
-  php: "8.2.3",
-};
 
 const options = [
   { value: "javascript", label: "JavaScript" },
@@ -37,7 +24,7 @@ interface ToolsProps {
   language: keyof typeof supported_language_versions;
   setLanguage: (language: keyof typeof supported_language_versions) => void;
   runCode: () => void;
-  pageTitle: string
+  pageTitle: PageTitle;
 }
 
 const Tools: React.FC<ToolsProps> = ({
@@ -46,33 +33,61 @@ const Tools: React.FC<ToolsProps> = ({
   language,
   setLanguage,
   runCode,
-  pageTitle
+  pageTitle,
 }) => {
   const icon = (
     <IconPlayerPlay style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
   );
   const { setParams } = useTools();
+  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (pageTitle === PageTitle.CHAT && selectedModel === Model.MULTI_LAYER) {
+      setSelectedModel(Model.Groq);
+      setParams((prevParams: Params) => ({
+        ...prevParams,
+        model: Model.Groq,
+      }));
+    }
+  }, [pageTitle, selectedModel, setSelectedModel, setParams]);
+
+  const availableModels =
+    pageTitle === PageTitle.CHAT
+      ? modelOptions.filter(({ value }) => value !== Model.MULTI_LAYER)
+      : modelOptions;
+
   return (
     <Flex justify="center" align="flex-end" gap="md" m={10}>
-      <Button leftSection={icon} variant="filled" onClick={runCode}>
-        Run Code
-      </Button>
-      {pageTitle !== 'Chat' &&
-        <Select
-          data={options}
-          value={language || 'javascript'}
-          onChange={(e) => {
-            const newLanguage = e as keyof typeof supported_language_versions;
-            setLanguage(newLanguage);
-            setParams((prevParams: Params) => ({
-              ...prevParams,
-              language: newLanguage,
-            }));
-          }}
-        />}
+      {pageTitle !== PageTitle.CHAT && (
+        <>
+          <Button leftSection={icon} variant="filled" onClick={runCode}>
+            Run Code
+          </Button>
+          <Select
+            allowDeselect={false}
+            data={options}
+            onClick={() => setLanguageDropdownOpen(true)}
+            value={language || "javascript"}
+            onChange={(e) => {
+              const newLanguage = e as keyof typeof supported_language_versions;
+              setLanguage(newLanguage);
+              setParams((prevParams: Params) => ({
+                ...prevParams,
+                language: newLanguage,
+              }));
+              setLanguageDropdownOpen(false);
+            }}
+            onBlur={() => setLanguageDropdownOpen(false)}
+            dropdownOpened={languageDropdownOpen}
+          />
+        </>
+      )}
       <Select
-        data={modelOptions}
-        value={selectedModel || 'Ollama (codellama:7b-code)'}
+        data={availableModels}
+        allowDeselect={false}
+        onClick={() => setModelDropdownOpen(true)}
+        value={selectedModel || "Ollama (codellama:7b-code)"}
         onChange={(e) => {
           const newModel = e as Model;
           setSelectedModel(newModel);
@@ -80,7 +95,10 @@ const Tools: React.FC<ToolsProps> = ({
             ...prevParams,
             model: newModel,
           }));
+          setModelDropdownOpen(false);
         }}
+        onBlur={() => setModelDropdownOpen(false)}
+        dropdownOpened={modelDropdownOpen}
       />
     </Flex>
   );

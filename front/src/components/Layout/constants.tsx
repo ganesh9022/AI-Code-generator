@@ -1,7 +1,8 @@
 import { IconBrandHipchat, IconEdit } from "@tabler/icons-react"
+import { PageTitle } from './types';
 export type SidebarItem = {
   path?: string
-  name: string
+  name: PageTitle
   position: "top" | "bottom"
   links?: SidebarItem[]
   tooltip?: string
@@ -16,13 +17,13 @@ export type SidebarItem = {
 export const SIDEBAR_ITEMS: SidebarItem[] = [
   {
     path: "chat",
-    name: "Chat",
+    name: PageTitle.CHAT,
     position: "top",
     icon: IconBrandHipchat,
   },
   {
     path: "editor",
-    name: "Editor",
+    name: PageTitle.EDITOR,
     position: "top",
     tooltip: "Explore multi-cloud spend, correlate it to your business growth",
     icon: IconEdit,

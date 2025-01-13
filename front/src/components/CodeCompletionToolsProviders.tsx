@@ -5,7 +5,7 @@ import React, {
   ReactNode,
   useRef,
 } from "react";
-import { Model, supported_language_versions } from "./Layout/Tools";
+import { Model, supported_language_versions } from "./Layout/types";
 import * as monaco from "monaco-editor";
 import axios from "axios";
 import { Directory } from "../utils/file-manager";
@@ -45,7 +45,7 @@ interface ToolsProps {
 }
 
 const ToolsContext = createContext<ToolsProps>({
-  selectedModel: Model.MULTI_LAYER,
+  selectedModel: Model.Groq,
   setSelectedModel: () => {},
   language: "javascript",
   setLanguage: () => {},
@@ -69,7 +69,7 @@ const ToolsContext = createContext<ToolsProps>({
     currentLine: "",
     suffix: "",
     language: "javascript",
-    model: Model.MULTI_LAYER,
+    model: Model.Groq,
     toggle: false,
   },
   setParams: () => {},
@@ -80,7 +80,7 @@ const ToolsContext = createContext<ToolsProps>({
 export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [selectedModel, setSelectedModel] = useState<Model>(Model.MULTI_LAYER);
+  const [selectedModel, setSelectedModel] = useState<Model>(Model.Groq);
   const [language, setLanguage] = useState<keyof typeof supported_language_versions>("javascript");
   const [output, setOutput] = useState<string>("");
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);

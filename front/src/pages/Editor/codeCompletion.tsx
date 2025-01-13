@@ -19,7 +19,7 @@ import { IconChevronRight } from "@tabler/icons-react";
 import { useUser } from "@clerk/clerk-react";
 import useLazyApi from "../../hooks/useLazyApi";
 import { useDetails } from "../../components/UserDetailsProviders";
-import { Model } from "../../components/Layout/Tools";
+import { Model } from "../../components/Layout/types";
 const CodeCompletionEditor = ({
   selectedFile,
   setSelectedFile,

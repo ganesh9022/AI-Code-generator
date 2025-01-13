@@ -15,10 +15,11 @@ import { SIDEBAR_ITEMS, SidebarItem } from "./constants";
 import Tools from "./Tools";
 import { useTools } from "../CodeCompletionToolsProviders";
 import { UserButton } from "@clerk/clerk-react";
+import { PageTitle } from './types';
 
 interface FlattenedRoute {
   path: string;
-  name: string;
+  name: PageTitle;
   tooltip?: string;
 }
 export const AppHeader = () => {
@@ -40,7 +41,7 @@ export const AppHeader = () => {
       routes.flatMap((route) => {
         const fullPath = route.path ? `${basePath}/${route.path}` : basePath;
         const flattened = route.path
-          ? [{ path: fullPath, name: route.name, tooltip: route.tooltip }]
+          ? [{ path: fullPath, name: route.name as PageTitle, tooltip: route.tooltip }]
           : [];
         const subRoutes = route.links
           ? flattenRoutes(route.links, fullPath)
@@ -52,7 +53,7 @@ export const AppHeader = () => {
       matchPath(route.path, location.pathname)
     );
     return {
-      pageTitle: currentRoute?.name || "",
+      pageTitle: currentRoute?.name || PageTitle.EDITOR,
       tooltipText: currentRoute?.tooltip || "",
     };
   }, [location.pathname]);
@@ -68,17 +69,19 @@ export const AppHeader = () => {
           </Title>
         </Group>
         <Group gap={0} wrap="nowrap">
-          <Button
-            leftSection={
-              <IconAdjustmentsPlus
-                style={{ width: rem(18), height: rem(18) }}
-                stroke={1.5}
-              />
-            }
-            variant="outline"
-            children="More options"
-            onClick={() => setSideDrawerOpen(!sideDrawerOpen)}
-          />
+          {pageTitle !== PageTitle.CHAT && (
+            <Button
+              leftSection={
+                <IconAdjustmentsPlus
+                  style={{ width: rem(18), height: rem(18) }}
+                  stroke={1.5}
+                />
+              }
+              variant="outline"
+              children="More options"
+              onClick={() => setSideDrawerOpen(!sideDrawerOpen)}
+            />
+          )}
           <Tools
             selectedModel={selectedModel}
             setSelectedModel={setSelectedModel}
