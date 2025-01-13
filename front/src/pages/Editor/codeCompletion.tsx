@@ -16,6 +16,7 @@ import { CompletionFormatter } from "../../components/completion-formatter";
 import useApi from "../../hooks/useApi";
 import { File } from "../../utils/file-manager";
 import { IconChevronRight } from "@tabler/icons-react";
+import { RxCross1 } from "react-icons/rx";
 import { useUser } from "@clerk/clerk-react";
 import useLazyApi from "../../hooks/useLazyApi";
 import { useDetails } from "../../components/UserDetailsProviders";
@@ -31,6 +32,7 @@ const CodeCompletionEditor = ({
     language,
     editorRef,
     output,
+    setOutput,
     params,
     setParams,
     code,
@@ -44,15 +46,20 @@ const CodeCompletionEditor = ({
   const { colorScheme } = useMantineColorScheme();
   const { isLoaded, user, isSignedIn } = useUser();
   const { userData, setUserData } = useDetails();
+  const isOpen = !!output;
   const { fetchData } = userData
     ? useLazyApi<{ userId: string; userName: string; email: string }>(
-        "saveUser"
-      )
+      "saveUser"
+    )
     : { fetchData: () => {} };
 
   if (!isLoaded) {
     return null;
   }
+
+  const closeOutputWindow = () => {
+    setOutput("")
+  };
 
   useEffect(() => {
     if (isSignedIn && userData) {
@@ -195,15 +202,20 @@ const CodeCompletionEditor = ({
             }}
           />
         </Paper>
-
-        {output && (
+        {isOpen && (
           <Paper
             w={"50%"}
             p={"10px"}
             style={{
+              position: "relative",
               overflowY: "auto",
             }}
           >
+            <RxCross1 onClick={closeOutputWindow} style={{
+              cursor: "pointer", position: "absolute",
+              top: "10px",
+              right: "10px",
+            }} />
             <Title order={4}>Output:</Title>
             <pre>{output || "No output yet"}</pre>
           </Paper>
