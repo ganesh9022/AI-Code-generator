@@ -36,20 +36,72 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
       ```
 
 ### 2. Backend Setup
-   - Create a virtual environment
+
+   - Install pipx (if not already installed):
+      - For macOS:
+         ```bash
+         brew install pipx
+         ```
+      - For Linux:
+         ```bash
+         sudo apt install pipx
+         ```
+   - Install Poetry using pipx:
+      ```bash
+      pipx install poetry
+      ```
+   - Verify Poetry Installation:
+      ```bash
+      poetry --version
+      ```
+   -  Navigate to the backend directory:
       ```bash
       cd backend
-      python -m venv venv
-      source venv/bin/activate
       ```
-   -  Install the dependencies listed in the `requirements.txt` file:
+   - Set up the backend environment:
+      Installs all dependencies specified in the `pyproject.toml` file:
       ```bash
-      pip install -r requirements.txt
+      make setup
       ```
-   - If dependencies are not installed, then manually install each of them from `requirements.txt` file using below command:
+   - Run the backend:
+      Runs the backend server using the main.py entry point:
       ```bash
-      pip install <module_name>
+      make run
       ```
+   - Run the unit test:
+      ```bash
+      make test
+      ```
+   - Update the project:
+      ```bash
+      make update
+      ```
+   - Add new dependency:
+      ```bash
+      poetry add <dependency-name>
+      ```
+   - Add a Dependency with a Specific Version:
+      ```bash
+      poetry add <package-name>@<package-version>
+      ```
+      Example: poetry add flask@2.3.3
+
+   - Remove dependency:
+      ```bash
+      poetry remove <dependency-name>
+      ```
+   - Formatting the code:
+
+      - Format all files in the project using black:
+         ```bash
+         make format
+         ```
+      - Format the specific file using black:
+         ```bash
+         make format-file file=<file-name>
+         ```
+         Example: make format-file file=main.py
+
 ### 3. Database Setup
    - For Ubuntu
       1. Install PostgreSQL:
@@ -104,7 +156,7 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
    ```
 ### 5. Ollama Setup
    - Install ollama from https://ollama.com/
-   - Run below command on new terminal 
+   - Run below command on new terminal
       ```bash
       ollama run granite-code:3b-instruct-128k-q2_K
       ```
@@ -120,9 +172,9 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
    - Use below commands to run the development server
       ```bash
       yarn dev
- 
+
 ### 8. Run the Unit test:
    - Use below commands to run unit test
       ```bash
-         python3 -m pytest backend/tests/unit    
+         python3 -m pytest backend/tests/unit
       ```

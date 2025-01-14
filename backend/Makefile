@@ -1,9 +1,24 @@
 setup:
-	@echo "Setting up the project using pipenv and requirements.txt..."
-	pipenv install
-	pipenv install -r requirement.txt
-	@echo "Setup complete."
+	@echo "Setting up the project using Poetry..."
+	poetry install
+	@echo "Setup completed....."
 
-run:
+run: setup
 	@echo "Running Backend......"
-	python main.py
+	poetry run python main.py
+
+test:
+	@echo "Running Tests......"
+	poetry run pytest tests/unit
+
+update:
+	poetry update
+	@echo "Updated Poetry and installed all dependencies......"
+
+format:
+	poetry run black .
+	@echo "Formatted all files in the project using black:......"
+
+format-file:
+	poetry run black $(file)
+	@echo "Formatted code......"

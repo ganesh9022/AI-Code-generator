@@ -2,7 +2,6 @@ import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_caching import Cache
-from g4f.client import Client
 from constants import FOLDERPATH
 from db.sqlalchemy_orm import get_user_details
 from mappers.model_mapper import map_models,map_chat_models
@@ -13,8 +12,6 @@ CORS(app)
 
 app.config.from_mapping(get_cache_config())
 cache = Cache(app)
-
-client = Client()
 
 
 def make_key():
