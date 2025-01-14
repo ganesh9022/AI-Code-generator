@@ -31,8 +31,7 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
       ```
    - Install frontend dependencies
       ```bash
-      cd front
-      yarn install
+      yarn install:frontend
       ```
 
 ### 2. Backend Setup
@@ -102,7 +101,12 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
          ```
          Example: make format-file file=main.py
 
-### 3. Database Setup
+### 3.Alternatively install Frontend and backend dependencies:
+   - Use below command 
+     ```bash
+       yarn install:all
+     ```     
+### 4. Database Setup
    - For Ubuntu
       1. Install PostgreSQL:
          ```bash
@@ -148,13 +152,13 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
          \c codedb
          ```
 
-### 4. Environment Variables
+### 5. Environment Variables
    - To run this project, you will need to set up the following environment variables in a `backend/.env` file in the root of your project directory.
    #### Example `backend/.env` File
    ```
     GROQ_API_KEY=dummygroqapikey12345
    ```
-### 5. Ollama Setup
+### 6. Ollama Setup
    - Install ollama from https://ollama.com/
    - Run below command on new terminal
       ```bash
@@ -162,18 +166,24 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
       ```
    - Start Backend server
 
-### 6. Run the Backend Server
+### 7. Run the Backend Server
    - Use below commands to run the server
       ```bash
-      python main.py
+      yarn start:backend
       ```
 
-### 7. Run the Development Server:
+### 8. Run the Development Server:
    - Use below commands to run the development server
       ```bash
-      yarn dev
+       yarn start:frontend
+       ```
 
-### 8. Run the Unit test:
+### 9. Alternatively run both the frontend and backend servers concurrently:
+   - Use below command
+      ```bash
+          yarn start
+      ```
+### 10. Run the Unit test:
    - Use below commands to run unit test
       ```bash
          python3 -m pytest backend/tests/unit
