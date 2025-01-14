@@ -4,11 +4,27 @@ import React, {
   useState,
   ReactNode,
   useRef,
+  useEffect,
+  useMemo,
 } from "react";
 import { Model, supported_language_versions } from "./Layout/types";
 import * as monaco from "monaco-editor";
 import axios from "axios";
 import { Directory } from "../utils/file-manager";
+
+export interface ToolsState {
+  selectedModel: Model;
+  language: keyof typeof supported_language_versions;
+  output: string;
+  code: string;
+  sideDrawerOpen: boolean;
+  uploadFiles: File[] | null;
+  uploadFolders: Directory | null;
+  toggle: boolean;
+  isEditorVisible: boolean;
+  openFiles: File | null;
+  openFolders: FileList | null;
+}
 
 export interface Params {
   prefix: string;
@@ -18,52 +34,31 @@ export interface Params {
   model: Model;
   toggle: boolean;
 }
+
 interface ToolsProps {
-  selectedModel: Model;
-  setSelectedModel: (model: Model) => void;
-  toggle: boolean;
-  setToggle: (toggle: boolean) => void;
-  language: keyof typeof supported_language_versions;
-  setLanguage: (language: keyof typeof supported_language_versions) => void;
+  state: ToolsState;
+  updateState: <K extends keyof ToolsState>(key: K, value: ToolsState[K]) => void;
   runCode: () => void;
-  output: string;
-  setOutput: (value: string) => void;
-  editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
   handleCodeChange: (currentCode: string) => void;
-  code: string;
-  setCode: (code: string) => void;
-  sideDrawerOpen: boolean;
-  setSideDrawerOpen: (value: boolean) => void;
-  uploadFiles: File[] | null;
-  setUploadFiles: (file: File[] | null) => void;
-  setUploadFolders: (directory: Directory | null) => void;
-  uploadFolders: Directory | null;
+  editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
   params: Params;
   setParams: (params: Params) => void;
-  isEditorVisible: boolean;
-  setIsEditorVisible: (value: boolean) => void;
 }
 
 const ToolsContext = createContext<ToolsProps>({
-  selectedModel: Model.Groq,
-  setSelectedModel: () => {},
-  language: "javascript",
-  setLanguage: () => {},
-  runCode: () => {},
-  output: "",
-  setOutput: () => {},
-  editorRef: { current: null },
-  handleCodeChange: () => {},
-  code: "",
-  setCode: () => {},
-  sideDrawerOpen: false,
-  setSideDrawerOpen: () => {},
-  setUploadFiles: () => {},
-  uploadFiles: null,
-  setUploadFolders: () => {},
-  uploadFolders: null,
-  toggle: false,
-  setToggle: () => {},
+  state: {
+    selectedModel: Model.Groq,
+    language: "javascript",
+    output: "",
+    code: "",
+    sideDrawerOpen: false,
+    uploadFiles: null,
+    uploadFolders: null,
+    toggle: false,
+    isEditorVisible: true,
+    openFiles: null,
+    openFolders: null,
+  },
   params: {
     prefix: "",
     currentLine: "",
@@ -73,34 +68,82 @@ const ToolsContext = createContext<ToolsProps>({
     toggle: false,
   },
   setParams: () => {},
-  isEditorVisible: true,
-  setIsEditorVisible: () => {},
+  updateState: () => {},
+  runCode: () => {},
+  handleCodeChange: () => {},
+  editorRef: { current: null },
 });
 
 export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [selectedModel, setSelectedModel] = useState<Model>(Model.Groq);
-  const [language, setLanguage] = useState<keyof typeof supported_language_versions>("javascript");
-  const [output, setOutput] = useState<string>("");
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const [code, setCode] = useState("");
-  const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
-  const [uploadFiles, setUploadFiles] = useState<File[] | null>(null);
-  const [uploadFolders, setUploadFolders] = useState<Directory | null>(null);
-  const [toggle, setToggle] = useState(false);
-  const [params, setParams] = useState({
+  const initialState = useMemo<ToolsState>(() => {
+    const savedState = localStorage.getItem("toolsState");
+    const savedOpenFiles = localStorage.getItem("openFiles");
+    const savedOpenFolders = localStorage.getItem("openFolders");
+    return {
+      ...(savedState
+        ? JSON.parse(savedState)
+        : {
+            selectedModel: Model.Groq,
+            language: "javascript",
+            output: "",
+            code: "",
+            sideDrawerOpen: false,
+            uploadFiles: null,
+            uploadFolders: null,
+            toggle: false,
+            isEditorVisible: false,
+          }),
+      openFiles: savedOpenFiles ? JSON.parse(savedOpenFiles) : null,
+      openFolders: savedOpenFolders ? JSON.parse(savedOpenFolders) : null,
+    };
+  }, []);
+  const [state, setState] = useState<ToolsState>(initialState);
+  const { selectedModel, language, openFiles, openFolders } = state;
+
+  const initialParams = useMemo<Params>(() => ({
     prefix: "",
     currentLine: "",
     suffix: "",
     language: language,
     model: selectedModel,
     toggle: false,
-  });
-  const [isEditorVisible, setIsEditorVisible] = useState(false);
+  }), [language, selectedModel]);
+  const [params, setParams] = useState<Params>(initialParams);
+
   const API = axios.create({
     baseURL: "https://emkc.org/api/v2/piston",
   });
+
+  useEffect(() => {
+    if (openFiles) {
+      localStorage.setItem("openFiles",JSON.stringify({
+          name: openFiles.name,
+          size: openFiles.size
+        })
+      );
+    }
+
+    if (openFolders) {
+      const folderFiles = Array.from(openFolders).map((file) => ({
+        name: file.webkitRelativePath || file.name,
+        size: file.size
+      }));
+      localStorage.setItem("openFolders", JSON.stringify(folderFiles));
+    }
+
+    localStorage.setItem("toolsState", JSON.stringify(state));
+  }, [state]);
+
+  const updateState = <K extends keyof ToolsState>(
+    key: K,
+    value: ToolsState[K]
+  ) => {
+    setState((prev) => ({ ...prev, [key]: value }));
+
+  };
 
   const handleCodeChange = async (currentCode: string) => {
     const trimmedCode = currentCode.trim();
@@ -123,18 +166,11 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
   const runCode = async () => {
     if (editorRef.current) {
       const code = editorRef.current.getValue();
-      const logs: string[] = [];
-      const originalConsoleLog = console.log;
-      console.log = function (...args) {
-        logs.push(args.join(" "));
-        originalConsoleLog.apply(console, args);
-      };
-
       try {
-        const lang: keyof typeof supported_language_versions = language;
+        const lang: keyof typeof supported_language_versions = state.language;
         const version = supported_language_versions[lang];
         if (!lang || !version) {
-          setOutput("Error: Unsupported language or missing version.");
+          updateState("output", "Error: Unsupported language or missing version.");
           return;
         }
 
@@ -148,38 +184,22 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
           ],
         });
 
-        setOutput(response.data.run?.output);
+        updateState("output", response.data.run?.output || "");
       } catch (error) {
-        setOutput("Error: " + error);
+        updateState("output", "Error: " + error);
       }
     }
   };
   return (
     <ToolsContext.Provider
       value={{
-        toggle,
-        setToggle,
-        selectedModel,
-        setSelectedModel,
-        language,
-        setLanguage,
-        output,
-        setOutput,
+        state,
+        updateState,
         runCode,
-        editorRef,
         handleCodeChange,
-        code,
-        setCode,
-        sideDrawerOpen,
-        setSideDrawerOpen,
-        setUploadFiles,
-        uploadFiles,
-        setUploadFolders,
-        uploadFolders,
+        editorRef,
         params,
         setParams,
-        isEditorVisible,
-        setIsEditorVisible,
       }}
     >
       {children}

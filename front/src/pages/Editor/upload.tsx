@@ -5,8 +5,7 @@ import { Directory, File } from "../../utils/file-manager";
 import { IconFolderUp, IconFileUpload } from '@tabler/icons-react';
 export const Upload = () => {
     const {
-        setUploadFiles,
-        setUploadFolders
+      updateState
     } = useTools();
     const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;    
@@ -69,7 +68,7 @@ export const Upload = () => {
         dirs: Object.values(dirMap).filter((dir) => dir.depth === 1),
         files: [],
       }; 
-      setUploadFolders(rootDirectory);
+      updateState("uploadFolders", rootDirectory);
     }
   };
   return (
@@ -86,8 +85,8 @@ export const Upload = () => {
       >
         <div>
           <FileButton multiple onChange={(files) => {
-            setUploadFolders(null);
-            setUploadFiles(files)}}>
+            updateState("uploadFolders", null);
+            updateState("uploadFiles", files)}}>
             {(props) => (
               <Button bg="none" radius="md" {...props} mb={15}>
                 <Box display="flex">
@@ -132,7 +131,7 @@ export const Upload = () => {
               }
             }}
             onChange={(event) => {
-              setUploadFiles(null);
+              updateState("uploadFiles", null);
               handleFolderUpload(event);
             }}
           />

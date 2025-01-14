@@ -21,7 +21,7 @@ interface SubTreeProps {
 }
 
 const SubTree = (props: SubTreeProps) => {
-  const { isEditorVisible, setIsEditorVisible, setLanguage, setParams } = useTools();
+  const { updateState, setParams } = useTools();
 
   const extensionToLanguageMap: { [key: string]: "javascript" | "typescript" | "python" | "java" | "php" } = {
     js: "javascript",
@@ -35,10 +35,10 @@ const SubTree = (props: SubTreeProps) => {
 
   const handleFileSelect = (file: File) => {
     props.onSelect(file);
-    setIsEditorVisible(true);
+    updateState("isEditorVisible", true);
     const fileExtension = file.name.split(".").pop();
     const language = fileExtension && extensionToLanguageMap[fileExtension] ? extensionToLanguageMap[fileExtension] : "javascript";
-    setLanguage(language);
+    updateState("language", language);
     setParams((prevParams: Params) => ({
       ...prevParams,
       language: language,

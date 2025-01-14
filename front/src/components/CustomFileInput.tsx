@@ -30,9 +30,7 @@ const TrainModelButton = ({ onTrainModel, filesSelected }) => {
 };
 
 const CustomFileInput: React.FC = () => {
-  const [file, setFile] = useState<File | null>(null);
-  const [folder, setFolder] = useState<FileList | null>(null);
-  const { toggle, setToggle, setParams } = useTools();
+  const { state: { toggle, openFiles, openFolders }, updateState, setParams } = useTools();
   const [formData, setFormData] = useState<FormData | null>(null);
   const { data, error } = useApi(
     "train-model",
@@ -50,19 +48,19 @@ const CustomFileInput: React.FC = () => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      setFile(event.target.files[0]);
+      updateState("openFiles", event.target.files[0]);
     }
   };
 
   const handleFolderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      setFolder(event.target.files);
+      updateState("openFolders", event.target.files);
     }
   };
 
   const handleToggleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newToggleValue = event.currentTarget.checked;
-    setToggle(newToggleValue);
+    updateState("toggle", newToggleValue);
 
     setParams((prevParams: Params) => ({
       ...prevParams,
@@ -74,11 +72,11 @@ const CustomFileInput: React.FC = () => {
     async () => {
       const newFormData = new FormData();
 
-      if (file) {
-        newFormData.append("files", file);
+      if (openFiles) {
+        newFormData.append("files", openFiles);
       }
-      if (folder) {
-        Array.from(folder).forEach((file) => {
+      if (openFolders) {
+        Array.from(openFolders).forEach((file) => {
           newFormData.append("files", file);
         });
       }
@@ -139,7 +137,7 @@ const CustomFileInput: React.FC = () => {
         }}
         onChange={handleFolderChange}
       />
-      {file || (folder && folder.length > 0) ? (
+      {openFiles || (openFolders && openFolders.length > 0) ? (
         <>
           <Paper shadow="xs" withBorder style={{ marginTop: 20, padding: 10 , maxWidth: "100%", 
     overflow: "hidden"}}>
@@ -154,11 +152,11 @@ const CustomFileInput: React.FC = () => {
                 />
               }
             >
-              {file && (
-                <List.Item>{file.webkitRelativePath || file.name}</List.Item>
+              {openFiles && (
+                <List.Item>{openFiles.webkitRelativePath || openFiles.name}</List.Item>
               )}
-              {folder &&
-                Array.from(folder).map((file, index) => (
+              {openFolders &&
+                Array.from(openFolders).map((file, index) => (
                   <List.Item key={index}>
                     {file.webkitRelativePath || file.name}
                   </List.Item>
@@ -169,7 +167,7 @@ const CustomFileInput: React.FC = () => {
       ) : null}
       <TrainModelButton
         onTrainModel={submitTrainingData}
-        filesSelected={file || (folder && folder.length > 0)}
+        filesSelected={openFiles || (openFolders && openFolders.length > 0)}
       />
     </div>
   );

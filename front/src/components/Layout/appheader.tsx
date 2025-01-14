@@ -15,7 +15,7 @@ import { SIDEBAR_ITEMS, SidebarItem } from "./constants";
 import Tools from "./Tools";
 import { useTools } from "../CodeCompletionToolsProviders";
 import { UserButton } from "@clerk/clerk-react";
-import { PageTitle } from './types';
+import { Model, PageTitle, supported_language_versions } from './types';
 
 interface FlattenedRoute {
   path: string;
@@ -25,13 +25,9 @@ interface FlattenedRoute {
 export const AppHeader = () => {
   const location = useLocation();
   const {
-    setSelectedModel,
-    language,
-    setLanguage,
+    state: { selectedModel, language, sideDrawerOpen },
+    updateState,
     runCode,
-    selectedModel,
-    sideDrawerOpen,
-    setSideDrawerOpen,
   } = useTools();
   const { pageTitle } = useMemo(() => {
     const flattenRoutes = (
@@ -79,14 +75,14 @@ export const AppHeader = () => {
               }
               variant="outline"
               children="More options"
-              onClick={() => setSideDrawerOpen(!sideDrawerOpen)}
+              onClick={() => updateState("sideDrawerOpen", !sideDrawerOpen)}
             />
           )}
           <Tools
             selectedModel={selectedModel}
-            setSelectedModel={setSelectedModel}
+            setSelectedModel={(model: Model) => updateState('selectedModel', model)}
             language={language}
-            setLanguage={setLanguage}
+            setLanguage={(language: keyof typeof supported_language_versions) => updateState('language', language)}
             runCode={runCode}
             pageTitle={pageTitle}
           />

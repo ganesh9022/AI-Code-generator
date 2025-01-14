@@ -25,7 +25,7 @@ type ChatMessage = {
 export const Chat = () => {
     const [inputValue, setInputValue] = useState("")
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
-    const { selectedModel } = useTools()
+    const { state: { selectedModel } } = useTools()
     const theme = useMantineTheme()
     const { colorScheme } = useMantineColorScheme()
     const [tooltipText, setTooltipText] = useState("Copy to clipboard")

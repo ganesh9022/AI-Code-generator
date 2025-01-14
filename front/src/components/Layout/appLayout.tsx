@@ -18,7 +18,7 @@ import { useTools } from "../CodeCompletionToolsProviders";
 export const AppLayout = () => {
   const { colorScheme } = useMantineColorScheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { sideDrawerOpen, setSideDrawerOpen } = useTools();
+  const { state: { sideDrawerOpen }, updateState } = useTools();
   const location = useLocation();
 
   useEffect(() => {
@@ -89,7 +89,7 @@ export const AppLayout = () => {
       </AppShell.Main>
       <SideDrawer
         opened={sideDrawerOpen}
-        close={() => setSideDrawerOpen(false)}
+        close={() => updateState("sideDrawerOpen", false)}
       />
     </AppShell>
   );

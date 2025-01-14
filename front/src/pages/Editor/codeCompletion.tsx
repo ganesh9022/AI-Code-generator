@@ -29,18 +29,14 @@ const CodeCompletionEditor = ({
   setSelectedFile: (file: File | undefined) => void;
 }) => {
   const {
-    language,
+    state,
+    updateState,
     editorRef,
-    output,
-    setOutput,
     params,
     setParams,
-    code,
-    isEditorVisible,
-    setIsEditorVisible,
-    selectedModel,
   } = useTools();
   const monaco = useMonaco();
+  const { selectedModel, output } = state;
   const useDebounceFlag = selectedModel != Model.MULTI_LAYER;
   const { data } = useApi("code-snippet", params, useDebounceFlag);
   const { colorScheme } = useMantineColorScheme();
@@ -58,7 +54,7 @@ const CodeCompletionEditor = ({
   }
 
   const closeOutputWindow = () => {
-    setOutput("")
+    updateState("output", "")
   };
 
   useEffect(() => {
@@ -77,7 +73,7 @@ const CodeCompletionEditor = ({
     if (!monaco) return;
 
     const provider = monaco.languages.registerInlineCompletionsProvider(
-      language,
+      state.language,
       {
         provideInlineCompletions: async (model, position) => {
           if (
@@ -112,19 +108,19 @@ const CodeCompletionEditor = ({
       }
     );
     return () => provider.dispose();
-  }, [monaco, language, data, selectedFile]);
+  }, [monaco, state.language, data, selectedFile]);
   const handleClose = () => {
-    setIsEditorVisible(false);
+    updateState("isEditorVisible", false);
   };
   const selectedFileContent = selectedFile?.content;
   const breadcrumbItems = selectedFile?.path?.split("/");
-  if (!isEditorVisible) {
+  if (!state.isEditorVisible) {
     setSelectedFile(undefined);
   }
   return (
     <Box style={{ height: "calc(100vh - 70px)" }}>
       <Box p={5}>
-        {isEditorVisible && (
+        {state.isEditorVisible && (
           <Box>
             <Box style={{ display: "flex" }}>
               <Box>
@@ -170,19 +166,19 @@ const CodeCompletionEditor = ({
       <Paper
         style={{
           display: "flex",
-          height: isEditorVisible
+          height: state.isEditorVisible
             ? "calc(96.5vh - 104px)"
             : "calc(100vh - 70px)",
           overflow: "auto",
         }}
       >
-        <Paper w={output ? "50%" : "100%"}>
+        <Paper w={state.output ? "50%" : "100%"}>
           <Editor
             onMount={(editor) => {
               editorRef.current = editor;
             }}
             theme={colorScheme === "dark" ? "vs-dark" : "vs"}
-            language={language}
+            language={state.language}
             options={{
               autoClosingBrackets: "never",
               autoClosingQuotes: "never",
@@ -190,7 +186,7 @@ const CodeCompletionEditor = ({
               formatOnPaste: true,
               trimAutoWhitespace: true,
             }}
-            value={selectedFileContent || code}
+            value={selectedFileContent || state.code}
             onChange={(value, ev) => {
               if (value) {
                 const lineNumber = ev.changes[0].range.startLineNumber;
@@ -217,7 +213,7 @@ const CodeCompletionEditor = ({
               right: "10px",
             }} />
             <Title order={4}>Output:</Title>
-            <pre>{output || "No output yet"}</pre>
+            <pre>{state.output || "No output yet"}</pre>
           </Paper>
         )}
       </Paper>

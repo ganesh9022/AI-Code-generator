@@ -9,7 +9,7 @@ import { IconFiles } from "@tabler/icons-react";
 import { Upload } from "./upload";
 
 const EditorPage = () => {
-  const { uploadFiles, uploadFolders } = useTools();
+  const { state: { uploadFolders, uploadFiles } } = useTools();
   const { colorScheme } = useMantineColorScheme();
   const dummyDir: Directory = {
     id: "1",
