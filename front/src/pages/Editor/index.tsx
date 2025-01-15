@@ -50,8 +50,13 @@ const EditorPage = () => {
     updateDir();
   }, [uploadFiles, uploadFolders]);
 
+  useEffect(() => {
+    const hasFiles = rootDir.files.length > 0 || rootDir.dirs.length > 0;
+    setCollapsed(!hasFiles)
+  }, [rootDir]);
+
   const onSelect = (file: File) => setSelectedFile(file);
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
   const hasFiles = rootDir.files.length > 0|| rootDir.dirs.length > 0;
   return (
     <Container fluid p={0} m={0} style={{ overflow: "hidden" }}>

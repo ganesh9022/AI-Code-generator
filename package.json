@@ -18,10 +18,10 @@
   },
   "scripts": {
     "install:frontend": "cd front && yarn install",
-    "install:backend": "cd backend && pip3 install -r requirements.txt",
+    "install:backend": "cd backend && make setup",
     "install:all": "yarn install:frontend && yarn install:backend",
     "start:frontend": "yarn workspace front dev",
-    "start:backend": "python3 backend/main.py",
+    "start:backend": "cd backend && make run",
     "start": "concurrently \"yarn start:frontend\" \"yarn start:backend\""
   }
 }
