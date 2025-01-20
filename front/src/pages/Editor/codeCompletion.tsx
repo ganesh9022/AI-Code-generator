@@ -18,7 +18,7 @@ import { File } from "../../utils/file-manager";
 import { IconChevronRight } from "@tabler/icons-react";
 import { RxCross1 } from "react-icons/rx";
 import { useUser } from "@clerk/clerk-react";
-import useLazyApi from "../../hooks/useLazyApi";
+import useLazyApi, { BackendEndpoints } from "../../hooks/useLazyApi";
 import { useDetails } from "../../components/UserDetailsProviders";
 import { Model } from "../../components/Layout/types";
 const CodeCompletionEditor = ({
@@ -45,7 +45,7 @@ const CodeCompletionEditor = ({
   const isOpen = !!output;
   const { fetchData } = userData
     ? useLazyApi<{ userId: string; userName: string; email: string }>(
-      "saveUser"
+      BackendEndpoints.SaveUser
     )
     : { fetchData: () => {} };
 
@@ -64,7 +64,7 @@ const CodeCompletionEditor = ({
       const email = user.emailAddresses[0].emailAddress;
       if (userData.email !== email) {
         setUserData({ ...userData, userId, userName, email });
-        fetchData({ userId, userName, email });
+        fetchData({data: { userId, userName, email }});
       }
     }
   }, [isSignedIn, user, userData]);

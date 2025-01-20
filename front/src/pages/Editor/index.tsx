@@ -39,6 +39,7 @@ const EditorPage = () => {
             name: uploadedFile.name || "Untitled",
           }))
         );
+        localStorage.setItem("uploadFiles", JSON.stringify(files));
 
         setRootDir({
           ...dummyDir,
@@ -58,6 +59,21 @@ const EditorPage = () => {
   const onSelect = (file: File) => setSelectedFile(file);
   const [collapsed, setCollapsed] = useState(true)
   const hasFiles = rootDir.files.length > 0|| rootDir.dirs.length > 0;
+  useEffect(() => {
+      const savedUploadFiles = localStorage.getItem("uploadFiles");
+      if (savedUploadFiles) {
+        const files: File[] = JSON.parse(savedUploadFiles).map((fileData: any) => ({
+          ...fileData, 
+          text: async () => fileData.content,
+        }));
+        setRootDir({
+          ...dummyDir,
+          files,
+        });
+
+      };
+  }, [])
+ 
   return (
     <Container fluid p={0} m={0} style={{ overflow: "hidden" }}>
       <Grid gutter="md" h="calc(100vh - 64px)" m={0} p={0} pt={10}>
