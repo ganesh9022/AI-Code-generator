@@ -7,7 +7,7 @@ import {
   Stack,
   ThemeIcon,
 } from "@mantine/core";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { AppHeader } from "./appheader";
 import { SidebarLink } from "./Sidebar";
 import { IconCode, IconChevronLeftPipe } from "@tabler/icons-react";
@@ -29,7 +29,11 @@ export const AppLayout = () => {
       "/more-options/contextual-response": "AI code generator - Contextual Response"
 
     };
-    document.title = titles[location.pathname] || "AI code generator - 404";
+    
+    const title = location.pathname.startsWith('/chat') 
+      ? "AI code generator - Chat"
+      : titles[location.pathname] || "AI code generator - 404";
+    document.title = title;
   }, [location]);
 
   return (

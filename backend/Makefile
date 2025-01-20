@@ -22,3 +22,7 @@ format:
 format-file:
 	poetry run black $(file)
 	@echo "Formatted code......"
+
+migrate:
+	@echo "Running database migrations..."
+	poetry run python db/migrations/run_migrations.py

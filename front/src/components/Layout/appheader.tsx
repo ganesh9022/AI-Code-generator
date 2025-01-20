@@ -1,15 +1,16 @@
 import {
   AppShell,
   Box,
+  Button,
   Group,
   rem,
   ThemeIcon,
   Title,
   useMantineColorScheme,
 } from "@mantine/core";
-import { IconMoon, IconSun } from "@tabler/icons-react";
+import { IconAdjustmentsPlus, IconMoon, IconSun } from "@tabler/icons-react";
 import { useMemo } from "react";
-import { matchPath, useLocation } from "react-router-dom";
+import {  useLocation } from "react-router-dom";
 import { SIDEBAR_ITEMS, SidebarItem } from "./constants";
 import Tools from "./Tools";
 import { useTools } from "../CodeCompletionToolsProviders";
@@ -45,8 +46,9 @@ export const AppHeader = () => {
       });
 
     const currentRoute = flattenRoutes(SIDEBAR_ITEMS).find((route) =>
-      matchPath(route.path, location.pathname)
+      location.pathname.startsWith(route.path)
     );
+
     return {
       pageTitle: currentRoute?.name || PageTitle.EDITOR,
       tooltipText: currentRoute?.tooltip || "",
@@ -64,6 +66,19 @@ export const AppHeader = () => {
           </Title>
         </Group>
         <Group gap={0} wrap="nowrap">
+          {pageTitle === PageTitle.EDITOR && (
+            <Button
+              leftSection={
+                <IconAdjustmentsPlus
+                  style={{ width: rem(18), height: rem(18) }}
+                  stroke={1.5}
+                />
+              }
+              variant="outline"
+              children="More options"
+              onClick={() => updateState("sideDrawerOpen", !sideDrawerOpen)}
+            />
+          )}
           <Tools
             selectedModel={selectedModel}
             setSelectedModel={(model: Model) => updateState('selectedModel', model)}

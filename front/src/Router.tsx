@@ -3,7 +3,7 @@ import {
   Navigate,
   createRoutesFromElements,
   createBrowserRouter,
-} from "react-router-dom";
+} from "react-router-dom"
 import EditorPage from "./pages/Editor";
 import { AppLayout } from "./components/Layout/appLayout";
 import ChatPage from "./pages/Chat";
@@ -21,6 +21,8 @@ export const router = createBrowserRouter(
         </Route>
         <Route path="chat">
           <Route index element={<ChatPage />} />
+          <Route path=":pageId" element={<ChatPage />} />
+          <Route path=":pageId/:messageId" element={<ChatPage />} />
         </Route>
         <Route path="more-options">
           <Route index element={<MoreOptions />} />

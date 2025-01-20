@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, create_engine, DateTime, inspect
+import uuid
+from sqlalchemy import Column, Integer, String, create_engine, DateTime, inspect, Text, func 
 from sqlalchemy.orm import sessionmaker, declarative_base
 from flask import jsonify
 from dotenv import load_dotenv
@@ -6,7 +7,8 @@ import os
 from datetime import datetime, timedelta
 import pytz
 import logging
-
+from flask import jsonify
+from .database import Base, engine, SessionLocal
 # Setup logging
 logger = logging.getLogger(__name__)
 
@@ -35,13 +37,131 @@ ist_timezone = pytz.timezone('Asia/Kolkata')
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, autoincrement=True)
-    user_id = Column(String)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String, nullable=False, unique=True)
     username = Column(String)
     email = Column(String, primary_key=True)
     
     def __repr__(self) -> str:
         return f"<User(id={self.id}, user_id={self.user_id}, username={self.username}, email={self.email})>"
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    message_id = Column(String, nullable=False)
+    user_id = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    type = Column(String, nullable=False)
+    page_uuid = Column(String, nullable=False)
+    conversation_id = Column(Integer, nullable=False, default=1)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.message_id,
+            "content": self.content,
+            "type": self.type,
+            "pageUuid": self.page_uuid,
+            "conversationId": self.conversation_id,
+            "timestamp": self.timestamp.isoformat() if self.timestamp else None
+        }
+
+def get_user_details(user_id: str, userName: str, email: str):
+    db = SessionLocal()
+    try:
+        if not all([user_id, userName, email]):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        existing_user = db.query(User).filter_by(email=email).first()
+        if existing_user:
+            return jsonify({"error": f"User with the email {email} already exists"}), 400
+
+        user = User(username=userName, user_id=user_id, email=email)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        return jsonify({
+            "message": "User saved successfully!",
+            "user": {
+                "user_id": user.user_id,
+                "username": user.username,
+                "email": user.email,
+            }
+        }), 200
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+def get_chat_messages_by_page(user_id: str, page_uuid: str) -> list:
+    db = SessionLocal()
+    try:
+        messages = db.query(ChatMessage)\
+            .filter_by(user_id=user_id, page_uuid=page_uuid)\
+            .order_by(ChatMessage.timestamp)\
+            .all()
+        return [message.to_dict() for message in messages]
+    finally:
+        db.close()
+
+def get_next_conversation_id(db, user_id: str, page_uuid: str) -> int:
+    max_conv_id = db.query(func.max(ChatMessage.conversation_id))\
+        .filter_by(user_id=user_id, page_uuid=page_uuid)\
+        .scalar()
+    return (max_conv_id or 0) + 1
+
+def save_chat_message(user_id: str, message_id: str, content: str, message_type: str, page_uuid: str = None):
+    db = SessionLocal()
+    try:
+        # Generate new page_uuid if not provided
+        if not page_uuid:
+            page_uuid = str(uuid.uuid4())
+
+        message = ChatMessage(
+            message_id=message_id,
+            user_id=user_id,
+            content=content,
+            type=message_type,
+            page_uuid=page_uuid,
+            conversation_id=get_next_conversation_id(db, user_id, page_uuid)
+        )
+        db.add(message)
+        db.commit()
+        db.refresh(message)
+        return message.to_dict()
+    except Exception as e:
+        print(f"Error saving message: {str(e)}")
+        db.rollback()
+        raise e
+    finally:
+        db.close()
+
+def get_total_pages(user_id: str) -> int:
+    db = SessionLocal()
+    try:
+        total_pages = db.query(func.count(func.distinct(ChatMessage.page_uuid)))\
+            .filter_by(user_id=user_id)\
+            .scalar()
+        return total_pages or 0
+    finally:
+        db.close()
+
+def delete_chat_page(user_id: str, page_uuid: str):
+    db = SessionLocal()
+    try:
+        # Delete messages with the page_uuid
+        db.query(ChatMessage)\
+            .filter_by(user_id=user_id, page_uuid=page_uuid)\
+            .delete()
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
 
 class TokenData(Base):
     __tablename__ = "token_data"

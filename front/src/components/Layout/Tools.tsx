@@ -59,7 +59,7 @@ const Tools: React.FC<ToolsProps> = ({
 
   return (
     <Flex justify="center" align="flex-end" gap="md" m={10}>
-      {pageTitle !== PageTitle.CHAT && (
+      {pageTitle === PageTitle.EDITOR && (
         <>
           <Button leftSection={icon} variant="filled" onClick={runCode}>
             Run Code
@@ -87,7 +87,7 @@ const Tools: React.FC<ToolsProps> = ({
         data={availableModels}
         allowDeselect={false}
         onClick={() => setModelDropdownOpen(true)}
-        value={selectedModel || "Ollama (codellama:7b-code)"}
+        value={selectedModel || Model.Groq}
         onChange={(e) => {
           const newModel = e as Model;
           setSelectedModel(newModel);
