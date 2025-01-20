@@ -1,12 +1,15 @@
 export enum Model {
   Ollama = "ollama",
   Groq = "groq",
-  MULTI_LAYER = "multi-layer-ml-model"
+  MULTI_LAYER = "multi-layer-ml-model",
 }
 
 export enum PageTitle {
   CHAT = "Chat",
-  EDITOR = "Editor"
+  EDITOR = "Editor",
+  MoreOptions = "More Options",
+  GitHubAuth = "GitHub Authentication",
+  ContextualResponse = "Contextual Response",
 }
 
 export const supported_language_versions = {
@@ -16,3 +19,14 @@ export const supported_language_versions = {
   java: "15.0.2",
   php: "8.2.3",
 };
+
+export enum RequestStatus {
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED'
+}
+
+export interface ApiResponse<T = any> {
+  status: RequestStatus;
+  message?: string;
+  data?: T;
+} 

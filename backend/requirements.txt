@@ -17,3 +17,7 @@ sqlalchemy==2.0.37
 scikit-learn==1.6.0
 sentence-transformers==3.3.1
 spacy==3.8.3
+tf_keras==2.18.0
+nest-asyncio==1.6.0
+Flask-Caching==2.3.0
+PyGithub==2.5.0

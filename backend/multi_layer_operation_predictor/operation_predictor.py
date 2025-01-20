@@ -145,7 +145,6 @@ def get_operation_definition(user_input, language):
         if closest_match:
             return operations[closest_match]
     except Exception as e:
-        print(f"Error during ML prediction: {e}")
         return ""
     
     return ""

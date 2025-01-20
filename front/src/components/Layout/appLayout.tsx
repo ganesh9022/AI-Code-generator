@@ -12,13 +12,11 @@ import { AppHeader } from "./appheader";
 import { SidebarLink } from "./Sidebar";
 import { IconCode, IconChevronLeftPipe } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import SideDrawer from "../SideDrawer";
 import { useTools } from "../CodeCompletionToolsProviders";
 
 export const AppLayout = () => {
   const { colorScheme } = useMantineColorScheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { state: { sideDrawerOpen }, updateState } = useTools();
   const location = useLocation();
 
   useEffect(() => {
@@ -26,6 +24,10 @@ export const AppLayout = () => {
       "/": "AI code generator",
       "/editor": "AI code generator - Editor",
       "/chat": "AI code generator - Chat",
+      "/more-options": "AI code generator - More Options",
+      "/more-options/github-auth": "AI code generator - GitHub Authentication",
+      "/more-options/contextual-response": "AI code generator - Contextual Response"
+
     };
     document.title = titles[location.pathname] || "AI code generator - 404";
   }, [location]);
@@ -87,10 +89,6 @@ export const AppLayout = () => {
           <Outlet />
         </Container>
       </AppShell.Main>
-      <SideDrawer
-        opened={sideDrawerOpen}
-        close={() => updateState("sideDrawerOpen", false)}
-      />
     </AppShell>
   );
 };

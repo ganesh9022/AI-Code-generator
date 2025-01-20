@@ -1,14 +1,13 @@
 import {
   AppShell,
   Box,
-  Button,
   Group,
   rem,
   ThemeIcon,
   Title,
   useMantineColorScheme,
 } from "@mantine/core";
-import { IconAdjustmentsPlus, IconMoon, IconSun } from "@tabler/icons-react";
+import { IconMoon, IconSun } from "@tabler/icons-react";
 import { useMemo } from "react";
 import { matchPath, useLocation } from "react-router-dom";
 import { SIDEBAR_ITEMS, SidebarItem } from "./constants";
@@ -25,7 +24,7 @@ interface FlattenedRoute {
 export const AppHeader = () => {
   const location = useLocation();
   const {
-    state: { selectedModel, language, sideDrawerOpen },
+    state: { selectedModel, language },
     updateState,
     runCode,
   } = useTools();
@@ -65,19 +64,6 @@ export const AppHeader = () => {
           </Title>
         </Group>
         <Group gap={0} wrap="nowrap">
-          {pageTitle !== PageTitle.CHAT && (
-            <Button
-              leftSection={
-                <IconAdjustmentsPlus
-                  style={{ width: rem(18), height: rem(18) }}
-                  stroke={1.5}
-                />
-              }
-              variant="outline"
-              children="More options"
-              onClick={() => updateState("sideDrawerOpen", !sideDrawerOpen)}
-            />
-          )}
           <Tools
             selectedModel={selectedModel}
             setSelectedModel={(model: Model) => updateState('selectedModel', model)}

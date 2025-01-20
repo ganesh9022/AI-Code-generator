@@ -1,16 +1,36 @@
-from sqlalchemy import Column, Integer, String, create_engine
+from sqlalchemy import Column, Integer, String, create_engine, DateTime, inspect
 from sqlalchemy.orm import sessionmaker, declarative_base
 from flask import jsonify
 from dotenv import load_dotenv
 import os
+from datetime import datetime, timedelta
+import pytz
+import logging
+
+# Setup logging
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
+# Default token expiration time (6 hours = 360 minutes)
+DEFAULT_TOKEN_EXPIRATION = 360
+
+# Get token expiration time from environment variable if set, otherwise use default
+TOKEN_EXPIRATION_MINUTES = DEFAULT_TOKEN_EXPIRATION
+if os.getenv("TOKEN_EXPIRATION_MINUTES"):
+    try:
+        TOKEN_EXPIRATION_MINUTES = int(os.getenv("TOKEN_EXPIRATION_MINUTES"))
+        logger.info(f"Using configured token expiration time: {TOKEN_EXPIRATION_MINUTES} minutes")
+    except ValueError as e:
+        logger.warning(f"Invalid TOKEN_EXPIRATION_MINUTES value, using default of {DEFAULT_TOKEN_EXPIRATION} minutes")
+else:
+    logger.info(f"No token expiration time configured, using default of {DEFAULT_TOKEN_EXPIRATION} minutes")
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 db = create_engine(DATABASE_URL, echo=True)
-
 Session = sessionmaker(bind=db)
 Base = declarative_base()
+ist_timezone = pytz.timezone('Asia/Kolkata')
 
 class User(Base):
     __tablename__ = "users"
@@ -19,28 +39,141 @@ class User(Base):
     user_id = Column(String)
     username = Column(String)
     email = Column(String, primary_key=True)
+    
     def __repr__(self) -> str:
         return f"<User(id={self.id}, user_id={self.user_id}, username={self.username}, email={self.email})>"
 
+class TokenData(Base):
+    __tablename__ = "token_data"
 
-def get_user_details(user_id, userName, email) :
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String, unique=True)
+    access_token = Column(String, nullable=True)  # Made nullable to allow keeping user data after token deletion
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(ist_timezone))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(ist_timezone), onupdate=lambda: datetime.now(ist_timezone))
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<TokenData(email={self.email})>"
+
+    def is_expired(self) -> bool:
+        """Check if token is expired"""
+        current_time = datetime.now(ist_timezone)
+        return current_time > self.expires_at
+
+def get_user_details(user_id: str, userName: str, email: str) -> tuple:
+    """Save user details to database"""
     Base.metadata.create_all(db)
+    
     if not userName or not email or not user_id:
         return jsonify({"error": "Missing required fields"}), 400
 
     with Session() as session:
-        existing_user = session.query(User).filter_by(email=email).first()
-        if existing_user:
-            return jsonify({"error": f"User with the email {email} already exists"}), 400
+        try:
+            existing_user = session.query(User).filter_by(email=email).first()
+            if existing_user:
+                return jsonify({"error": f"User with the email {email} already exists"}), 400
 
-        user = User(username=userName, user_id=user_id, email=email)
-        session.add(user)
-        session.commit()
-        return jsonify({
-            "message": "User saved successfully!",
-            "user": {
-                "user.id": user.user_id,
-                "username": user.username,
-                "email": user.email,
-            }
-        }), 200
+            user = User(username=userName, user_id=user_id, email=email)
+            session.add(user)
+            session.commit()
+            
+            return jsonify({
+                "message": "User saved successfully!",
+                "user": {
+                    "user_id": user.user_id,
+                    "username": user.username,
+                    "email": user.email
+                }
+            }), 200
+        except Exception as e:
+            session.rollback()
+            return jsonify({"error": f"Failed to save user: {str(e)}"}), 500
+
+def save_github_token(email: str, access_token: str) -> tuple:
+    """Save or update GitHub token"""
+    if not email or not access_token:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        # Create table if it doesn't exist
+        inspector = inspect(db)
+        if "token_data" not in inspector.get_table_names():
+            TokenData.__table__.create(db)
+    except Exception as e:
+        return jsonify({"error": "Database setup failed"}), 500
+
+    with Session() as session:
+        try:
+            # Check if token already exists
+            existing_token = session.query(TokenData).filter_by(email=email).first()
+            current_time = datetime.now(ist_timezone)
+            expiration_time = current_time + timedelta(minutes=TOKEN_EXPIRATION_MINUTES)
+            
+            if existing_token:
+                # Update token and timestamps
+                existing_token.access_token = access_token
+                existing_token.updated_at = current_time
+                existing_token.expires_at = expiration_time
+                token = existing_token
+            else:
+                # Create new token
+                token = TokenData(
+                    email=email,
+                    access_token=access_token,
+                    created_at=current_time,
+                    updated_at=current_time,
+                    expires_at=expiration_time
+                )
+                session.add(token)
+            
+            session.commit()
+
+            # Schedule token deletion
+            from scheduler.token_scheduler import token_scheduler
+            token_scheduler.schedule_token_deletion(email, expiration_time)
+
+            return jsonify({
+                "message": "Token data saved successfully",
+                "token": {
+                    "email": email,
+                    "created_at": token.created_at.isoformat(),
+                    "updated_at": token.updated_at.isoformat(),
+                    "expires_at": token.expires_at.isoformat()
+                }
+            }), 200
+            
+        except Exception as e:
+            session.rollback()
+            return jsonify({"error": f"Failed to save token: {str(e)}"}), 500
+
+
+def get_github_token(email: str) -> TokenData | None:
+    """Get GitHub token for a user
+    Args:
+        email (str): User's email address
+    Returns:
+        TokenData | None: Token object if found and not expired, None otherwise
+    """
+    if not email:
+        return None
+
+    with Session() as session:
+        try:
+            token = session.query(TokenData).filter_by(email=email).first()
+            if token:
+                current_time = datetime.now(ist_timezone)
+                if not token.is_expired():
+                    return token
+            return None
+        except Exception as e:
+            return None
+
+# Create all tables
+try:
+    logger.info("Creating database tables")
+    Base.metadata.create_all(db)
+    logger.info("Successfully created database tables")
+except Exception as e:
+    logger.error(f"Failed to create database tables: {str(e)}", exc_info=True)
+

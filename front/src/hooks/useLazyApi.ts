@@ -6,6 +6,8 @@ export enum BackendEndpoints {
   CodeSnippet = "code-snippet",
   AskQuery = "ask-query",
   SaveUser = "saveUser",
+  GetGithubToken = "get-github-token",
+  ExtractRepoFunctions = "extract-repo-functions",
 }
 
 interface ApiResponse<T> {

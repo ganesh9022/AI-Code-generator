@@ -3,31 +3,23 @@ import {
   Button,
   Group,
   List,
-  Center,
   Paper,
-  rem,
   Text,
   Stack,
   Badge,
   Switch,
+  useMantineColorScheme,
+  Title,
+  ScrollArea,
+  ThemeIcon,
+  Box,
 } from "@mantine/core";
-import axios from "axios";
-import { IconFile } from "@tabler/icons-react";
+import { IconFile, IconFiles, IconBrain } from "@tabler/icons-react";
 import { useTools, Params } from "./CodeCompletionToolsProviders";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useApi from "../hooks/useApi";
-
-
-const TrainModelButton = ({ onTrainModel, filesSelected }) => {
-  return filesSelected ? (
-    <Center mt={20}>
-      <Button variant="gradient" onClick={onTrainModel}>
-        Train Model
-      </Button>
-    </Center>
-  ) : null;
-};
+import { useNavigate } from "react-router-dom";
 
 const CustomFileInput: React.FC = () => {
   const { state: { toggle, openFiles, openFolders }, updateState, setParams } = useTools();
@@ -36,6 +28,8 @@ const CustomFileInput: React.FC = () => {
     "train-model",
     formData,
   );
+  const { colorScheme } = useMantineColorScheme();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (formData) {
@@ -44,7 +38,6 @@ const CustomFileInput: React.FC = () => {
       toast.error("Failed to train model.");
     }
   },[formData] );
-
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -68,109 +61,182 @@ const CustomFileInput: React.FC = () => {
     }));
   };
 
-  const submitTrainingData =
-    async () => {
-      const newFormData = new FormData();
+  const submitTrainingData = async () => {
+    const newFormData = new FormData();
 
-      if (openFiles) {
-        newFormData.append("files", openFiles);
-      }
-      if (openFolders) {
-        Array.from(openFolders).forEach((file) => {
-          newFormData.append("files", file);
-        });
-      }
-      setFormData(newFormData);
-
+    if (openFiles) {
+      newFormData.append("files", openFiles);
     }
+    if (openFolders) {
+      Array.from(openFolders).forEach((file) => {
+        newFormData.append("files", file);
+      });
+    }
+    setFormData(newFormData);
+  };
 
   return (
-    <div>
-      <Center mt={20} style={{ flexDirection: "column" }}>
-        <Stack align="flex-start" gap={0}>
-          <Group>
-            <Text size="xl">Contextual responses</Text>
-            <Switch
-              checked={toggle}
-              onChange={handleToggleChange}
-              size="md"
-              style={{ marginLeft: "auto" }}
-            />
-          </Group>
-          <Text size="xs" color="dimmed">
-            This feature allows you to upload files and folders for model
-            training.
-          </Text>
-        </Stack>
-        <Group mt={20}>
-          <Button
-            variant="outline"
-            onClick={() => document.getElementById("fileInput")?.click()}
-            disabled={!toggle}
-          >
-            Open file
-          </Button>
-          <Button
-            variant="filled"
-            onClick={() => document.getElementById("folderInput")?.click()}
-            disabled={!toggle}
-          >
-            Open folder
-          </Button>
-        </Group>
-      </Center>
-      <input
-        type="file"
-        id="fileInput"
-        style={{ display: "none" }}
-        onChange={handleFileChange}
-      />
-      <input
-        type="file"
-        id="folderInput"
-        style={{ display: "none" }}
-        ref={(input) => {
-          if (input) {
-            input.setAttribute("webkitdirectory", "true");
-            input.setAttribute("mozdirectory", "true");
-          }
+    <Box 
+      style={{ 
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        minHeight: 'calc(100vh - 60px)',
+        padding: '20px'
+      }}
+    >
+      <Paper 
+        shadow="md" 
+        radius="lg" 
+        p="xl"
+        mt={80}
+        style={{ 
+          width: '100%',
+          maxWidth: 800,
+          backgroundColor: colorScheme === "dark" ? "var(--mantine-color-dark-6)" : "white"
         }}
-        onChange={handleFolderChange}
-      />
-      {openFiles || (openFolders && openFolders.length > 0) ? (
-        <>
-          <Paper shadow="xs" withBorder style={{ marginTop: 20, padding: 10 , maxWidth: "100%", 
-    overflow: "hidden"}}>
-            <List
-              spacing="xs"
-              size="sm"
-              center
-              icon={
-                <IconFile
-                  style={{ width: rem(18), height: rem(18) }}
-                  stroke={1.5}
-                />
-              }
-            >
-              {openFiles && (
-                <List.Item>{openFiles.webkitRelativePath || openFiles.name}</List.Item>
-              )}
-              {openFolders &&
-                Array.from(openFolders).map((file, index) => (
-                  <List.Item key={index}>
-                    {file.webkitRelativePath || file.name}
-                  </List.Item>
-                ))}
-            </List>
+      >
+        <Stack gap="xl">
+          <Stack gap="xs">
+            <Group justify="space-between" align="center">
+              <Stack gap={0}>
+                <Title order={3}>File Upload Settings</Title>
+                <Text size="sm" c="dimmed">Configure how you want to train the model</Text>
+              </Stack>
+              <Switch
+                checked={toggle}
+                onChange={handleToggleChange}
+                size="md"
+                label="Enable file upload"
+                labelPosition="left"
+              />
+            </Group>
+          </Stack>
+
+          <Paper 
+            withBorder 
+            radius="md" 
+            p="lg"
+            style={{
+              backgroundColor: colorScheme === "dark" ? "var(--mantine-color-dark-7)" : "var(--mantine-color-gray-0)",
+              opacity: toggle ? 1 : 0.5,
+              transition: "opacity 0.2s ease"
+            }}
+          >
+            <Stack gap="md">
+              <Group grow>
+                <Button
+                  variant="light"
+                  leftSection={<IconFile size={20} />}
+                  onClick={() => document.getElementById("fileInput")?.click()}
+                  disabled={!toggle}
+                >
+                  Select File
+                </Button>
+                <Button
+                  variant="light"
+                  leftSection={<IconFiles size={20} />}
+                  onClick={() => document.getElementById("folderInput")?.click()}
+                  disabled={!toggle}
+                >
+                  Select Folder
+                </Button>
+              </Group>
+
+              <input
+                type="file"
+                id="fileInput"
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+              <input
+                type="file"
+                id="folderInput"
+                style={{ display: "none" }}
+                ref={(input) => {
+                  if (input) {
+                    input.setAttribute("webkitdirectory", "true");
+                    input.setAttribute("mozdirectory", "true");
+                  }
+                }}
+                onChange={handleFolderChange}
+              />
+            </Stack>
           </Paper>
-        </>
-      ) : null}
-      <TrainModelButton
-        onTrainModel={submitTrainingData}
-        filesSelected={openFiles || (openFolders && openFolders.length > 0)}
-      />
-    </div>
+
+          {(openFiles || (openFolders && openFolders.length > 0)) && (
+            <Paper 
+              withBorder 
+              radius="md" 
+              p="lg"
+              style={{
+                backgroundColor: colorScheme === "dark" ? "var(--mantine-color-dark-7)" : "var(--mantine-color-gray-0)"
+              }}
+            >
+              <Stack gap="md">
+                <Group justify="space-between">
+                  <Text fw={500}>Selected Files</Text>
+                  <Badge size="lg" variant="light">
+                    {openFolders ? Array.from(openFolders).length + (openFiles ? 1 : 0) : (openFiles ? 1 : 0)} files
+                  </Badge>
+                </Group>
+                <ScrollArea.Autosize mah={200}>
+                  <List
+                    spacing="xs"
+                    size="sm"
+                    center
+                    icon={
+                      <ThemeIcon 
+                        color="blue" 
+                        size={24} 
+                        variant="light"
+                      >
+                        <IconFile size={14} />
+                      </ThemeIcon>
+                    }
+                  >
+                    {openFiles && (
+                      <List.Item>
+                        <Text size="sm">{openFiles.webkitRelativePath || openFiles.name}</Text>
+                      </List.Item>
+                    )}
+                    {openFolders &&
+                      Array.from(openFolders).map((file, index) => (
+                        <List.Item key={index}>
+                          <Text size="sm">{file.webkitRelativePath || file.name}</Text>
+                        </List.Item>
+                      ))}
+                  </List>
+                </ScrollArea.Autosize>
+              </Stack>
+            </Paper>
+          )}
+
+          {(openFiles || (openFolders && openFolders.length > 0)) && (
+            <Button
+              onClick={submitTrainingData}
+              size="md"
+              variant="gradient"
+              gradient={{ from: "blue", to: "cyan" }}
+              leftSection={<IconBrain size={20} />}
+            >
+              Train Model
+            </Button>
+          )}
+            <Button 
+              variant="subtle" 
+              fullWidth 
+              size="md" 
+              onClick={() => navigate('/more-options')}
+              color="gray"
+            >
+                Go Back
+            </Button>
+        </Stack>
+      </Paper>
+    </Box>
   );
 };
 
 export default CustomFileInput;
+
