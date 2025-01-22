@@ -25,6 +25,7 @@ from scheduler.token_scheduler import token_scheduler
 import logging
 import atexit
 from routes.github_routes import get_github_token_route, extract_repo_functions
+from auth.clerk_auth import requires_auth
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -50,8 +51,8 @@ def make_key():
 # Register scheduler shutdown on app exit
 atexit.register(token_scheduler.stop)
 
-
 @app.route("/train-model", methods=["POST"])
+@requires_auth
 def train_model():
     uploaded_files = request.files.getlist("files")
     save_directory = os.path.join(FOLDERPATH)
@@ -66,6 +67,7 @@ def train_model():
     return jsonify({"message": "Files received and saved successfully"}), 200
 
 @app.route("/code-snippet", methods=["POST"])
+@requires_auth
 @cache.cached(timeout=600, make_cache_key=make_key)
 def generate_code_snippet():
     data = request.json
@@ -81,6 +83,7 @@ def generate_code_snippet():
     return response
 
 @app.route("/ask-query", methods=["POST"])
+@requires_auth
 @cache.cached(timeout=600, make_cache_key=make_key)
 def provide_answer():
     data = request.json
@@ -90,6 +93,7 @@ def provide_answer():
     return response
 
 @app.route("/saveUser", methods=["POST"])
+@requires_auth 
 def save_user():
     data = request.json
     user_id = data.get("userId")
@@ -99,6 +103,7 @@ def save_user():
     return response
 
 @app.route("/total-pages", methods=["GET"])
+@requires_auth
 def total_pages():
     user_id = request.args.get("userId")
 
@@ -113,6 +118,7 @@ def total_pages():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/chat-history", methods=["GET"])
+@requires_auth
 def get_chat_history():
     user_id = request.args.get("userId")
     page_uuid = request.args.get("pageUuid")
@@ -132,6 +138,7 @@ def get_chat_history():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/save-message", methods=["POST"])
+@requires_auth
 def save_message():
     data = request.json
     user_id = data.get("userId")
@@ -158,6 +165,7 @@ def save_message():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/delete-page", methods=["DELETE"])
+@requires_auth
 def delete_page():
     user_id = request.args.get("userId")
     page_uuid = request.args.get("pageUuid")
@@ -177,6 +185,7 @@ def delete_page():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/all-chat-histories", methods=["POST"])
+@requires_auth
 def get_all_histories():
     user_id = request.args.get("userId")
 
@@ -190,8 +199,24 @@ def get_all_histories():
         print(f"Error getting all chat histories: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-app.route("/get-github-token", methods=["POST"])(get_github_token_route)
-app.route("/extract-repo-functions", methods=["POST"])(extract_repo_functions)
+@app.route("/get-github-token", methods=["POST"])
+@requires_auth
+def github_token_route():
+    return get_github_token_route()
+
+@app.route("/extract-repo-functions", methods=["POST"])
+@requires_auth
+def extract_functions_route():
+    return extract_repo_functions()
+
+@app.route("/api/protected-resource", methods=["GET"])
+@requires_auth
+def protected_resource():
+    """A protected endpoint that requires valid Clerk authentication"""
+    return jsonify({
+        "message": "You have successfully accessed the protected resource",
+        "user": request.user
+    }), 200
 
 if __name__ == "__main__":
     nest_asyncio.apply()
