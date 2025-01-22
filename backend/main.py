@@ -12,7 +12,8 @@ from db.sqlalchemy_orm import (
     engine as db,
     delete_chat_page,
     SessionLocal,
-    ChatMessage
+    ChatMessage,
+    get_all_chat_histories
 )
 from sqlalchemy import func
 from mappers.model_mapper import map_models, map_chat_models
@@ -175,31 +176,20 @@ def delete_page():
         print(f"Error deleting page: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-@app.route("/page-uuids", methods=["GET"])
-def get_page_uuids():
+@app.route("/all-chat-histories", methods=["POST"])
+def get_all_histories():
     user_id = request.args.get("userId")
-    db = SessionLocal()
 
     if not user_id:
         return jsonify({"error": "User ID is required"}), 400
 
     try:
-        # Get page UUIDs ordered by the first message timestamp in each page
-        page_uuids = db.query(
-            ChatMessage.page_uuid,
-            func.min(ChatMessage.timestamp).label('first_message_time')
-        )\
-            .filter_by(user_id=user_id)\
-            .group_by(ChatMessage.page_uuid)\
-            .order_by('first_message_time')\
-            .all()
-        
-        return jsonify({"pageUuids": [uuid[0] for uuid in page_uuids]})
+        histories = get_all_chat_histories(user_id)
+        return jsonify({"histories": histories})
     except Exception as e:
-        print(f"Error getting page UUIDs: {str(e)}")
+        print(f"Error getting all chat histories: {str(e)}")
         return jsonify({"error": str(e)}), 500
-    finally:
-        db.close()
+
 app.route("/get-github-token", methods=["POST"])(get_github_token_route)
 app.route("/extract-repo-functions", methods=["POST"])(extract_repo_functions)
 

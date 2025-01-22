@@ -59,38 +59,33 @@ export const Chat = () => {
     const [tooltipText, setTooltipText] = useState("Copy to clipboard")
     const bgColor = colorScheme === 'dark' ? '#777777' : "#f0f0f0"
     const textColor = colorScheme === 'dark' ? "white" : "black"
-    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);      
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const [historyOpened, setHistoryOpened] = useState(false);
     const [currentPage, setCurrentPage] = useState<string>(pageId || crypto.randomUUID());
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const [showScrollButton, setShowScrollButton] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
     const loadChatHistory = async (pageUuid: string) => {
         if (!userId || !pageUuid) return;
-        
+
         try {
-            setIsLoading(true);
             await fetchChatHistoryApi({
               method: "GET",
               params: { userId, pageUuid },
-            });            
+            });
             if (data?.messages) {
                 setChatHistory(data.messages);
             }
         } catch (error) {
             console.error("Error loading chat history:", error);
             setChatHistory([]);
-        } finally {
-            setIsLoading(false);
         }
     };
 
     useEffect(() => {
         const scrollToMessage = () => {
             if (!messageId || !scrollAreaRef.current) return;
-            
-            // Add a small delay to ensure the DOM is updated
+
             setTimeout(() => {
                 const messageElement = document.getElementById(`message-${messageId}`);
                 if (messageElement && scrollAreaRef.current) {
@@ -125,7 +120,7 @@ export const Chat = () => {
                 }
             }
         };
-        
+
         if (userId) {
             loadInitialData();
         }
@@ -176,7 +171,7 @@ export const Chat = () => {
                     type: "received",
                     pageUuid: currentPage,
                 });
-    
+
                 addMessageToHistory({
                     type: "received",
                     content: askQueryData.answer,
@@ -186,8 +181,9 @@ export const Chat = () => {
                 });
             }
         };
-    
+
         addMessage();
+        setTimeout(scrollToBottom, 200);
     }, [askQueryData]);
 
     const handleEditCancel = () => {
@@ -207,7 +203,7 @@ export const Chat = () => {
 
     const handleMessage = async () => {
         if (inputValue.trim() === "" || !userId) return;
-        
+
         const messageId = Date.now().toString();
         const userMessage: ChatMessage = {
             type: "sent",
@@ -230,9 +226,7 @@ export const Chat = () => {
             };
             // Save user message
             await saveAndAddMessage(userMessage);
-            // Update chat history
             if (editingMessageId) {
-                // Find the index of the edited message
                 const messageIndex = chatHistory.findIndex(msg => msg.id === editingMessageId);
                 if (messageIndex !== -1) {
                     // Keep only messages up to the edited message and add the new message
@@ -349,28 +343,29 @@ export const Chat = () => {
     }
 
     const handleNewChat = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const newPageUuid = crypto.randomUUID();
-        setCurrentPage(newPageUuid);
-        setChatHistory([]);
-        setInputValue('');
-        setEditingMessageId(null);
-        navigate(`/chat/${newPageUuid}`);
-        setHistoryOpened(false);
+        if(chatHistory.length > 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            const newPageUuid = crypto.randomUUID();
+            setCurrentPage(newPageUuid);
+            setChatHistory([]);
+            setInputValue('');
+            setEditingMessageId(null);
+            setShowScrollButton(false);
+            navigate(`/chat/${newPageUuid}`);
+            setHistoryOpened(false);
+        }
     };
 
     const handleSelectPage = async (pageUuid: string) => {
         if (pageUuid === currentPage) {
-            setHistoryOpened(false);
             return;
         }
         setCurrentPage(pageUuid);
         setInputValue('');
         setEditingMessageId(null);
-        await loadChatHistory(pageUuid);
+        setShowScrollButton(false);
         navigate(`/chat/${pageUuid}`);
-        setHistoryOpened(false);
     };
 
     const handlePageChange = (newPageId: string) => {
@@ -378,7 +373,7 @@ export const Chat = () => {
         setCurrentPage(newPageId);
         setInputValue('');
         setEditingMessageId(null);
-        loadChatHistory(newPageId);
+        setShowScrollButton(false);
         navigate(`/chat/${newPageId}`);
     };
 
@@ -406,7 +401,6 @@ export const Chat = () => {
                             e.stopPropagation();
                             setHistoryOpened(true);
                         }}
-                        loading={isLoading}
                     >
                         <IconHistory size={20} />
                         History
@@ -423,7 +417,6 @@ export const Chat = () => {
             </Group>
 
             <ChatHistory
-                chatHistory={chatHistory}
                 onSelectChat={handleSelectPage}
                 opened={historyOpened}
                 currentPage={currentPage}
@@ -446,10 +439,10 @@ export const Chat = () => {
             >
                 <Box style={{ padding: rem(16) }}>
                     {chatHistory.length === 0 ? (
-                        <Flex 
-                            direction="column" 
-                            align="center" 
-                            justify="center" 
+                        <Flex
+                            direction="column"
+                            align="center"
+                            justify="center"
                             h="50vh"
                             style={{ textAlign: 'center' }}
                         >

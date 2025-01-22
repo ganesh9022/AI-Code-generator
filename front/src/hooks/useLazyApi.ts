@@ -7,11 +7,11 @@ export enum BackendEndpoints {
   AskQuery = "ask-query",
   SaveUser = "saveUser",
   DeletePage = "delete-page",
-  PageUuids = "page-uuids",
   SaveMessage = "save-message",
   ChatHistory = "chat-history",
   GetGithubToken = "get-github-token",
   ExtractRepoFunctions = "extract-repo-functions",
+  AllChatHistories = "all-chat-histories",
 }
 
 interface ApiResponse<T> {

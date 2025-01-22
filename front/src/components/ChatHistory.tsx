@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
 interface ChatHistoryProps {
-    chatHistory: ChatMessage[];
     onSelectChat: (pageUuid: string) => void;
     opened: boolean;
     currentPage: string;
@@ -21,8 +20,8 @@ interface DeletePageResponse {
     success: boolean;
 }
 
-interface PageUuidsResponse {
-    pageUuids: string[];
+interface ChatHistoriesResponse {
+    histories: Record<string, ChatMessage[]>;
 }
 
 export const ChatHistory = ({
@@ -35,48 +34,46 @@ export const ChatHistory = ({
     setMessages,
 }: ChatHistoryProps) => {
     const { fetchData: deletePage } = useLazyApi<DeletePageResponse>(BackendEndpoints.DeletePage);
-    const { data: pageUuidsData, fetchData: fetchPageUuids } = useLazyApi<PageUuidsResponse>(BackendEndpoints.PageUuids);
+    const { data: allHistoriesData, fetchData: fetchAllHistories, loading } = useLazyApi<ChatHistoriesResponse>(BackendEndpoints.AllChatHistories);
     const navigate = useNavigate();
     const [pageUuids, setPageUuids] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [chatTitles, setChatTitles] = useState<Record<string, string>>({});
 
-    // Load page UUIDs when opened
     useEffect(() => {
-        let isMounted = true;
+        const loadPageData = async () => {
+            if (!opened || !userId) return;
 
-        const loadPageUuids = async () => {
-            if (!opened || !userId || isLoading) return;
-            
-            setIsLoading(true);
             try {
-                await fetchPageUuids({
-                    method: "GET",
+                await fetchAllHistories({
                     params: { userId },
                 });
             } catch (err) {
-                console.error("Error loading page UUIDs:", err);
-            } finally {
-                if (isMounted) {
-                    setIsLoading(false);
-                }
+                console.error("Error loading chat histories:", err);
             }
         };
 
         if (opened) {
-            loadPageUuids();
+            loadPageData();
         }
-
-        return () => {
-            isMounted = false;
-        };
     }, [opened, userId]);
 
-    // Update pageUuids when data changes
     useEffect(() => {
-        if (pageUuidsData?.pageUuids) {
-            setPageUuids(pageUuidsData.pageUuids);
+        if (!allHistoriesData?.histories || !opened) return;
+
+        const histories = allHistoriesData.histories;
+        const uuids = Object.keys(histories);
+        setPageUuids(uuids);
+        const titles: Record<string, string> = {};
+        for (const [pageUuid, messages] of Object.entries(histories)) {
+            const firstUserMessage = messages.find(msg => msg.type === "sent");
+            titles[pageUuid] = firstUserMessage
+                ? firstUserMessage.content.length > 10
+                    ? `${firstUserMessage.content.slice(0, 23)}...`
+                    : firstUserMessage.content
+                : 'New Chat';
         }
-    }, [pageUuidsData]);
+        setChatTitles(titles);
+    }, [allHistoriesData, opened]);
 
     const isValidPage = (pageUuid: string) => {
         return pageUuids.includes(pageUuid);
@@ -87,26 +84,26 @@ export const ChatHistory = ({
         onSelectChat(pageUuid);
     };
 
+    const handleNewChat = () => {
+        setMessages([]);
+        const newPageUuid = crypto.randomUUID();
+        navigate(`/chat/${newPageUuid}`);
+        setCurrentPage(newPageUuid);
+        onClose();
+    };
     const handleDeletePage = async (pageUuid: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (isLoading) return;
-        
-        // Optimistically update UI first
         setPageUuids(prev => prev.filter(uuid => uuid !== pageUuid));
-        
+
         try {
             await deletePage({
                 method: "DELETE",
                 params:{ userId, pageUuid },
             });
-            
+
             // If this is the last page or current page
             if (pageUuids.length <= 1 || currentPage === pageUuid) {
-                setMessages([]);
-                const newPageUuid = crypto.randomUUID();
-                setCurrentPage(newPageUuid);
-                navigate(`/chat/${newPageUuid}`);
-                onClose();
+                handleNewChat();
             }
         } catch (error) {
             console.error("Error deleting page:", error);
@@ -115,7 +112,6 @@ export const ChatHistory = ({
         }
     };
 
-    // Handle outside clicks
     const ref = useClickOutside(() => {
         if (opened) {
             onClose();
@@ -147,7 +143,7 @@ export const ChatHistory = ({
                 </Flex>
                 <ScrollArea h="calc(100vh - 60px)">
                     <Stack>
-                        {isLoading && pageUuids.length === 0 ? (
+                        {loading ? (
                             <Text ta="center">Loading chats...</Text>
                         ) : pageUuids.length === 0 ? (
                             <Text ta="center" c="dimmed">No previous chats</Text>
@@ -170,12 +166,15 @@ export const ChatHistory = ({
                                             onClick={() => handleChatSelection(pageUuid)}
                                         >
                                             <IconMessage size={16} />
-                                            <Text size="sm" truncate>Chat {pageUuid.slice(0, 8)}...</Text>
+                                            <Text size="sm" truncate>
+                                                {chatTitles[pageUuid] || 'Loading...'}
+                                            </Text>
                                         </Flex>
                                         <ActionIcon
                                             color="red"
                                             variant="subtle"
                                             onClick={(e) => handleDeletePage(pageUuid, e)}
+                                            mr="5px"
                                         >
                                             <IconTrash size={16} />
                                         </ActionIcon>

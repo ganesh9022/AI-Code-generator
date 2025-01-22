@@ -163,6 +163,28 @@ def delete_chat_page(user_id: str, page_uuid: str):
     finally:
         db.close()
 
+def get_all_chat_histories(user_id: str) -> dict:
+    db = SessionLocal()
+    try:
+        # Get all messages for the user, ordered by page_uuid and timestamp
+        messages = (
+            db.query(ChatMessage)
+            .filter_by(user_id=user_id)
+            .order_by(ChatMessage.page_uuid, ChatMessage.timestamp)
+            .all()
+        )
+
+        # Group messages by page_uuid
+        histories = {}
+        for message in messages:
+            if message.page_uuid not in histories:
+                histories[message.page_uuid] = []
+            histories[message.page_uuid].append(message.to_dict())
+
+        return histories
+    finally:
+        db.close()
+
 class TokenData(Base):
     __tablename__ = "token_data"
 
