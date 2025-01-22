@@ -4,8 +4,7 @@ import { router } from "./Router";
 import { theme } from "./theme";
 import { RouterProvider } from "react-router-dom";
 import { ToolsProvider } from "./components/CodeCompletionToolsProviders";
-import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-react";
-import { WelcomePage } from "./components/authentication/WelcomePage";
+import { ClerkProvider } from "@clerk/clerk-react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; 
 
@@ -27,14 +26,9 @@ export default function App() {
       }}
     >
       <MantineProvider theme={theme}>
-        <SignedOut>
-          <WelcomePage/> 
-        </SignedOut>
-        <SignedIn>
-          <ToolsProvider>
-            <RouterProvider router={router} />
-          </ToolsProvider>
-        </SignedIn>
+        <ToolsProvider>
+          <RouterProvider router={router} />
+        </ToolsProvider>
         <ToastContainer />
       </MantineProvider>
     </ClerkProvider>

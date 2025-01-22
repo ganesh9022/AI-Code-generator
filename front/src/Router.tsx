@@ -10,10 +10,11 @@ import ChatPage from "./pages/Chat";
 import MoreOptions from "./pages/MoreOptions";
 import GithubLoginPage from "./components/GihubLoginPage";
 import CustomFileInput from "./components/CustomFileInput";
+import { AuthGuard } from "./components/authentication/AuthGuard";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route>
+    <Route element={<AuthGuard />}>
       <Route element={<AppLayout />}>
         <Route index element={<Navigate to="/editor" replace />} />
         <Route path="editor">
