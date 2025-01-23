@@ -29,7 +29,6 @@ const useApi = <T>(
       try {
         const URL = generateUrl(url);
         const token = await getToken();
-        // const token = "asdfasdflasjdfajsdlfsdf"
         const response = debouncedParams && (await axios.post<T>(URL, debouncedParams, {
           headers: {
             Authorization: `Bearer ${token}`,

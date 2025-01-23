@@ -39,12 +39,13 @@ def get_jwks():
             headers={'Accept': 'application/json'}
         )
         response.raise_for_status()
+        print("----------------->", response.json())
         return response.json()
     except requests.exceptions.RequestException as e:
         logger.error(f"Failed to fetch JWKS: {str(e)}")
         raise JWTError(f"Failed to fetch JWKS: {str(e)}")
 
-def verify_token(token, ignore_expiry=False):
+def verify_token(token):
     """Verify the JWT token from Clerk"""
     try:
         # First decode without verification to check expiry
@@ -55,8 +56,7 @@ def verify_token(token, ignore_expiry=False):
             now = datetime.now()
             if exp_time < now:
                 logger.warning(f"Token expired at {exp_time}")
-                if not ignore_expiry:
-                    raise ExpiredSignatureError("Token has expired")
+                raise ExpiredSignatureError("Token has expired")
 
         # Get the JWKS
         jwks = get_jwks()
@@ -81,8 +81,6 @@ def verify_token(token, ignore_expiry=False):
 
         # Verify the token
         options = {"verify_aud": False}
-        if ignore_expiry:
-            options["verify_exp"] = False
 
         payload = jwt.decode(
             token,

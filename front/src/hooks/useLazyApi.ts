@@ -50,7 +50,6 @@ const useLazyApi = <T>(endpoint: BackendEndpoints): ApiResponse<T> => {
     setLoading(true);
     setError(null);
     const token = await getToken();
-    // const token = "asdfasdnfjaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     const { method = "POST", params, headers = {}, ...rest } = options || {};
 
     try {

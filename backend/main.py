@@ -141,13 +141,13 @@ def get_chat_history():
 @requires_auth
 def save_message():
     data = request.json
-    user_id = data.get("userId")
+    user_id = request.user['sub']  # Get user ID from JWT token
     message_id = data.get("messageId")
     content = data.get("content")
     message_type = data.get("type")
     page_uuid = data.get("pageUuid")
 
-    if not all([user_id, message_id, content, message_type, page_uuid]):
+    if not all([message_id, content, message_type, page_uuid]):
         return jsonify({"error": "Missing required fields"}), 400
 
     try:
@@ -167,10 +167,10 @@ def save_message():
 @app.route("/delete-page", methods=["DELETE"])
 @requires_auth
 def delete_page():
-    user_id = request.args.get("userId")
+    user_id = request.user['sub']  # Get user ID from JWT token
     page_uuid = request.args.get("pageUuid")
 
-    if not all([user_id, page_uuid]):
+    if not page_uuid:
         return jsonify({"error": "Missing required fields"}), 400
 
     try:
@@ -187,10 +187,7 @@ def delete_page():
 @app.route("/all-chat-histories", methods=["POST"])
 @requires_auth
 def get_all_histories():
-    user_id = request.args.get("userId")
-
-    if not user_id:
-        return jsonify({"error": "User ID is required"}), 400
+    user_id = request.user['sub']  # Get user ID from JWT token
 
     try:
         histories = get_all_chat_histories(user_id)

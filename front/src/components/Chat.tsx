@@ -64,6 +64,7 @@ export const Chat = () => {
     const [currentPage, setCurrentPage] = useState<string>(pageId || crypto.randomUUID());
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const [showScrollButton, setShowScrollButton] = useState(false);
+    const { getToken } = useAuth();
 
     const loadChatHistory = async (pageUuid: string) => {
         if (!userId || !pageUuid) return;
@@ -111,6 +112,11 @@ export const Chat = () => {
 
     useEffect(() => {
         const loadInitialData = async () => {
+            const token = await window.Clerk.session.getToken();
+            console.log("session token",token);
+            const tokens = await getToken();
+            console.log("getToken",tokens);
+
             const currentPageId = pageId || currentPage;
             if (currentPageId && typeof userId === 'string') {
                 setCurrentPage(currentPageId);
