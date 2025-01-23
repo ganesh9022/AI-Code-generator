@@ -12,7 +12,6 @@ import { AppHeader } from "./appheader";
 import { SidebarLink } from "./Sidebar";
 import { IconCode, IconChevronLeftPipe } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useTools } from "../CodeCompletionToolsProviders";
 
 export const AppLayout = () => {
   const { colorScheme } = useMantineColorScheme();
@@ -26,11 +25,11 @@ export const AppLayout = () => {
       "/chat": "AI code generator - Chat",
       "/more-options": "AI code generator - More Options",
       "/more-options/github-auth": "AI code generator - GitHub Authentication",
-      "/more-options/contextual-response": "AI code generator - Contextual Response"
-
+      "/more-options/contextual-response":
+        "AI code generator - Contextual Response",
     };
-    
-    const title = location.pathname.startsWith('/chat') 
+
+    const title = location.pathname.startsWith("/chat")
       ? "AI code generator - Chat"
       : titles[location.pathname] || "AI code generator - 404";
     document.title = title;

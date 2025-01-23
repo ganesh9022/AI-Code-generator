@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Flex, Button, Select, rem } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons-react";
-import { useTools, Params } from "../CodeCompletionToolsProviders";
+import { useTools } from "../CodeCompletionToolsProviders";
 import { Model, PageTitle, supported_language_versions } from "./types";
 
 const modelOptions = [
@@ -38,17 +38,17 @@ const Tools: React.FC<ToolsProps> = ({
   const icon = (
     <IconPlayerPlay style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
   );
-  const { setParams } = useTools();
+  const { setParams, params } = useTools();
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (pageTitle === PageTitle.CHAT && selectedModel === Model.MULTI_LAYER) {
       setSelectedModel(Model.Groq);
-      setParams((prevParams: Params) => ({
-        ...prevParams,
+      setParams({
+        ...params,
         model: Model.Groq,
-      }));
+      });
     }
   }, [pageTitle, selectedModel, setSelectedModel, setParams]);
 
@@ -72,10 +72,10 @@ const Tools: React.FC<ToolsProps> = ({
             onChange={(e) => {
               const newLanguage = e as keyof typeof supported_language_versions;
               setLanguage(newLanguage);
-              setParams((prevParams: Params) => ({
-                ...prevParams,
+              setParams({
+                ...params,
                 language: newLanguage,
-              }));
+              });
               setLanguageDropdownOpen(false);
             }}
             onBlur={() => setLanguageDropdownOpen(false)}
@@ -91,10 +91,10 @@ const Tools: React.FC<ToolsProps> = ({
         onChange={(e) => {
           const newModel = e as Model;
           setSelectedModel(newModel);
-          setParams((prevParams: Params) => ({
-            ...prevParams,
+          setParams({
+            ...params,
             model: newModel,
-          }));
+          });
           setModelDropdownOpen(false);
         }}
         onBlur={() => setModelDropdownOpen(false)}

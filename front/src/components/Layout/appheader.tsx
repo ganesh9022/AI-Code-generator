@@ -10,12 +10,12 @@ import {
 } from "@mantine/core";
 import { IconAdjustmentsPlus, IconMoon, IconSun } from "@tabler/icons-react";
 import { useMemo } from "react";
-import {  useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { SIDEBAR_ITEMS, SidebarItem } from "./constants";
 import Tools from "./Tools";
 import { useTools } from "../CodeCompletionToolsProviders";
 import { UserButton } from "@clerk/clerk-react";
-import { Model, PageTitle, supported_language_versions } from './types';
+import { Model, PageTitle, supported_language_versions } from "./types";
 
 interface FlattenedRoute {
   path: string;
@@ -25,7 +25,7 @@ interface FlattenedRoute {
 export const AppHeader = () => {
   const location = useLocation();
   const {
-    state: { selectedModel, language },
+    state: { selectedModel, language, sideDrawerOpen },
     updateState,
     runCode,
   } = useTools();
@@ -37,7 +37,13 @@ export const AppHeader = () => {
       routes.flatMap((route) => {
         const fullPath = route.path ? `${basePath}/${route.path}` : basePath;
         const flattened = route.path
-          ? [{ path: fullPath, name: route.name as PageTitle, tooltip: route.tooltip }]
+          ? [
+              {
+                path: fullPath,
+                name: route.name as PageTitle,
+                tooltip: route.tooltip,
+              },
+            ]
           : [];
         const subRoutes = route.links
           ? flattenRoutes(route.links, fullPath)
@@ -81,9 +87,13 @@ export const AppHeader = () => {
           )}
           <Tools
             selectedModel={selectedModel}
-            setSelectedModel={(model: Model) => updateState('selectedModel', model)}
+            setSelectedModel={(model: Model) =>
+              updateState("selectedModel", model)
+            }
             language={language}
-            setLanguage={(language: keyof typeof supported_language_versions) => updateState('language', language)}
+            setLanguage={(language: keyof typeof supported_language_versions) =>
+              updateState("language", language)
+            }
             runCode={runCode}
             pageTitle={pageTitle}
           />

@@ -1,11 +1,6 @@
-import React, { ReactNode } from "react";
-import {
-  SiHtml5,
-  SiCss3,
-  SiTypescript,
-  SiJson,
-} from "react-icons/si";
-import {FcPicture, FcFile } from "react-icons/fc";
+import { ReactNode } from "react";
+import { SiHtml5, SiCss3, SiTypescript, SiJson } from "react-icons/si";
+import { FcPicture, FcFile } from "react-icons/fc";
 import { AiFillFileText } from "react-icons/ai";
 import { IconChevronDown, IconChevronRight } from "@tabler/icons-react";
 import { DiJavascript } from "react-icons/di";
