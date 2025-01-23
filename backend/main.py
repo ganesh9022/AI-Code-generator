@@ -108,18 +108,15 @@ def get_chat_history():
     user_id = request.args.get("userId")
     page_uuid = request.args.get("pageUuid")
     
-    print(f"Received chat history request - userId: {user_id}, pageUuid: {page_uuid}")
-
     if not all([user_id, page_uuid]):
-        print("Missing required fields")
+        logger.info("Missing required fields")
         return jsonify({"error": "Missing required fields"}), 400
 
     try:
         messages = get_chat_messages_by_page(user_id, page_uuid)
-        print(f"Retrieved {len(messages)} messages")
         return jsonify({"messages": messages})
     except Exception as e:
-        print(f"Error getting chat history: {str(e)}")
+        logger.info(f"Error getting chat history: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/save-message", methods=["POST"])
@@ -136,7 +133,6 @@ def save_message():
         return jsonify({"error": "Missing required fields"}), 400
 
     try:
-        print(f"Saving message: {data}")  # Debug log
         saved_message = save_chat_message(
             user_id=user_id,
             message_id=message_id,
@@ -146,7 +142,7 @@ def save_message():
         )
         return jsonify(saved_message)
     except Exception as e:
-        print(f"Error in save_message: {str(e)}")
+        logger.info(f"Error in save_message: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/delete-page", methods=["DELETE"])
@@ -166,7 +162,7 @@ def delete_page():
             "totalPages": total_pages
         })
     except Exception as e:
-        print(f"Error deleting page: {str(e)}")
+        logger.info(f"Error deleting page: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/all-chat-histories", methods=["POST"])
@@ -178,7 +174,7 @@ def get_all_histories():
         histories = get_all_chat_histories(user_id)
         return jsonify({"histories": histories})
     except Exception as e:
-        print(f"Error getting all chat histories: {str(e)}")
+        logger.info(f"Error getting all chat histories: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/get-github-token", methods=["POST"])

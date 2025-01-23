@@ -39,7 +39,6 @@ def get_jwks():
             headers={'Accept': 'application/json'}
         )
         response.raise_for_status()
-        print("----------------->", response.json())
         return response.json()
     except requests.exceptions.RequestException as e:
         logger.error(f"Failed to fetch JWKS: {str(e)}")
