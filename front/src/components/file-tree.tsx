@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
-import { Directory, File, sortDir, sortFile } from '../../src/utils/file-manager';
+import React, { useState } from "react";
+import {
+  Directory,
+  File,
+  sortDir,
+  sortFile,
+} from "../../src/utils/file-manager";
 import styled from "@emotion/styled";
-import { getIcon } from './icon';
-import { useTools, Params } from './CodeCompletionToolsProviders';
+import { getIcon } from "./icon";
+import { useTools } from "./CodeCompletionToolsProviders";
 
 interface FileTreeProps {
   rootDir: Directory;
@@ -11,8 +16,8 @@ interface FileTreeProps {
 }
 
 export const FileTree = (props: FileTreeProps) => {
-  return <SubTree directory={props.rootDir} {...props} />
-}
+  return <SubTree directory={props.rootDir} {...props} />;
+};
 
 interface SubTreeProps {
   directory: Directory;
@@ -21,9 +26,11 @@ interface SubTreeProps {
 }
 
 const SubTree = (props: SubTreeProps) => {
-  const { updateState, setParams } = useTools();
+  const { updateState, setParams, params } = useTools();
 
-  const extensionToLanguageMap: { [key: string]: "javascript" | "typescript" | "python" | "java" | "php" } = {
+  const extensionToLanguageMap: {
+    [key: string]: "javascript" | "typescript" | "python" | "java" | "php";
+  } = {
     js: "javascript",
     ts: "typescript",
     jsx: "javascript",
@@ -37,45 +44,47 @@ const SubTree = (props: SubTreeProps) => {
     props.onSelect(file);
     updateState("isEditorVisible", true);
     const fileExtension = file.name.split(".").pop();
-    const language = fileExtension && extensionToLanguageMap[fileExtension] ? extensionToLanguageMap[fileExtension] : "javascript";
+    const language =
+      fileExtension && extensionToLanguageMap[fileExtension]
+        ? extensionToLanguageMap[fileExtension]
+        : "javascript";
     updateState("language", language);
-    setParams((prevParams: Params) => ({
-      ...prevParams,
+    setParams({
+      ...params,
       language: language,
-    }));
+    });
   };
 
   return (
     <div>
-      {
-        props.directory.dirs
-          .sort(sortDir)
-          .map(dir => (
-            <React.Fragment key={dir.id}>
-              <DirDiv
-                directory={dir}
-                selectedFile={props.selectedFile}
-                onSelect={props.onSelect} />
-            </React.Fragment>
-          ))
-      }
-      {
-        props.directory.files
-          .sort(sortFile)
-          .map(file => (
-            <React.Fragment key={file.id}>
-              <FileDiv
-                file={file}
-                selectedFile={props.selectedFile}
-                onClick={() => handleFileSelect(file)} />
-            </React.Fragment>
-          ))
-      }
+      {props.directory.dirs.sort(sortDir).map((dir) => (
+        <React.Fragment key={dir.id}>
+          <DirDiv
+            directory={dir}
+            selectedFile={props.selectedFile}
+            onSelect={props.onSelect}
+          />
+        </React.Fragment>
+      ))}
+      {props.directory.files.sort(sortFile).map((file) => (
+        <React.Fragment key={file.id}>
+          <FileDiv
+            file={file}
+            selectedFile={props.selectedFile}
+            onClick={() => handleFileSelect(file)}
+          />
+        </React.Fragment>
+      ))}
     </div>
-  )
-}
+  );
+};
 
-const FileDiv = ({ file, icon, selectedFile, onClick }: {
+const FileDiv = ({
+  file,
+  icon,
+  selectedFile,
+  onClick,
+}: {
   file: File | Directory;
   icon?: string;
   selectedFile: File | undefined;
@@ -84,44 +93,43 @@ const FileDiv = ({ file, icon, selectedFile, onClick }: {
   const isSelected = (selectedFile && selectedFile.id === file.id) as boolean;
   const depth = file.depth;
   return (
-    <Div
-      depth={depth}
-      isSelected={isSelected}
-      onClick={onClick}>
-      <FileIcon
-        name={icon}
-        extension={file.name.split('.').pop() || ""} />
+    <Div depth={depth} isSelected={isSelected} onClick={onClick}>
+      <FileIcon name={icon} extension={file.name.split(".").pop() || ""} />
       <span color="var(--mantine-color-text)" style={{ marginLeft: 1 }}>
         {file.name}
       </span>
     </Div>
-  )
-}
+  );
+};
 
 const Div = styled.div<{
   depth: number;
   isSelected: boolean;
 }>`
-  width:fit-content;
+  width: fit-content;
   display: flex;
   align-items: center;
-  padding-left: ${props => props.depth * 16}px;
-  background-color: ${props => props.isSelected ? "#4a90e2" : "transparent"};
-  padding-right:10px;
+  padding-left: ${(props) => props.depth * 16}px;
+  background-color: ${(props) =>
+    props.isSelected ? "#4a90e2" : "transparent"};
+  padding-right: 10px;
   :hover {
     cursor: pointer;
-    background-color:#808080;
+    background-color: #808080;
   }
-`
+`;
 
-const DirDiv = ({ directory, selectedFile, onSelect }: {
+const DirDiv = ({
+  directory,
+  selectedFile,
+  onSelect,
+}: {
   directory: Directory;
   selectedFile: File | undefined;
   onSelect: (file: File) => void;
 }) => {
   let defaultOpen = false;
-  if (selectedFile)
-    defaultOpen = isChildSelected(directory, selectedFile)
+  if (selectedFile) defaultOpen = isChildSelected(directory, selectedFile);
   const [open, setOpen] = useState(defaultOpen);
   return (
     <>
@@ -129,19 +137,18 @@ const DirDiv = ({ directory, selectedFile, onSelect }: {
         file={directory}
         icon={open ? "openDirectory" : "closedDirectory"}
         selectedFile={selectedFile}
-        onClick={() => setOpen(!open)} />
-      {
-        open ? (
-          <SubTree
-            directory={directory}
-            selectedFile={selectedFile}
-            onSelect={onSelect} />
-        ) : null
-      }
+        onClick={() => setOpen(!open)}
+      />
+      {open ? (
+        <SubTree
+          directory={directory}
+          selectedFile={selectedFile}
+          onSelect={onSelect}
+        />
+      ) : null}
     </>
-  )
-}
-
+  );
+};
 
 const isChildSelected = (directory: Directory, selectedFile: File) => {
   let res: boolean = false;
@@ -151,27 +158,29 @@ const isChildSelected = (directory: Directory, selectedFile: File) => {
       res = true;
       return;
     }
-    if (selectedFile.parentId === '0') {
+    if (selectedFile.parentId === "0") {
       res = false;
       return;
     }
     dir.dirs.forEach((item) => {
       isChild(item, file);
-    })
+    });
   }
 
   isChild(directory, selectedFile);
   return res;
-}
+};
 
-const FileIcon = ({ extension, name }: { name?: string, extension?: string }) => {
+const FileIcon = ({
+  extension,
+  name,
+}: {
+  name?: string;
+  extension?: string;
+}) => {
   let icon = getIcon(extension || "", name || "");
-  return (
-    <Span>
-      {icon}
-    </Span>
-  )
-}
+  return <Span>{icon}</Span>;
+};
 
 const Span = styled.span`
   display: flex;
@@ -180,5 +189,4 @@ const Span = styled.span`
   padding-right:10px
   justify-content: center;
   align-items: center;
-`
-
+`;

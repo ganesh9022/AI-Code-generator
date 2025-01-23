@@ -15,19 +15,21 @@ import {
   Box,
 } from "@mantine/core";
 import { IconFile, IconFiles, IconBrain } from "@tabler/icons-react";
-import { useTools, Params } from "./CodeCompletionToolsProviders";
+import { useTools } from "./CodeCompletionToolsProviders";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useApi from "../hooks/useApi";
 import { useNavigate } from "react-router-dom";
 
 const CustomFileInput: React.FC = () => {
-  const { state: { toggle, openFiles, openFolders }, updateState, setParams } = useTools();
+  const {
+    state: { toggle, openFiles, openFolders },
+    updateState,
+    setParams,
+    params,
+  } = useTools();
   const [formData, setFormData] = useState<FormData | null>(null);
-  const { data, error } = useApi(
-    "train-model",
-    formData,
-  );
+  const { error } = useApi("train-model", formData);
   const { colorScheme } = useMantineColorScheme();
   const navigate = useNavigate();
 
@@ -37,7 +39,7 @@ const CustomFileInput: React.FC = () => {
     } else if (error) {
       toast.error("Failed to train model.");
     }
-  },[formData] );
+  }, [formData]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -55,10 +57,10 @@ const CustomFileInput: React.FC = () => {
     const newToggleValue = event.currentTarget.checked;
     updateState("toggle", newToggleValue);
 
-    setParams((prevParams: Params) => ({
-      ...prevParams,
+    setParams({
+      ...params,
       toggle: newToggleValue,
-    }));
+    });
   };
 
   const submitTrainingData = async () => {
@@ -76,24 +78,25 @@ const CustomFileInput: React.FC = () => {
   };
 
   return (
-    <Box 
-      style={{ 
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        minHeight: 'calc(100vh - 60px)',
-        padding: '20px'
+    <Box
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "center",
+        minHeight: "calc(100vh - 60px)",
+        padding: "20px",
       }}
     >
-      <Paper 
-        shadow="md" 
-        radius="lg" 
+      <Paper
+        shadow="md"
+        radius="lg"
         p="xl"
         mt={80}
-        style={{ 
-          width: '100%',
+        style={{
+          width: "100%",
           maxWidth: 800,
-          backgroundColor: colorScheme === "dark" ? "var(--mantine-color-dark-6)" : "white"
+          backgroundColor:
+            colorScheme === "dark" ? "var(--mantine-color-dark-6)" : "white",
         }}
       >
         <Stack gap="xl">
@@ -101,7 +104,9 @@ const CustomFileInput: React.FC = () => {
             <Group justify="space-between" align="center">
               <Stack gap={0}>
                 <Title order={3}>File Upload Settings</Title>
-                <Text size="sm" c="dimmed">Configure how you want to train the model</Text>
+                <Text size="sm" c="dimmed">
+                  Configure how you want to train the model
+                </Text>
               </Stack>
               <Switch
                 checked={toggle}
@@ -113,14 +118,17 @@ const CustomFileInput: React.FC = () => {
             </Group>
           </Stack>
 
-          <Paper 
-            withBorder 
-            radius="md" 
+          <Paper
+            withBorder
+            radius="md"
             p="lg"
             style={{
-              backgroundColor: colorScheme === "dark" ? "var(--mantine-color-dark-7)" : "var(--mantine-color-gray-0)",
+              backgroundColor:
+                colorScheme === "dark"
+                  ? "var(--mantine-color-dark-7)"
+                  : "var(--mantine-color-gray-0)",
               opacity: toggle ? 1 : 0.5,
-              transition: "opacity 0.2s ease"
+              transition: "opacity 0.2s ease",
             }}
           >
             <Stack gap="md">
@@ -136,7 +144,9 @@ const CustomFileInput: React.FC = () => {
                 <Button
                   variant="light"
                   leftSection={<IconFiles size={20} />}
-                  onClick={() => document.getElementById("folderInput")?.click()}
+                  onClick={() =>
+                    document.getElementById("folderInput")?.click()
+                  }
                   disabled={!toggle}
                 >
                   Select Folder
@@ -165,19 +175,27 @@ const CustomFileInput: React.FC = () => {
           </Paper>
 
           {(openFiles || (openFolders && openFolders.length > 0)) && (
-            <Paper 
-              withBorder 
-              radius="md" 
+            <Paper
+              withBorder
+              radius="md"
               p="lg"
               style={{
-                backgroundColor: colorScheme === "dark" ? "var(--mantine-color-dark-7)" : "var(--mantine-color-gray-0)"
+                backgroundColor:
+                  colorScheme === "dark"
+                    ? "var(--mantine-color-dark-7)"
+                    : "var(--mantine-color-gray-0)",
               }}
             >
               <Stack gap="md">
                 <Group justify="space-between">
                   <Text fw={500}>Selected Files</Text>
                   <Badge size="lg" variant="light">
-                    {openFolders ? Array.from(openFolders).length + (openFiles ? 1 : 0) : (openFiles ? 1 : 0)} files
+                    {openFolders
+                      ? Array.from(openFolders).length + (openFiles ? 1 : 0)
+                      : openFiles
+                        ? 1
+                        : 0}{" "}
+                    files
                   </Badge>
                 </Group>
                 <ScrollArea.Autosize mah={200}>
@@ -186,24 +204,24 @@ const CustomFileInput: React.FC = () => {
                     size="sm"
                     center
                     icon={
-                      <ThemeIcon 
-                        color="blue" 
-                        size={24} 
-                        variant="light"
-                      >
+                      <ThemeIcon color="blue" size={24} variant="light">
                         <IconFile size={14} />
                       </ThemeIcon>
                     }
                   >
                     {openFiles && (
                       <List.Item>
-                        <Text size="sm">{openFiles.webkitRelativePath || openFiles.name}</Text>
+                        <Text size="sm">
+                          {openFiles.webkitRelativePath || openFiles.name}
+                        </Text>
                       </List.Item>
                     )}
                     {openFolders &&
                       Array.from(openFolders).map((file, index) => (
                         <List.Item key={index}>
-                          <Text size="sm">{file.webkitRelativePath || file.name}</Text>
+                          <Text size="sm">
+                            {file.webkitRelativePath || file.name}
+                          </Text>
                         </List.Item>
                       ))}
                   </List>
@@ -223,15 +241,15 @@ const CustomFileInput: React.FC = () => {
               Train Model
             </Button>
           )}
-            <Button 
-              variant="subtle" 
-              fullWidth 
-              size="md" 
-              onClick={() => navigate('/more-options')}
-              color="gray"
-            >
-                Go Back
-            </Button>
+          <Button
+            variant="subtle"
+            fullWidth
+            size="md"
+            onClick={() => navigate("/more-options")}
+            color="gray"
+          >
+            Go Back
+          </Button>
         </Stack>
       </Paper>
     </Box>
@@ -239,4 +257,3 @@ const CustomFileInput: React.FC = () => {
 };
 
 export default CustomFileInput;
-
