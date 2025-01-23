@@ -42,12 +42,6 @@ Base.metadata.create_all(db)
 app.config.from_mapping(get_cache_config())
 cache = Cache(app)
 
-def make_key():
-    """Generate a cache key from request data"""
-    user_data = request.get_json()
-    sorted_items = sorted(user_data.items())
-    endpoint = request.endpoint
-    return f"{endpoint}:{','.join([f'{k}={v}' for k, v in sorted_items])}"
 # Register scheduler shutdown on app exit
 atexit.register(token_scheduler.stop)
 
@@ -199,6 +193,6 @@ def protected_resource():
 if __name__ == "__main__":
     nest_asyncio.apply()
     try:
-        app.run(debug=True, port=8000)
+        app.run(host="0.0.0.0", port=8000, debug=True)
     finally:
         token_scheduler.stop()
