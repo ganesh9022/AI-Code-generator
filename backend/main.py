@@ -102,21 +102,6 @@ def save_user():
     response = get_user_details(user_id, userName, email)
     return response
 
-@app.route("/total-pages", methods=["GET"])
-@requires_auth
-def total_pages():
-    user_id = request.args.get("userId")
-
-    if not user_id:
-        return jsonify({"error": "User ID is required"}), 400
-
-    try:
-        total = get_total_pages(user_id)
-        return jsonify({"totalPages": total})
-    except Exception as e:
-        print(f"Error getting total pages: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
 @app.route("/chat-history", methods=["GET"])
 @requires_auth
 def get_chat_history():

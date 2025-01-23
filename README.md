@@ -153,10 +153,41 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
          ```
 
 ### 5. Environment Variables
-   - To run this project, you will need to set up the following environment variables in a `backend/.env` file in the root of your project directory.
-   #### Example `backend/.env` File
+   You'll need to set up environment variables in two locations:
+
+   #### Frontend Environment Variables (`front/.env`)
+   ```env
+   # Backend API URL (e.g., http://localhost:5000)
+   VITE_SERVER_URL=
+
+   # Clerk authentication publishable key
+   VITE_CLERK_PUBLISHABLE_KEY=
+
+   # GitHub OAuth App Client ID
+   VITE_OAUTH_APP_CLIENT_ID=
    ```
-    GROQ_API_KEY=dummygroqapikey12345
+
+   #### Backend Environment Variables (`backend/.env`)
+   ```env
+   # GROQ API key for AI model access
+   GROQ_API_KEY=
+
+   # PostgreSQL database connection URL (format: postgresql://user:password@host:port/dbname)
+   DATABASE_URL=
+
+   # GitHub OAuth credentials
+   OAUTH_APP_CLIENT_ID=
+   OAUTH_APP_CLIENT_SECRET=
+
+   # Security key for encryption (generate a strong random key)
+   ENCRYPTION_KEY=
+
+   # Token expiration time in minutes (e.g., 60)
+   TOKEN_EXPIRATION_MINUTES=
+
+   # Clerk authentication configuration
+   CLERK_ISSUER=
+   CLERK_JWT_AUDIENCE=
    ```
 ### 6. Ollama Setup
    - Install ollama from https://ollama.com/
