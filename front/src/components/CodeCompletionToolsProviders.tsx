@@ -11,6 +11,14 @@ import { Model, supported_language_versions } from "./Layout/types";
 import * as monaco from "monaco-editor";
 import axios from "axios";
 import { Directory } from "../utils/file-manager";
+import { useUser } from "@clerk/clerk-react";
+
+export enum LocalStorageKeys {
+  ToolsState = "toolsState",
+  OpenFiles = "openFiles",
+  OpenFolders = "openFolders",
+  UploadFiles = "uploadFiles",
+}
 
 export interface ToolsState {
   selectedModel: Model;
@@ -79,9 +87,9 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const initialState = useMemo<ToolsState>(() => {
-    const savedState = localStorage.getItem("toolsState");
-    const savedOpenFiles = localStorage.getItem("openFiles");
-    const savedOpenFolders = localStorage.getItem("openFolders");
+    const savedState = localStorage.getItem(LocalStorageKeys.ToolsState);
+    const savedOpenFiles = localStorage.getItem(LocalStorageKeys.OpenFiles);
+    const savedOpenFolders = localStorage.getItem(LocalStorageKeys.OpenFolders);
     return {
       ...(savedState
         ? JSON.parse(savedState)
@@ -119,7 +127,7 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     if (openFiles) {
-      localStorage.setItem("openFiles",JSON.stringify({
+      localStorage.setItem(LocalStorageKeys.OpenFiles,JSON.stringify({
           name: openFiles.name,
           size: openFiles.size
         })
@@ -131,11 +139,21 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
         name: file.webkitRelativePath || file.name,
         size: file.size
       }));
-      localStorage.setItem("openFolders", JSON.stringify(folderFiles));
+      localStorage.setItem(LocalStorageKeys.OpenFolders, JSON.stringify(folderFiles));
     }
 
-    localStorage.setItem("toolsState", JSON.stringify(state));
+    localStorage.setItem(LocalStorageKeys.ToolsState, JSON.stringify(state));
   }, [state]);
+
+  const { isLoaded, user } = useUser();
+
+  useEffect(() => {
+    if (!isLoaded) return;
+  
+    if (user === null) {
+      Object.values(LocalStorageKeys).forEach((key) => localStorage.removeItem(key));
+    }
+  }, [user, isLoaded]);
 
   const updateState = <K extends keyof ToolsState>(
     key: K,

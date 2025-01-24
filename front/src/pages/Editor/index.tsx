@@ -7,6 +7,7 @@ import { v4 as gen_random_uuid } from "uuid";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
 import { IconFiles } from "@tabler/icons-react";
 import { Upload } from "./upload";
+import { LocalStorageKeys } from "../../components/CodeCompletionToolsProviders";
 
 const EditorPage = () => {
   const { state: { uploadFolders, uploadFiles } } = useTools();
@@ -27,6 +28,7 @@ const EditorPage = () => {
   useEffect(() => {
     const updateDir = async () => {
       if (uploadFolders) {
+        localStorage.removeItem(LocalStorageKeys.UploadFiles);
         setRootDir(uploadFolders);
       } else if (Array.isArray(uploadFiles) && uploadFiles.length > 0) {
         const files: File[] = await Promise.all(
@@ -39,7 +41,7 @@ const EditorPage = () => {
             name: uploadedFile.name || "Untitled",
           }))
         );
-        localStorage.setItem("uploadFiles", JSON.stringify(files));
+        localStorage.setItem(LocalStorageKeys.UploadFiles, JSON.stringify(files));
 
         setRootDir({
           ...dummyDir,
@@ -60,7 +62,7 @@ const EditorPage = () => {
   const [collapsed, setCollapsed] = useState(true)
   const hasFiles = rootDir.files.length > 0|| rootDir.dirs.length > 0;
   useEffect(() => {
-      const savedUploadFiles = localStorage.getItem("uploadFiles");
+      const savedUploadFiles = localStorage.getItem(LocalStorageKeys.UploadFiles);
       if (savedUploadFiles) {
         const files: File[] = JSON.parse(savedUploadFiles).map((fileData: any) => ({
           ...fileData, 
