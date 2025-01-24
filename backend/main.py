@@ -193,6 +193,7 @@ def protected_resource():
 if __name__ == "__main__":
     nest_asyncio.apply()
     try:
-        app.run(host="0.0.0.0", port=8000, debug=True)
+        port = int(os.environ.get("PORT", 10000))
+        app.run(host="0.0.0.0", port=port, debug=True)
     finally:
         token_scheduler.stop()

@@ -188,7 +188,11 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
    # Clerk authentication configuration
    CLERK_ISSUER=
    CLERK_JWT_AUDIENCE=
+   
+   # PORT: The port number on which the Flask server will run
+   PORT=
    ```
+
 ### 6. Ollama Setup
    - Install ollama from https://ollama.com/
    - Run below command on new terminal
