@@ -2,19 +2,18 @@ import React, { useEffect, useState } from "react";
 import {
   Button,
   Group,
-  List,
   Paper,
   Text,
   Stack,
   Badge,
-  Switch,
   useMantineColorScheme,
   Title,
   ScrollArea,
   ThemeIcon,
   Box,
+  ActionIcon,
 } from "@mantine/core";
-import { IconFile, IconFiles, IconBrain } from "@tabler/icons-react";
+import { IconFile, IconFiles, IconBrain, IconX } from "@tabler/icons-react";
 import { useTools } from "./CodeCompletionToolsProviders";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,16 +21,21 @@ import useApi from "../hooks/useApi";
 import { useNavigate } from "react-router-dom";
 
 const CustomFileInput: React.FC = () => {
-  const {
-    state: { toggle, openFiles, openFolders },
-    updateState,
-    setParams,
-    params,
-  } = useTools();
+  const { state: { toggle, openFiles, openFolders }, updateState } = useTools();
   const [formData, setFormData] = useState<FormData | null>(null);
   const { error } = useApi("train-model", formData);
   const { colorScheme } = useMantineColorScheme();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!toggle) {
+      navigate('/more-options');
+    }
+  }, [toggle, navigate]);
+
+  if (!toggle) {
+    return null;
+  }
 
   useEffect(() => {
     if (formData) {
@@ -53,14 +57,12 @@ const CustomFileInput: React.FC = () => {
     }
   };
 
-  const handleToggleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newToggleValue = event.currentTarget.checked;
-    updateState("toggle", newToggleValue);
+  const handleRemoveFile = () => {
+    updateState("openFiles", null);
+  };
 
-    setParams({
-      ...params,
-      toggle: newToggleValue,
-    });
+  const handleRemoveFolder = () => {
+    updateState("openFolders", null);
   };
 
   const submitTrainingData = async () => {
@@ -74,47 +76,41 @@ const CustomFileInput: React.FC = () => {
         newFormData.append("files", file);
       });
     }
+    newFormData.append("enable_groq", toggle.toString());
     setFormData(newFormData);
   };
 
   return (
-    <Box
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-        minHeight: "calc(100vh - 60px)",
-        padding: "20px",
+    <Box 
+      style={{ 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 'calc(100vh - 60px)',
+        padding: '20px'
       }}
     >
       <Paper
         shadow="md"
         radius="lg"
         p="xl"
-        mt={80}
-        style={{
-          width: "100%",
-          maxWidth: 800,
-          backgroundColor:
-            colorScheme === "dark" ? "var(--mantine-color-dark-6)" : "white",
+        style={{ 
+          width: '100%',
+          maxWidth: 600,
+          backgroundColor: colorScheme === "dark" ? "var(--mantine-color-dark-6)" : "white"
         }}
       >
         <Stack gap="xl">
-          <Stack gap="xs">
-            <Group justify="space-between" align="center">
-              <Stack gap={0}>
-                <Title order={3}>File Upload Settings</Title>
-                <Text size="sm" c="dimmed">
-                  Configure how you want to train the model
-                </Text>
-              </Stack>
-              <Switch
-                checked={toggle}
-                onChange={handleToggleChange}
-                size="md"
-                label="Enable file upload"
-                labelPosition="left"
-              />
+          <Stack gap="xs" align="center">
+            <ThemeIcon size={60} radius={60} color="blue" variant="light" style={{ border: '2px solid var(--mantine-color-blue-5)' }}>
+              <IconFiles size={30} />
+            </ThemeIcon>
+            <Title order={2}>GROQ RAG Model Training</Title>
+            <Group gap="xs">
+              <ThemeIcon size={24} radius={24} color="blue" variant="light">
+                <IconBrain size={14} />
+              </ThemeIcon>
+              <Text size="sm" c="blue">Upload files to train GROQ RAG model</Text>
             </Group>
           </Stack>
 
@@ -123,12 +119,7 @@ const CustomFileInput: React.FC = () => {
             radius="md"
             p="lg"
             style={{
-              backgroundColor:
-                colorScheme === "dark"
-                  ? "var(--mantine-color-dark-7)"
-                  : "var(--mantine-color-gray-0)",
-              opacity: toggle ? 1 : 0.5,
-              transition: "opacity 0.2s ease",
+              backgroundColor: colorScheme === "dark" ? "var(--mantine-color-dark-7)" : "var(--mantine-color-gray-0)",
             }}
           >
             <Stack gap="md">
@@ -137,17 +128,13 @@ const CustomFileInput: React.FC = () => {
                   variant="light"
                   leftSection={<IconFile size={20} />}
                   onClick={() => document.getElementById("fileInput")?.click()}
-                  disabled={!toggle}
                 >
                   Select File
                 </Button>
                 <Button
                   variant="light"
                   leftSection={<IconFiles size={20} />}
-                  onClick={() =>
-                    document.getElementById("folderInput")?.click()
-                  }
-                  disabled={!toggle}
+                  onClick={() => document.getElementById("folderInput")?.click()}
                 >
                   Select Folder
                 </Button>
@@ -171,85 +158,78 @@ const CustomFileInput: React.FC = () => {
                 }}
                 onChange={handleFolderChange}
               />
+
+              {(openFiles || openFolders) && (
+                <Stack gap="xs">
+                  <Group justify="space-between">
+                    <Text fw={500}>Selected Files</Text>
+                    <Badge size="lg" variant="light">
+                      {openFolders ? Array.from(openFolders).length + (openFiles ? 1 : 0) : (openFiles ? 1 : 0)} files
+                    </Badge>
+                  </Group>
+                  <ScrollArea.Autosize mah={200}>
+                    <Stack gap="xs">
+                      {openFiles && (
+                        <Group justify="space-between" wrap="nowrap">
+                          <Group gap="xs" wrap="nowrap">
+                            <ThemeIcon color="blue" size={24} variant="light">
+                              <IconFile size={14} />
+                            </ThemeIcon>
+                            <Text size="sm" truncate>{openFiles.name}</Text>
+                          </Group>
+                          <ActionIcon 
+                            variant="subtle" 
+                            color="red" 
+                            onClick={handleRemoveFile}
+                          >
+                            <IconX size={16} />
+                          </ActionIcon>
+                        </Group>
+                      )}
+                      {openFolders && Array.from(openFolders).map((file, index) => (
+                        <Group key={index} justify="space-between" wrap="nowrap">
+                          <Group gap="xs" wrap="nowrap">
+                            <ThemeIcon color="blue" size={24} variant="light">
+                              <IconFile size={14} />
+                            </ThemeIcon>
+                            <Text size="sm" truncate>{file.name}</Text>
+                          </Group>
+                          <ActionIcon 
+                            variant="subtle" 
+                            color="red" 
+                            onClick={handleRemoveFolder}
+                          >
+                            <IconX size={16} />
+                          </ActionIcon>
+                        </Group>
+                      ))}
+                    </Stack>
+                  </ScrollArea.Autosize>
+                </Stack>
+              )}
             </Stack>
           </Paper>
 
-          {(openFiles || (openFolders && openFolders.length > 0)) && (
-            <Paper
-              withBorder
-              radius="md"
-              p="lg"
-              style={{
-                backgroundColor:
-                  colorScheme === "dark"
-                    ? "var(--mantine-color-dark-7)"
-                    : "var(--mantine-color-gray-0)",
-              }}
-            >
-              <Stack gap="md">
-                <Group justify="space-between">
-                  <Text fw={500}>Selected Files</Text>
-                  <Badge size="lg" variant="light">
-                    {openFolders
-                      ? Array.from(openFolders).length + (openFiles ? 1 : 0)
-                      : openFiles
-                        ? 1
-                        : 0}{" "}
-                    files
-                  </Badge>
-                </Group>
-                <ScrollArea.Autosize mah={200}>
-                  <List
-                    spacing="xs"
-                    size="sm"
-                    center
-                    icon={
-                      <ThemeIcon color="blue" size={24} variant="light">
-                        <IconFile size={14} />
-                      </ThemeIcon>
-                    }
-                  >
-                    {openFiles && (
-                      <List.Item>
-                        <Text size="sm">
-                          {openFiles.webkitRelativePath || openFiles.name}
-                        </Text>
-                      </List.Item>
-                    )}
-                    {openFolders &&
-                      Array.from(openFolders).map((file, index) => (
-                        <List.Item key={index}>
-                          <Text size="sm">
-                            {file.webkitRelativePath || file.name}
-                          </Text>
-                        </List.Item>
-                      ))}
-                  </List>
-                </ScrollArea.Autosize>
-              </Stack>
-            </Paper>
-          )}
-
-          {(openFiles || (openFolders && openFolders.length > 0)) && (
+          <Stack gap="md">
             <Button
               onClick={submitTrainingData}
               size="md"
               variant="gradient"
               gradient={{ from: "blue", to: "cyan" }}
               leftSection={<IconBrain size={20} />}
+              disabled={!openFiles && !openFolders}
             >
-              Train Model
+              Train GROQ RAG Model
             </Button>
-          )}
-          <Button
-            variant="subtle"
-            fullWidth
-            size="md"
-            onClick={() => navigate("/more-options")}
-            color="gray"
-          >
-            Go Back
-          </Button>
+            <Button 
+              variant="subtle" 
+              size="md" 
+              onClick={() => navigate('/more-options')}
+              color="gray"
+            >
+              Go Back
+            </Button>
+          </Stack>
         </Stack>
       </Paper>
     </Box>

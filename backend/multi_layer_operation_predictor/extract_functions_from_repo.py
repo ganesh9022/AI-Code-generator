@@ -1,4 +1,5 @@
 import ast
+import csv
 import json
 from github import Github
 import base64
@@ -180,3 +181,27 @@ class FunctionExtractor:
                 self.log.error(f"Error saving {language} functions: {str(e)}")
 
         return saved_files  # Return list of saved file paths
+
+    def save_functions_to_csv(self):
+        """
+        Save all extracted functions to a single CSV file.
+
+        The CSV will contain no headers or quotes, and each row will contain one raw function definition.
+        """
+        data_dir = "files"
+        self.ensure_directory_exists(data_dir)
+        output_file = os.path.join(data_dir, "functions.csv")
+
+        # Collect only the raw function code
+        all_functions = [func_code.strip() for functions in self.functions_by_language.values() for func_code in functions.values()]
+
+        # Save to CSV
+        try:
+            with open(output_file, "w", encoding="utf-8", newline="") as csvfile:
+                for func_code in all_functions:
+                    csvfile.write(func_code + "\n\n")  # Write each function directly, followed by a newline
+            self.log.info(f"Successfully saved raw function code to {output_file}")
+            return output_file
+        except Exception as e:
+            self.log.error(f"Error saving raw function code to CSV: {str(e)}")
+            return None

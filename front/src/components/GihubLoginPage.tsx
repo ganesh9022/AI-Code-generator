@@ -1,14 +1,15 @@
-import { Box, Button, Paper, TextInput, Stack, ThemeIcon, Title, Text, useMantineColorScheme, Progress } from "@mantine/core";
+import { Box, Button, Paper, TextInput, Stack, ThemeIcon, Title, Text, useMantineColorScheme, Progress, Group, Switch } from "@mantine/core";
 import { useEffect, useState } from "react";
 import useGitHubOAuth from "../hooks/useGitHubOAuth";
 import { useGithubToken } from "../hooks/useGithubToken";
 import { toast } from "react-toastify";
 import { useUser } from "@clerk/clerk-react";
 import React from "react";
-import { IconBrandGithub, IconCheck, IconClock, IconArrowLeft, IconLink, IconCode } from "@tabler/icons-react";
+import { IconBrandGithub, IconCheck, IconClock, IconArrowLeft, IconLink, IconCode, IconBrain } from "@tabler/icons-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useLazyApi, { BackendEndpoints, FetchOptions } from "../hooks/useLazyApi";
 import { RequestStatus } from "./Layout/types";
+import { useTools } from "../components/CodeCompletionToolsProviders";
 
 const encodeCode = (code: string): string => {
     return btoa(code);
@@ -28,6 +29,7 @@ export default function GithubLoginPage() {
     const location = useLocation();
     const navigate = useNavigate();
     const email = user?.primaryEmailAddress?.emailAddress;
+    const { state: { toggle } } = useTools();
     
     const { 
         tokenStatus, 
@@ -67,10 +69,11 @@ export default function GithubLoginPage() {
             return;
         }
 
-        const options: FetchOptions = {
+        const options = {
             data: {
                 repo_url: repoUrl,
-                email
+                email,
+                enable_contextual: toggle
             }
         };
 
@@ -81,13 +84,13 @@ export default function GithubLoginPage() {
     useEffect(() => {
         if (extractResponse) {
             if (extractResponse.status === RequestStatus.SUCCESS) {
-                toast.success("Functions extracted successfully!");
+                toast.success(extractResponse.message || "Repository processed successfully!");
             } else {
-                toast.error(extractResponse.message || "Failed to extract functions");
+                toast.error(extractResponse.message || "Failed to process repository");
             }
         }
         if (extractError) {
-            toast.error("Failed to extract functions: " + extractError);
+            toast.error("Failed to process repository: " + extractError);
         }
     }, [extractResponse, extractError]);
 
@@ -119,93 +122,126 @@ export default function GithubLoginPage() {
                         </ThemeIcon>
                         <Title order={2}>GitHub Repository Analysis</Title>
                         <Text size="sm" c="dimmed" ta="center" maw={400}>
-                            Connect your GitHub account to analyze repositories and extract functions using AI
+                            {toggle 
+                                ? "Extract and analyze repository functions using both Multi-Layer and GROQ RAG "
+                                : "Extract and analyze repository functions using Multi-Layer ML (JSON)"}
                         </Text>
+                        {toggle && (
+                            <Group gap="xs">
+                                <ThemeIcon size={24} radius={24} color="blue" variant="light">
+                                    <IconBrain size={14} />
+                                </ThemeIcon>
+                                <Text size="sm" c="blue">Dual Analysis Mode: ML + GROQ</Text>
+                            </Group>
+                        )}
                     </Stack>
 
                     <form onSubmit={(e) => e.preventDefault()}>
                         <Stack gap="md">
-                            {/* Step 1: GitHub Authorization */}
-                            <Stack gap="xs">
-                                <Text fw={500} size="lg">Step 1: GitHub Authorization</Text>
-                                <Box>
-                                    <Button 
-                                        type="button"
-                                        fullWidth 
-                                        size="md" 
-                                        variant={tokenStatus?.status === RequestStatus.SUCCESS ? 'light' : 'gradient'}
-                                        gradient={{ from: 'teal', to: 'green', deg: 90 }}
-                                        color={tokenStatus?.status === RequestStatus.SUCCESS ? 'green' : undefined}
-                                        leftSection={tokenStatus?.status === RequestStatus.SUCCESS ? <IconCheck size={20} /> : <IconBrandGithub size={20} />}
-                                        onClick={() => {
-                                            processedCode.current = null;
-                                            handleLogin();
-                                        }}
-                                        loading={isTokenLoading}
-                                        disabled={tokenStatus?.status === RequestStatus.SUCCESS}
-                                    >
-                                        {tokenStatus?.status === RequestStatus.SUCCESS 
-                                            ? 'Access Token Active' 
-                                            : 'Generate Access Token'}
-                                    </Button>
-                                    {tokenStatus?.status === RequestStatus.SUCCESS && tokenStatus.expiresAt && (
-                                        <Box mt="xs">
-                                            <Stack gap="xs">
-                                                <Text size="sm" c="dimmed" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                    <IconClock size={16} />
-                                                    Token expires in: {timeLeft || 'Calculating...'}
-                                                </Text>
-                                                <Progress 
-                                                    value={((tokenStatus.expiresAt.getTime() - new Date().getTime()) / (tokenStatus.expiresAt.getTime() - new Date(tokenStatus.expiresAt).getTime())) * 100}
-                                                    color="green"
-                                                    size="sm"
-                                                    animated
-                                                    striped
-                                                />
-                                            </Stack>
-                                        </Box>
+                            {/* GitHub Status */}
+                            <Paper withBorder p="md" radius="md" style={{
+                                backgroundColor: colorScheme === "dark" ? "var(--mantine-color-dark-7)" : "var(--mantine-color-gray-0)"
+                            }}>
+                                <Stack gap="xs">
+                                    {tokenStatus?.status === RequestStatus.SUCCESS ? (
+                                        <>
+                                            <Group>
+                                                <ThemeIcon size={24} radius={24} color="green" variant="light">
+                                                    <IconCheck size={14} />
+                                                </ThemeIcon>
+                                                <Text fw={500}>GitHub Connected</Text>
+                                            </Group>
+                                            {tokenStatus.expiresAt && (
+                                                <Group gap="xs" align="center">
+                                                    <IconClock size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
+                                                    <Text size="sm" c="dimmed">Token expires in: {timeLeft || 'Calculating...'}</Text>
+                                                </Group>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Text fw={500}>GitHub Authorization Required</Text>
+                                            <Button
+                                                variant="light"
+                                                color="green"
+                                                leftSection={<IconBrandGithub size={18} />}
+                                                onClick={() => {
+                                                    processedCode.current = null;
+                                                    handleLogin();
+                                                }}
+                                                loading={isTokenLoading}
+                                                fullWidth
+                                            >
+                                                Connect with GitHub
+                                            </Button>
+                                        </>
                                     )}
-                                </Box>
-                            </Stack>
+                                </Stack>
+                            </Paper>
 
-                            {/* Step 2: Repository URL */}
-                            <Stack gap="xs">
-                                <Text fw={500} size="lg">Step 2: Repository Details</Text>
-                                <TextInput
-                                    placeholder="https://github.com/username/repository"
-                                    value={repoUrl}
-                                    onChange={(e) => setRepoUrl(e.target.value)}
-                                    required
-                                    size="md"
-                                    disabled={tokenStatus?.status !== RequestStatus.SUCCESS}
-                                    leftSection={<IconLink size={18} />}
-                                    styles={{
-                                        input: {
-                                            '&:disabled': {
-                                                opacity: 0.5,
-                                                backgroundColor: colorScheme === 'dark' ? 'var(--mantine-color-dark-5)' : 'var(--mantine-color-gray-1)'
+                            {/* Repository Input */}
+                            {tokenStatus?.status === RequestStatus.SUCCESS && (
+                                <>
+                                    <TextInput
+                                        placeholder="https://github.com/username/repository"
+                                        value={repoUrl}
+                                        onChange={(e) => setRepoUrl(e.target.value)}
+                                        required
+                                        size="md"
+                                        leftSection={<IconLink size={18} />}
+                                        styles={{
+                                            input: {
+                                                '&:disabled': {
+                                                    opacity: 0.5,
+                                                    backgroundColor: colorScheme === 'dark' ? 'var(--mantine-color-dark-5)' : 'var(--mantine-color-gray-1)'
+                                                }
                                             }
-                                        }
-                                    }}
-                                />
-                            </Stack>
+                                        }}
+                                    />
 
-                            {/* Step 3: Extract Functions */}
-                            <Stack gap="xs">
-                                <Text fw={500} size="lg">Step 3: Extract Functions</Text>
-                                <Button 
-                                    onClick={handleExtractFunctions}
-                                    loading={isExtracting}
-                                    disabled={!repoUrl.trim() || tokenStatus?.status !== RequestStatus.SUCCESS}
-                                    variant="gradient"
-                                    gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
-                                    fullWidth 
-                                    size="md"
-                                    leftSection={<IconCode size={20} />}
-                                >
-                                    {isExtracting ? 'Extracting Functions...' : 'Start Function Extraction'}
-                                </Button>
-                            </Stack>
+                                    {/* Analysis Mode Info */}
+                                    <Paper withBorder p="md" radius="md" style={{
+                                        backgroundColor: colorScheme === "dark" ? "var(--mantine-color-dark-7)" : "var(--mantine-color-gray-0)"
+                                    }}>
+                                        <Group justify="apart" align="center">
+                                            <Text fw={500}>Current Analysis Mode:</Text>
+                                            <Group gap="md">
+                                                <Group gap="xs" wrap="nowrap">
+                                                    <ThemeIcon size={24} radius={24} color="green" variant="light">
+                                                        <IconBrain size={14} />
+                                                    </ThemeIcon>
+                                                    <Text size="sm">Multi-Layer ML</Text>
+                                                </Group>
+                                                {toggle && (
+                                                    <>
+                                                        <Text size="sm" c="dimmed">+</Text>
+                                                        <Group gap="xs" wrap="nowrap">
+                                                            <ThemeIcon size={24} radius={24} color="blue" variant="light">
+                                                                <IconBrain size={14} />
+                                                            </ThemeIcon>
+                                                            <Text size="sm">GROQ RAG</Text>
+                                                        </Group>
+                                                    </>
+                                                )}
+                                            </Group>
+                                        </Group>
+                                    </Paper>
+
+                                    {/* Process Button */}
+                                    <Button 
+                                        onClick={handleExtractFunctions}
+                                        loading={isExtracting}
+                                        disabled={!repoUrl.trim()}
+                                        variant="gradient"
+                                        gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
+                                        fullWidth 
+                                        size="md"
+                                        leftSection={<IconCode size={20} />}
+                                    >
+                                        {isExtracting ? 'Processing Repository...' : (toggle ? 'Process with Dual Analysis' : 'Process with ML Analysis')}
+                                    </Button>
+                                </>
+                            )}
                         </Stack>
                     </form>
 

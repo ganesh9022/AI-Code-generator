@@ -75,7 +75,7 @@ def extract_repo_functions():
     data = request.get_json()
     repo_url = data.get("repo_url")
     email = data.get("email")
-    
+    enable_contextual = data.get("enable_contextual")
     if not repo_url or not email:
         logger.warning("Missing required fields for repo extraction")
         return jsonify({"status": "FAILED"}), 400
@@ -100,10 +100,12 @@ def extract_repo_functions():
         # Initialize function extractor
         extractor = FunctionExtractor(repo_url, access_token)
         
-        # Fetch and process repository
-        logger.info(f"Fetching repository: {repo_url}")
         if extractor.fetch_repository():
             saved_files = extractor.save_functions_to_json()
+            
+            if enable_contextual:
+                csv_path = extractor.save_functions_to_csv()
+
             logger.info("Successfully extracted and saved repository functions")
             return jsonify({"status": "SUCCESS"}), 200
         else:
