@@ -223,3 +223,10 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
       ```bash
          python3 -m pytest backend/tests/unit
       ```
+
+### 11. Run Type Check:
+   - Use below command for type checking
+   ```bash
+      cd front
+      yarn type-check
+   ```
