@@ -14,6 +14,18 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
 - **API Communication**: Flask
 - **Testing**: Python, Playwright, Cucumber
 
+## Deployed Models
+
+### Multi-Layer Operation Predictor
+The project uses a machine learning model deployed on Hugging Face Spaces for operation prediction in multiple programming languages. This model helps in predicting and suggesting code.
+
+- **Deployment Platform**: Hugging Face Spaces
+- **Model**: Multi-Layer Operation Predictor
+- **Supported Languages**: Python, JavaScript, TypeScript, PHP, Java
+- **Usage Mode**:
+  - Development: Uses local model implementation
+  - Production: Uses the deployed Hugging Face Space model
+
 ## Getting Started
 
 ### 1. Clone the project
@@ -191,6 +203,12 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
    
    # PORT: The port number on which the Flask server will run
    PORT=
+
+   # Hugging Face Space URL for the multi-layer operation predictor model
+   HUGGING_FACE_SPACE_URL=
+
+   # Environment setting (development/production)
+   ENVIRONMENT=development
    ```
 
 ### 6. Ollama Setup
@@ -230,15 +248,15 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
       cd front
       yarn type-check
    ```
-### 12. Run lint:
-   - Use below command for type checking
-   ```bash
-      cd front
-      yarn lint
-   ```
-### 13. Fix Linting Errors
-   - Use the command below to automatically fix linting errors wherever possible:
-      ```bash
-      cd front
-      yarn lint --fix
+### 12. Run lint:	
+   - Use below command for type checking	
+   ```bash	
+      cd front	
+      yarn lint	
+   ```	
+### 13. Fix Linting Errors	
+   - Use the command below to automatically fix linting errors wherever possible:	
+      ```bash	
+      cd front	
+      yarn lint --fix	
       ```  

@@ -1321,6 +1321,26 @@ protobuf = ">=3.20.2,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4
 grpc = ["grpcio (>=1.44.0,<2.0.0.dev0)"]
 
 [[package]]
+name = "gradio-client"
+version = "1.6.0"
+description = "Python library for easily interacting with trained machine learning models"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "gradio_client-1.6.0-py3-none-any.whl", hash = "sha256:172175510a0cc92928f5d376e95e93f94d1558e4a360969fcc0dfc4c9e313872"},
+    {file = "gradio_client-1.6.0.tar.gz", hash = "sha256:1c6fae52181d483c010cfbc4e4df8520da33ab4365ab412acabc798d7022ad98"},
+]
+
+[package.dependencies]
+fsspec = "*"
+httpx = ">=0.24.1"
+huggingface-hub = ">=0.19.3"
+packaging = "*"
+typing-extensions = ">=4.0,<5.0"
+websockets = ">=10.0,<15.0"
+
+[[package]]
 name = "greenlet"
 version = "3.1.1"
 description = "Lightweight in-process concurrent programming"
@@ -6159,4 +6179,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "29d48c6d89914b3b4cfdb999e2f655cefeffc434090d74375eee725a5e498288"
+content-hash = "6453e17bccc08f1cd8260cfc69115bb06cf7310d0251014e54d69b3d36cadaa0"
