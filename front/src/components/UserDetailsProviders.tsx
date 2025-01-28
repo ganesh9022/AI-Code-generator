@@ -45,5 +45,5 @@ import React, {
       </DetailsContext.Provider>
     );
   };
-  
+ /* eslint-disable-next-line */
   export const useDetails = (): DetailsProps => useContext(DetailsContext);

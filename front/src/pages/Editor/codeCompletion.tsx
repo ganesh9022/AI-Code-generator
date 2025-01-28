@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import {
   Box,
@@ -43,21 +43,23 @@ const CodeCompletionEditor = ({
   const { isLoaded, user, isSignedIn } = useUser();
   const { userData, setUserData } = useDetails();
   const isOpen = !!output;
-  const { fetchData } = userData
-    ? useLazyApi<{ userId: string; userName: string; email: string }>(
+  const lazyApi = useLazyApi<{ userId: string; userName: string; email: string }>(
       BackendEndpoints.SaveUser
-    )
-    : { fetchData: () => {} };
+  );
 
-  if (!isLoaded) {
-    return null;
-  }
+  const fetchData = useMemo(() => {
+    return userData ? lazyApi.fetchData : () => {};
+  }, [userData, lazyApi]);
 
   const closeOutputWindow = () => {
     updateState("output", "")
   };
 
   useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+
     if (isSignedIn && userData) {
       const userId = user.id;
       const userName = user.username ?? "";

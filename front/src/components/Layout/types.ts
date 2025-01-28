@@ -25,7 +25,7 @@ export enum RequestStatus {
   FAILED = 'FAILED'
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   status: RequestStatus;
   message?: string;
   data?: T;

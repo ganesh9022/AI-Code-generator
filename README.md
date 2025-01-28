@@ -230,3 +230,15 @@ The Intelligent Code Completion Tool provides real-time, context-aware code sugg
       cd front
       yarn type-check
    ```
+### 12. Run lint:
+   - Use below command for type checking
+   ```bash
+      cd front
+      yarn lint
+   ```
+### 13. Fix Linting Errors
+   - Use the command below to automatically fix linting errors wherever possible:
+      ```bash
+      cd front
+      yarn lint --fix
+      ```  

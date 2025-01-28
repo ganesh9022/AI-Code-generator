@@ -2,7 +2,7 @@ import { Box, Container, Grid, Text, Tooltip, useMantineColorScheme } from "@man
 import CodeCompletionEditor from "./codeCompletion";
 import { FileTree } from "../../components/file-tree";
 import { Directory, Type, File } from "../../utils/file-manager";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { v4 as gen_random_uuid } from "uuid";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
 import { IconFiles } from "@tabler/icons-react";
@@ -12,7 +12,7 @@ import { LocalStorageKeys } from "../../components/CodeCompletionToolsProviders"
 const EditorPage = () => {
   const { state: { uploadFolders, uploadFiles } } = useTools();
   const { colorScheme } = useMantineColorScheme();
-  const dummyDir: Directory = {
+  const dummyDir: Directory = useMemo(() => ({
     id: "1",
     name: "Dummy",
     type: Type.DUMMY,
@@ -20,7 +20,8 @@ const EditorPage = () => {
     depth: 1,
     dirs: [],
     files: [],
-  };
+  }), []);
+
 
   const [rootDir, setRootDir] = useState<Directory>(dummyDir);
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
@@ -64,7 +65,7 @@ const EditorPage = () => {
   useEffect(() => {
       const savedUploadFiles = localStorage.getItem(LocalStorageKeys.UploadFiles);
       if (savedUploadFiles) {
-        const files: File[] = JSON.parse(savedUploadFiles).map((fileData: any) => ({
+        const files: File[] = JSON.parse(savedUploadFiles).map((fileData: { content: string; name: string; type: string }) => ({
           ...fileData, 
           text: async () => fileData.content,
         }));

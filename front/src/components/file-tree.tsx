@@ -178,7 +178,7 @@ const FileIcon = ({
   name?: string;
   extension?: string;
 }) => {
-  let icon = getIcon(extension || "", name || "");
+  const icon = getIcon(extension || "", name || "");
   return <Span>{icon}</Span>;
 };
 

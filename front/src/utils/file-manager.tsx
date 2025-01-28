@@ -3,6 +3,19 @@ export enum Type {
   DIRECTORY,
   DUMMY
 }
+interface Data {
+  directories: {
+    shortid: string;
+    title: string;
+    directory_shortid: string | null;
+  }[];
+  modules: {
+    shortid: string;
+    title: string;
+    content: string;
+    directory_shortid: string | null;
+  }[];
+}
 
 interface CommonProps {
   id: string;
@@ -22,12 +35,12 @@ export interface Directory extends CommonProps {
   dirs: Directory[];
 }
 
-export function buildFileTree(data: any): Directory {
+export function buildFileTree(data: Data): Directory {
   const dirs = [...data.directories];
   const files = [...data.modules];
   const cache = new Map<string, Directory | File>();
 
-  let rootDir: Directory = {
+  const rootDir: Directory = {
     id: "0",
     name: "root",
     parentId: undefined,
@@ -38,7 +51,7 @@ export function buildFileTree(data: any): Directory {
   };
 
   dirs.forEach((item) => {
-    let dir: Directory = {
+    const dir: Directory = {
       id: item.shortid,
       name: item.title,
       parentId: item.directory_shortid === null ? "0" : item.directory_shortid,
@@ -52,7 +65,7 @@ export function buildFileTree(data: any): Directory {
   });
 
   files.forEach((item) => {
-    let file: File = {
+    const file: File = {
       id: item.shortid,
       name: item.title,
       parentId: item.directory_shortid === null ? "0" : item.directory_shortid,

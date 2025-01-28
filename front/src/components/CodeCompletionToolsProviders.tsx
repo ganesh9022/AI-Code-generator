@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import React, {
   createContext,
   useContext,
@@ -12,7 +14,7 @@ import * as monaco from "monaco-editor";
 import axios from "axios";
 import { Directory } from "../utils/file-manager";
 import { useUser } from "@clerk/clerk-react";
-
+  
 export enum LocalStorageKeys {
   ToolsState = "toolsState",
   OpenFiles = "openFiles",
@@ -177,7 +179,7 @@ export const ToolsProvider: React.FC<{ children: ReactNode }> = ({
       const message = code ? `Function: ${function_name}\n\n${code}` : "";
       editorRef.current?.setValue(message);
     } catch (error) {
-      editorRef.current?.setValue(currentCode + "\nError fetching completion.");
+      editorRef.current?.setValue(currentCode + "\nError fetching completion."+error);
     }
   };
 
