@@ -9,6 +9,9 @@ from sklearn.neighbors import KNeighborsClassifier
 import joblib
 from nltk.stem import WordNetLemmatizer
 import nltk
+from db.sqlalchemy_orm import ExtractedFile
+from db.database import SessionLocal
+from multi_layer_operation_predictor.extract_functions_from_repo import FunctionExtractor
 
 nltk.download('wordnet')
 
@@ -27,14 +30,78 @@ def get_model_path(language):
     return get_absolute_path(f'model/{language}_knn_model.h5')
 
 def load_functions(language):
-    lang_dir = get_absolute_path(f"data/{language}")
-    file_path = os.path.join(lang_dir, 'functions.json')
+    """
+    Load functions from database based on language.
     
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as file:
-            return json.load(file)
-    else:
-        raise FileNotFoundError(f"Function definitions for language '{language}' not found.")
+    Args:
+        language: The programming language to load functions for.
+    Returns:
+        Dictionary of function names and their code.
+    """
+    # Language mapping for standardization
+    language_mapping = {
+        "py": "python",
+        "js": "javascript",
+        "ts": "typescript",
+        "php": "php",
+        "java": "java"
+    }
+
+    db = SessionLocal()
+    try:
+        # Standardize language name
+        language = language.lower()
+        language = language_mapping.get(language, language)
+        print(f"Loading functions for language: {language}")
+
+        # Get the file extension for the language
+        language_ext = None
+        for lang, info in FunctionExtractor.SUPPORTED_LANGUAGES.items():
+            if lang == language:
+                language_ext = info["ext"]
+                break
+        
+        if not language_ext:
+            raise ValueError(f"Unsupported language: {language}")
+
+        print(f"Using file extension: .{language_ext}")
+
+        # Query files with matching extension
+        files = db.query(ExtractedFile).filter(
+            ExtractedFile.file_name.endswith(f".{language_ext}")
+        ).all()
+
+        print(f"Found {len(files)} files with extension .{language_ext}")
+
+        # Combine all functions from matching files
+        all_functions = {}
+        for file in files:
+            # print(f"\nProcessing file: {file.file_name}")
+            # print(f"File data type: {type(file.file_data)}")
+            # print(f"File data content: {file.file_data}")
+            
+            if isinstance(file.file_data, dict):
+                print(f"Number of functions in file: {len(file.file_data)}")
+                all_functions.update(file.file_data)
+            elif isinstance(file.file_data, list):
+                print(f"Number of items in list: {len(file.file_data)}")
+                for func in file.file_data:
+                    if isinstance(func, dict):
+                        all_functions.update(func)
+
+        print(f"\nTotal functions loaded: {len(all_functions)}")
+        print(f"Function names: {list(all_functions.keys())}")
+
+        if not all_functions:
+            print(f"No functions found for language: {language}")
+            return {}
+
+        return all_functions
+    except Exception as e:
+        print(f"Error loading functions from database: {str(e)}")
+        return {}
+    finally:
+        db.close()
 
 def clean_function_name(function_name, language):
     """
@@ -66,13 +133,6 @@ def preprocess_text(text):
     words = text.lower().split()
     lemmatized_words = [lemmatizer.lemmatize(word) for word in words]
     return " ".join(lemmatized_words)
-
-def load_functions(language):
-    """Loads functions from a JSON file based on the language."""
-    file_name = f'{language}_functions.json' 
-    file_path = get_absolute_path(f'data/{file_name}')
-    with open(file_path, 'r') as file:
-        return json.load(file)
 
 def find_closest_operation_fuzzy(user_input, operations):
     """Finds the closest operation name using fuzzy matching."""

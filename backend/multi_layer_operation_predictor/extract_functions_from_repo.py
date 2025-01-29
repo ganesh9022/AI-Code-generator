@@ -6,6 +6,10 @@ import base64
 import os
 import re
 import logging
+from datetime import datetime
+from sqlalchemy.orm import Session
+from db.sqlalchemy_orm import ExtractedFile
+from db.database import SessionLocal
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -27,6 +31,7 @@ class FunctionExtractor:
         self.owner, self.repo_name = self._parse_github_url(repo_url)
         self.github = Github(access_token) if access_token else Github()
         self.log = logging.getLogger(__name__)
+        self.files_data = []
 
     def _parse_github_url(self, url):
         parts = url.rstrip("/").split("/")
@@ -132,16 +137,18 @@ class FunctionExtractor:
 
                     if language:
                         try:
-                            content = base64.b64decode(file_content.content).decode(
-                                "utf-8"
-                            )
+                            content = base64.b64decode(file_content.content).decode("utf-8")
                             functions = self.extract_function_info(content, language)
-                            self.functions_by_language[language].update(functions)
+                            if functions:
+                                self.functions_by_language[language].update(functions)
+                                # Store file data
+                                self.files_data.append({
+                                    "file_name": file_content.path,
+                                    "functions": functions
+                                })
 
                         except Exception as e:
-                            self.log.error(
-                                f"Error processing {file_content.path}: {str(e)}"
-                            )
+                            self.log.error(f"Error processing {file_content.path}: {str(e)}")
 
             return True
 
@@ -149,38 +156,37 @@ class FunctionExtractor:
             self.log.error(f"Error fetching repository: {str(e)}")
             return False
 
-    def save_functions_to_json(self):
-        """Save functions for each language. Clear functions if none found."""
-        data_dir = self.get_absolute_path("data")
-        self.ensure_directory_exists(data_dir)
-        saved_files = []
+    def save_functions_to_database(self) -> int:
+        """Save extracted files to the database"""
+        total_functions = 0
+        db = SessionLocal()
+        try:
+            # Save files data
+            for file_data in self.files_data:
+                functions = file_data["functions"]
+                if functions:  # Only save if file has functions
+                    print(f"\nSaving file: {file_data['file_name']}")
+                    print(f"Functions type: {type(functions)}")
+                    print(f"Functions content: {functions}")
+                    print(f"Number of functions: {len(functions)}")
+                    
+                    extracted_file = ExtractedFile(
+                        file_name=file_data["file_name"],
+                        file_data=functions,
+                        repository_url=self.repo_url
+                    )
+                    db.add(extracted_file)
+                    total_functions += len(functions)
+                    self.log.info(f"Successfully saved file {file_data['file_name']} with {len(functions)} functions")
 
-        for language in self.SUPPORTED_LANGUAGES:
-            output_file = os.path.join(data_dir, f"{language}_functions.json")
-
-            # If no functions found for this language, save empty dict
-            if not self.functions_by_language.get(language):
-                try:
-                    with open(output_file, "w", encoding="utf-8") as f:
-                        json.dump({}, f, indent=4)
-                    self.log.info(f"No {language} functions were found")
-                    saved_files.append(output_file)
-                except Exception as e:
-                    self.log.error(f"Error clearing {language} functions: {str(e)}")
-                continue
-
-            # Save functions if they exist
-            try:
-                with open(output_file, "w", encoding="utf-8") as f:
-                    json.dump(self.functions_by_language[language], f, indent=4)
-                self.log.info(
-                    f"Successfully saved {len(self.functions_by_language[language])} {language} functions"
-                )
-                saved_files.append(output_file)
-            except Exception as e:
-                self.log.error(f"Error saving {language} functions: {str(e)}")
-
-        return saved_files  # Return list of saved file paths
+            db.commit()
+            return total_functions
+        except Exception as e:
+            db.rollback()
+            self.log.error(f"Error saving to database: {str(e)}")
+            raise
+        finally:
+            db.close()
 
     def save_functions_to_csv(self):
         """

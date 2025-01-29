@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, Integer, String, create_engine, DateTime, inspect, Text, func 
+from sqlalchemy import Column, Integer, String, create_engine, DateTime, inspect, Text, func, JSON
 from sqlalchemy.orm import sessionmaker, declarative_base
 from flask import jsonify
 from dotenv import load_dotenv
@@ -66,6 +66,18 @@ class ChatMessage(Base):
             "conversationId": self.conversation_id,
             "timestamp": self.timestamp.isoformat() if self.timestamp else None
         }
+
+class ExtractedFile(Base):
+    __tablename__ = 'extracted_files'
+
+    id = Column(Integer, primary_key=True)
+    file_name = Column(String(255), nullable=False)
+    file_data = Column(JSON, nullable=False)
+    repository_url = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(pytz.UTC))
+
+    def __repr__(self):
+        return f"<ExtractedFile(id={self.id}, file_name={self.file_name}, repository_url={self.repository_url})>"
 
 def get_user_details(user_id: str, userName: str, email: str):
     db = SessionLocal()

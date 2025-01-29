@@ -7,9 +7,11 @@ from sqlalchemy import create_engine
 # Add the parent directory to sys.path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from db.sqlalchemy_orm import Base, User, ChatMessage
+from db.sqlalchemy_orm import Base, User, ChatMessage, ExtractedFile
+from db.database import engine
 
 def run_migration():
+    """Run database migrations"""
     # Get database URL from environment variable
     load_dotenv()
     DATABASE_URL = os.getenv("DATABASE_URL")

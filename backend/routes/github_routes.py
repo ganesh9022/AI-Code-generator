@@ -76,41 +76,52 @@ def extract_repo_functions():
     repo_url = data.get("repo_url")
     email = data.get("email")
     enable_contextual = data.get("enable_contextual")
+    
     if not repo_url or not email:
         logger.warning("Missing required fields for repo extraction")
-        return jsonify({"status": "FAILED"}), 400
+        return jsonify({"status": "FAILED", "message": "Repository URL and email are required"}), 400
         
     try:
         logger.info(f"Starting repository function extraction for {repo_url}")
+        
         # Get token from database
         token_obj = get_github_token(email)
         
-        if not token_obj:
-            logger.error(f"No valid token found for email: {email}")
-            return jsonify({"status": "FAILED", "message": "No valid token found"}), 401
-            
-        # Decrypt the token
         try:
-            access_token = decrypt_token(token_obj.access_token)
-            logger.info("Successfully decrypted GitHub token")
-        except Exception as e:
-            logger.error(f"Token decryption failed: {str(e)}")
-            return jsonify({"status": "FAILED", "message": "Token decryption failed"}), 401
-        
-        # Initialize function extractor
-        extractor = FunctionExtractor(repo_url, access_token)
-        
-        if extractor.fetch_repository():
-            saved_files = extractor.save_functions_to_json()
+            # Try with GitHub token first
+            if token_obj:
+                access_token = decrypt_token(token_obj.access_token)
+                logger.info("Successfully decrypted GitHub token")
+                extractor = FunctionExtractor(repo_url, access_token)
+            else:
+                # Fallback to public access if no token is available
+                logger.info("No GitHub token found, attempting public access")
+                extractor = FunctionExtractor(repo_url)
             
-            if enable_contextual:
-                csv_path = extractor.save_functions_to_csv()
+            if extractor.fetch_repository():
+                functions_saved = extractor.save_functions_to_database()
+                
+                if enable_contextual:
+                    csv_path = extractor.save_functions_to_csv()
 
-            logger.info("Successfully extracted and saved repository functions")
-            return jsonify({"status": "SUCCESS"}), 200
-        else:
-            logger.error(f"Failed to fetch repository: {repo_url}")
-            return jsonify({"status": "FAILED", "message": "Failed to fetch repository"}), 400
+                logger.info(f"Successfully extracted and saved {functions_saved} functions to database")
+                return jsonify({
+                    "status": "SUCCESS",
+                    "functions_saved": functions_saved
+                }), 200
+            else:
+                logger.error(f"Failed to fetch repository: {repo_url}")
+                return jsonify({
+                    "status": "FAILED", 
+                    "message": "Failed to fetch repository. If this is a private repository, please ensure you have connected your GitHub account."
+                }), 400
+                
+        except Exception as e:
+            logger.error(f"Error accessing repository: {str(e)}")
+            return jsonify({
+                "status": "FAILED",
+                "message": "Error accessing repository. If this is a private repository, please ensure you have connected your GitHub account."
+            }), 401
             
     except Exception as e:
         logger.error(f"Repository function extraction failed: {str(e)}", exc_info=True)

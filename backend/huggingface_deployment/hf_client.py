@@ -2,7 +2,6 @@ from gradio_client import Client
 import os
 
 # Instantiate the client to interact with Hugging Face Space
-client = Client(os.getenv('HUGGING_FACE_SPACE_URL'))
 
 def get_multi_layer_model_result(currentLine: str, language: str) -> str:
     """
@@ -17,6 +16,7 @@ def get_multi_layer_model_result(currentLine: str, language: str) -> str:
     """
     try:
         # Making the API call to Hugging Face Space
+        client = Client(os.getenv('HUGGING_FACE_SPACE_URL'))
         result = client.predict(
             input_text=currentLine,
             language=language,
