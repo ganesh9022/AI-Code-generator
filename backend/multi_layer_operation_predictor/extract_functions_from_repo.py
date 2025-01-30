@@ -6,6 +6,8 @@ import base64
 import os
 import re
 import logging
+from typing import List
+from langchain_core.documents import Document
 from datetime import datetime
 from sqlalchemy.orm import Session
 from db.sqlalchemy_orm import ExtractedFile
@@ -211,3 +213,23 @@ class FunctionExtractor:
         except Exception as e:
             self.log.error(f"Error saving raw function code to CSV: {str(e)}")
             return None
+
+    def get_functions_as_documents(self) -> List[Document]:
+        """Get extracted functions as Document objects for direct embedding."""
+        documents = []
+        
+        for language, functions in self.functions_by_language.items():
+            for func_name, func_code in functions.items():
+                # Create a document with the function content and metadata
+                doc = Document(
+                    page_content=func_code,
+                    metadata={
+                        "source": f"{language}_functions",
+                        "function_name": func_name,
+                        "language": language,
+                        "type": "function"
+                    }
+                )
+                documents.append(doc)
+                
+        return documents

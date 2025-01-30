@@ -1,4 +1,4 @@
-import { Box, Button, Group, Text, Title, Paper, Stack, ThemeIcon, useMantineColorScheme, Switch, Center, Tooltip } from "@mantine/core";
+import { Box, Button, Group, Text, Title, Paper, Stack, ThemeIcon, useMantineColorScheme, Switch } from "@mantine/core";
 import { IconBrandGithub, IconFileText, IconArrowRight, IconBrain } from "@tabler/icons-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTools } from "../../components/CodeCompletionToolsProviders";
@@ -7,14 +7,14 @@ import { RequestStatus } from "../../components/Layout/types";
 import { useUser } from "@clerk/clerk-react";
 
 export default function MoreOptions() {
-  const { colorScheme } = useMantineColorScheme();
-  const { state: { toggle }, updateState, setParams } = useTools();
   const navigate = useNavigate();
   const location = useLocation();
-  const isRootPath = location.pathname === '/more-options';
+  const { colorScheme } = useMantineColorScheme();
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
   const { tokenStatus } = useGithubToken(email);
+  const { state: { toggle }, updateState, params, setParams } = useTools();
+  const isRootPath = location.pathname === '/more-options';
 
   if (!isRootPath) {
     return null;
@@ -24,10 +24,10 @@ export default function MoreOptions() {
     const newToggleValue = event.currentTarget.checked;
     updateState("toggle", newToggleValue);
 
-    setParams((prevParams: Params) => ({
-      ...prevParams,
+    setParams({
+      ...params,
       toggle: newToggleValue,
-    }));
+    });
   };
 
   return (

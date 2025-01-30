@@ -71,7 +71,7 @@ export function buildFileTree(data: Data): Directory {
       parentId: item.directory_shortid === null ? "0" : item.directory_shortid,
       type: Type.FILE,
       depth: 0,
-      content: item.code
+      content: item.content
     };
     cache.set(file.id, file);
   });

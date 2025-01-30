@@ -17,15 +17,17 @@ import { IconFile, IconFiles, IconBrain, IconX } from "@tabler/icons-react";
 import { useTools } from "./CodeCompletionToolsProviders";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import useApi from "../hooks/useApi";
+import useLazyApi, { BackendEndpoints } from "../hooks/useLazyApi";
 import { useNavigate } from "react-router-dom";
+import { RequestStatus, ApiResponse } from "./Layout/types";
+
 
 const CustomFileInput: React.FC = () => {
   const { state: { toggle, openFiles, openFolders }, updateState } = useTools();
-  const [formData, setFormData] = useState<FormData | null>(null);
-  const { error } = useApi("train-model", formData);
+  const [isTraining, setIsTraining] = useState(false);
   const { colorScheme } = useMantineColorScheme();
   const navigate = useNavigate();
+  const { data, error, fetchData } = useLazyApi<ApiResponse>(BackendEndpoints.TrainModel);
 
   useEffect(() => {
     if (!toggle) {
@@ -33,17 +35,28 @@ const CustomFileInput: React.FC = () => {
     }
   }, [toggle, navigate]);
 
+  useEffect(() => {
+    if (data) {
+      if (data.status === RequestStatus.SUCCESS) {
+        toast.success(data.message);
+        // Clear the files after successful training
+        updateState("openFiles", null);
+        updateState("openFolders", null);
+      } else if (data.status === RequestStatus.WARNING) {
+        toast.warning(data.message);
+      } else if (data.status === RequestStatus.FAILED) {
+        toast.error(data.message);
+      }
+      setIsTraining(false);
+    } else if (error) {
+      toast.error(error || "Failed to train model.");
+      setIsTraining(false);
+    }
+  }, [data, error]);
+
   if (!toggle) {
     return null;
   }
-
-  useEffect(() => {
-    if (formData) {
-      toast.success("Model trained successfully!");
-    } else if (error) {
-      toast.error("Failed to train model.");
-    }
-  }, [formData]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -61,24 +74,68 @@ const CustomFileInput: React.FC = () => {
     updateState("openFiles", null);
   };
 
-  const handleRemoveFolder = () => {
-    updateState("openFolders", null);
+  const handleRemoveFolderFile = (fileToRemove: File) => {
+    if (openFolders) {
+      const updatedFiles = Array.from(openFolders).filter(
+        file => file.name !== fileToRemove.name && file.webkitRelativePath !== fileToRemove.webkitRelativePath
+      );
+
+      if (updatedFiles.length === 0) {
+        updateState("openFolders", null);
+      } else {
+        const dataTransfer = new DataTransfer();
+        updatedFiles.forEach(file => dataTransfer.items.add(file));
+        updateState("openFolders", dataTransfer.files);
+      }
+    }
   };
 
   const submitTrainingData = async () => {
-    const newFormData = new FormData();
+    if (!openFiles && !openFolders) {
+      toast.warning("Please select files or folders to train the model.");
+      return;
+    }
 
-    if (openFiles) {
-      newFormData.append("files", openFiles);
-    }
-    if (openFolders) {
-      Array.from(openFolders).forEach((file) => {
-        newFormData.append("files", file);
+    setIsTraining(true);
+    const formData = new FormData();
+
+    try {
+      if (openFiles) {
+        const content = await openFiles.text();
+        const file = new File([content], openFiles.name, {
+          type: openFiles.type,
+          lastModified: openFiles.lastModified,
+        });
+        formData.append("files", file);
+      }
+
+      if (openFolders) {
+        await Promise.all(Array.from(openFolders).map(async (file) => {
+          const content = await file.text();
+          const newFile = new File([content], file.name, {
+            type: file.type,
+            lastModified: file.lastModified,
+          });
+          formData.append("files", newFile);
+        }));
+      }
+
+      formData.append("enable_groq", toggle.toString());
+      
+      await fetchData({
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
+    } catch (e) {
+      console.error('Error processing files:', e);
+      toast.error("Error processing files. Please try uploading again.");
+      setIsTraining(false);
     }
-    newFormData.append("enable_groq", toggle.toString());
-    setFormData(newFormData);
   };
+
+  const hasValidFiles = Boolean(openFiles || (openFolders && Array.from(openFolders).length > 0));
 
   return (
     <Box 
@@ -197,7 +254,7 @@ const CustomFileInput: React.FC = () => {
                           <ActionIcon 
                             variant="subtle" 
                             color="red" 
-                            onClick={handleRemoveFolder}
+                            onClick={() => handleRemoveFolderFile(file)}
                           >
                             <IconX size={16} />
                           </ActionIcon>
@@ -217,9 +274,10 @@ const CustomFileInput: React.FC = () => {
               variant="gradient"
               gradient={{ from: "blue", to: "cyan" }}
               leftSection={<IconBrain size={20} />}
-              disabled={!openFiles && !openFolders}
+              disabled={!hasValidFiles || isTraining}
+              loading={isTraining}
             >
-              Train GROQ RAG Model
+              {isTraining ? "Training Model..." : "Train GROQ RAG Model"}
             </Button>
             <Button 
               variant="subtle" 

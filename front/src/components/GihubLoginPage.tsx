@@ -1,4 +1,4 @@
-import { Box, Button, Paper, TextInput, Stack, ThemeIcon, Title, Text, useMantineColorScheme, Progress, Group, Switch } from "@mantine/core";
+import { Box, Button, Paper, TextInput, Stack, ThemeIcon, Title, Text, useMantineColorScheme, Group } from "@mantine/core";
 import { useEffect, useState } from "react";
 import useGitHubOAuth from "../hooks/useGitHubOAuth";
 import { useGithubToken } from "../hooks/useGithubToken";
@@ -7,7 +7,7 @@ import { useUser } from "@clerk/clerk-react";
 import React from "react";
 import { IconBrandGithub, IconCheck, IconClock, IconArrowLeft, IconLink, IconCode, IconBrain } from "@tabler/icons-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import useLazyApi, { BackendEndpoints, FetchOptions } from "../hooks/useLazyApi";
+import useLazyApi, { BackendEndpoints } from "../hooks/useLazyApi";
 import { RequestStatus } from "./Layout/types";
 import { useTools } from "../components/CodeCompletionToolsProviders";
 
@@ -85,6 +85,8 @@ export default function GithubLoginPage() {
         if (extractResponse) {
             if (extractResponse.status === RequestStatus.SUCCESS) {
                 toast.success(extractResponse.message || "Repository processed successfully!");
+            } else if (extractResponse.status === RequestStatus.PARTIAL_SUCCESS) {
+                toast.warning(extractResponse.message || "Functions extracted but embeddings creation failed");
             } else {
                 toast.error(extractResponse.message || "Failed to process repository");
             }

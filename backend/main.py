@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_caching import Cache
-from constants import FOLDERPATH
+from constants import RequestStatus
 from db.sqlalchemy_orm import (
     save_chat_message,
     get_chat_messages_by_page,
@@ -26,6 +26,7 @@ import logging
 import atexit
 from routes.github_routes import get_github_token_route, extract_repo_functions
 from auth.clerk_auth import requires_auth
+from langchain.schema import Document
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -48,17 +49,57 @@ atexit.register(token_scheduler.stop)
 @app.route("/train-model", methods=["POST"])
 @requires_auth
 def train_model():
-    uploaded_files = request.files.getlist("files")
-    save_directory = os.path.join(FOLDERPATH)
+    try:
+        uploaded_files = request.files.getlist("files")
+        if not uploaded_files:
+            return jsonify({
+                "message": "No files uploaded",
+                "status": RequestStatus.WARNING
+            }), 200
 
-    os.makedirs(save_directory, exist_ok=True)
+        # Process files directly
+        from groqclould.contextual_response import rag_manager
+        import asyncio
 
-    for file in uploaded_files:
-        file_path = os.path.join(save_directory, file.filename)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        file.save(file_path)
-        logger.info(f"Saved file: {file.filename} to {file_path}")
-    return jsonify({"message": "Files received and saved successfully"}), 200
+        documents = []
+        for file in uploaded_files:
+            try:
+                content = file.read().decode('utf-8')
+                doc = Document(
+                    page_content=content,
+                    metadata={"source": file.filename}
+                )
+                documents.append(doc)
+                logger.info(f"Processed file: {file.filename}")
+            except Exception as e:
+                logger.warning(f"Error processing file {file.filename}: {str(e)}")
+                continue
+
+        if not documents:
+            return jsonify({
+                "message": "No valid files could be processed",
+                "status": RequestStatus.WARNING
+            }), 200
+
+        success = asyncio.run(rag_manager.process_documents(documents))
+        
+        if success:
+            return jsonify({
+                "message": "Files processed and embeddings created successfully",
+                "status": RequestStatus.SUCCESS
+            }), 200
+        else:
+            return jsonify({
+                "message": "No content could be processed from the files",
+                "status": RequestStatus.WARNING
+            }), 200
+
+    except Exception as e:
+        logger.error(f"Error in train_model: {str(e)}")
+        return jsonify({
+            "message": f"Error processing files: {str(e)}",
+            "status": RequestStatus.FAILED
+        }), 500
 
 @app.route("/code-snippet", methods=["POST"])
 @requires_auth

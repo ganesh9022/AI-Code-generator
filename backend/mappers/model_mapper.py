@@ -41,7 +41,7 @@ async def run_contextual_response(currentLine: str) -> str:
         return await get_contextual_response(currentLine)
     except Exception as e:
         logger.error(f"Error in contextual response: {str(e)}")
-        return f"Error generating contextual response: {str(e)}"
+        return ""
 
 def map_models(
     model: Model,

@@ -22,7 +22,9 @@ export const supported_language_versions = {
 
 export enum RequestStatus {
   SUCCESS = 'SUCCESS',
-  FAILED = 'FAILED'
+  FAILED = 'FAILED',
+  WARNING = 'WARNING',
+  PARTIAL_SUCCESS = 'PARTIAL_SUCCESS'
 }
 
 export interface ApiResponse<T = unknown> {

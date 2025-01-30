@@ -1,6 +1,6 @@
 import uuid
-from sqlalchemy import Column, Integer, String, create_engine, DateTime, inspect, Text, func, JSON
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy import Column, Integer, String, create_engine, DateTime, inspect, Text, func, JSON, ForeignKey
+from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 from flask import jsonify
 from dotenv import load_dotenv
 import os
@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 import pytz
 import logging
 from flask import jsonify
-from .database import Base, engine, SessionLocal
+from db.database import Base, engine, SessionLocal
+from sqlalchemy.dialects.postgresql import ARRAY, FLOAT, JSONB
 # Setup logging
 logger = logging.getLogger(__name__)
 
@@ -78,6 +79,22 @@ class ExtractedFile(Base):
 
     def __repr__(self):
         return f"<ExtractedFile(id={self.id}, file_name={self.file_name}, repository_url={self.repository_url})>"
+
+class DocumentEmbedding(Base):
+    """SQLAlchemy model for storing document embeddings."""
+    __tablename__ = "document_embeddings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(String, nullable=False)
+    embedding = Column(ARRAY(FLOAT), nullable=False)
+    doc_metadata = Column(JSONB, nullable=True)
+    source = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    def __repr__(self):
+        """String representation of the model."""
+        return f"<DocumentEmbedding(id={self.id}, source={self.source})>"
 
 def get_user_details(user_id: str, userName: str, email: str):
     db = SessionLocal()
