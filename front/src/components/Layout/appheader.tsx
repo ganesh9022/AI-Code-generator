@@ -72,19 +72,6 @@ export const AppHeader = () => {
           </Title>
         </Group>
         <Group gap={0} wrap="nowrap">
-          {pageTitle === PageTitle.EDITOR && (
-            <Button
-              leftSection={
-                <IconAdjustmentsPlus
-                  style={{ width: rem(18), height: rem(18) }}
-                  stroke={1.5}
-                />
-              }
-              variant="outline"
-              children="More options"
-              onClick={() => updateState("sideDrawerOpen", !sideDrawerOpen)}
-            />
-          )}
           <Tools
             selectedModel={selectedModel}
             setSelectedModel={(model: Model) =>

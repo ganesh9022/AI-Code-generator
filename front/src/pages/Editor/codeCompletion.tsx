@@ -113,16 +113,21 @@ const CodeCompletionEditor = ({
   }, [monaco, state.language, data, selectedFile]);
   const handleClose = () => {
     updateState("isEditorVisible", false);
+    setSelectedFile(undefined);
+    updateState("code", "");
   };
   const selectedFileContent = selectedFile?.content;
   const breadcrumbItems = selectedFile?.path?.split("/");
-  if (!state.isEditorVisible) {
-    setSelectedFile(undefined);
-  }
+  useEffect(() => {
+    if (!state.isEditorVisible) {
+      setSelectedFile(undefined);
+    }
+  }, [state.isEditorVisible]);
+  
   return (
     <Box style={{ height: "calc(100vh - 70px)" }}>
       <Box p={5}>
-        {state.isEditorVisible && (
+        {selectedFile && (
           <Box>
             <Box style={{ display: "flex" }}>
               <Box>
@@ -196,6 +201,7 @@ const CodeCompletionEditor = ({
                 const currentLine = value.split("\n")[lineNumber - 1] ?? "";
                 const suffix = value.split("\n")[lineNumber] ?? "";
                 setParams({ ...params, prefix, currentLine, suffix });
+                updateState("code", value);
               }
             }}
           />

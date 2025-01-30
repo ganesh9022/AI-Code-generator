@@ -14,7 +14,7 @@ import {
   ActionIcon,
 } from "@mantine/core";
 import { IconFile, IconFiles, IconBrain, IconX } from "@tabler/icons-react";
-import { useTools } from "./CodeCompletionToolsProviders";
+import { LocalStorageKeys, useTools } from "./CodeCompletionToolsProviders";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useLazyApi, { BackendEndpoints } from "../hooks/useLazyApi";
@@ -60,18 +60,18 @@ const CustomFileInput: React.FC = () => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      updateState("openFiles", event.target.files[0]);
+      updateState(LocalStorageKeys.OpenFiles, event.target.files[0]);
     }
   };
 
   const handleFolderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      updateState("openFolders", event.target.files);
+      updateState(LocalStorageKeys.OpenFolders, event.target.files);
     }
   };
 
   const handleRemoveFile = () => {
-    updateState("openFiles", null);
+    updateState(LocalStorageKeys.OpenFiles, null);
   };
 
   const handleRemoveFolderFile = (fileToRemove: File) => {
@@ -81,11 +81,11 @@ const CustomFileInput: React.FC = () => {
       );
 
       if (updatedFiles.length === 0) {
-        updateState("openFolders", null);
+        updateState(LocalStorageKeys.OpenFolders, null);
       } else {
         const dataTransfer = new DataTransfer();
         updatedFiles.forEach(file => dataTransfer.items.add(file));
-        updateState("openFolders", dataTransfer.files);
+        updateState(LocalStorageKeys.OpenFolders, dataTransfer.files);
       }
     }
   };
@@ -121,7 +121,7 @@ const CustomFileInput: React.FC = () => {
       }
 
       formData.append("enable_groq", toggle.toString());
-      
+
       await fetchData({
         data: formData,
         headers: {
@@ -138,8 +138,8 @@ const CustomFileInput: React.FC = () => {
   const hasValidFiles = Boolean(openFiles || (openFolders && Array.from(openFolders).length > 0));
 
   return (
-    <Box 
-      style={{ 
+    <Box
+      style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -151,7 +151,7 @@ const CustomFileInput: React.FC = () => {
         shadow="md"
         radius="lg"
         p="xl"
-        style={{ 
+        style={{
           width: '100%',
           maxWidth: 600,
           backgroundColor: colorScheme === "dark" ? "var(--mantine-color-dark-6)" : "white"
@@ -234,9 +234,9 @@ const CustomFileInput: React.FC = () => {
                             </ThemeIcon>
                             <Text size="sm" truncate>{openFiles.name}</Text>
                           </Group>
-                          <ActionIcon 
-                            variant="subtle" 
-                            color="red" 
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
                             onClick={handleRemoveFile}
                           >
                             <IconX size={16} />
@@ -251,9 +251,9 @@ const CustomFileInput: React.FC = () => {
                             </ThemeIcon>
                             <Text size="sm" truncate>{file.name}</Text>
                           </Group>
-                          <ActionIcon 
-                            variant="subtle" 
-                            color="red" 
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
                             onClick={() => handleRemoveFolderFile(file)}
                           >
                             <IconX size={16} />
@@ -279,9 +279,9 @@ const CustomFileInput: React.FC = () => {
             >
               {isTraining ? "Training Model..." : "Train GROQ RAG Model"}
             </Button>
-            <Button 
-              variant="subtle" 
-              size="md" 
+            <Button
+              variant="subtle"
+              size="md"
               onClick={() => navigate('/more-options')}
               color="gray"
             >
