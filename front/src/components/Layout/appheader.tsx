@@ -1,14 +1,12 @@
 import {
   AppShell,
   Box,
-  Button,
   Group,
-  rem,
   ThemeIcon,
   Title,
   useMantineColorScheme,
 } from "@mantine/core";
-import { IconAdjustmentsPlus, IconMoon, IconSun } from "@tabler/icons-react";
+import { IconMoon, IconSun } from "@tabler/icons-react";
 import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { SIDEBAR_ITEMS, SidebarItem } from "./constants";
@@ -25,7 +23,7 @@ interface FlattenedRoute {
 export const AppHeader = () => {
   const location = useLocation();
   const {
-    state: { selectedModel, language, sideDrawerOpen },
+    state: { selectedModel, language },
     updateState,
     runCode,
   } = useTools();
