@@ -62,6 +62,12 @@ export const ChatHistory = ({
 
         const histories = allHistoriesData.histories;
         const uuids = Object.keys(histories);
+        uuids.sort((a, b) => {
+            const timestampA = histories[a][histories[a].length - 1]?.timestamp ?? 0;
+            const timestampB = histories[b][histories[b].length - 1]?.timestamp ?? 0;
+            return new Date(timestampB).getTime() - new Date(timestampA).getTime();
+        });
+
         setPageUuids(uuids);
         const titles: Record<string, string> = {};
         for (const [pageUuid, messages] of Object.entries(histories)) {
