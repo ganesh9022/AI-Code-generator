@@ -23,9 +23,9 @@ The project uses a machine learning model deployed on Hugging Face Spaces for op
 - **Model**: Multi-Layer Operation Predictor
 - **Supported Languages**: Python, JavaScript, TypeScript, PHP, Java
 - **Usage Mode**:
-  - Development: Uses local model implementation
-  - Production: Uses the deployed Hugging Face Space model
-
+  - Development: Uses local `HUGGING_FACE_SPACE_URL` as `http://127.0.0.1:7860` in `.env` file
+  - Production: Uses the deployed Hugging Face Space URL `HUGGING_FACE_SPACE_URL `
+- Ref: https://huggingface.co/spaces/AICodeGenerator/AI_Code_Generation
 ## Getting Started
 
 ### 1. Clone the project
@@ -219,42 +219,73 @@ The project uses a machine learning model deployed on Hugging Face Spaces for op
       ```
    - Start Backend server
 
-### 7. Run the Backend Server
+### 7. Hugging Face Model Setup
+
+   The project uses a local instance of the Hugging Face model for code generation. Follow these steps to set it up:
+
+   1. Clone the model repository:
+      ```bash
+      git clone git@hf.co:spaces/AICodeGenerator/AI_Code_Generation
+      cd AI_Code_Generation
+      ```
+
+   2. Set up Python environment:
+      ```bash
+      python -m venv env
+      source env/bin/activate  # On Windows: .\env\Scripts\activate
+      ```
+
+   3. Install model dependencies:
+      ```bash
+      pip install -r requirements.txt
+      ```
+
+   4. Start the model server:
+      ```bash
+      python app.py
+      ```
+
+   The model server will be available at `http://127.0.0.1:7860`. Make sure to:
+   - Keep this server running alongside your main backend
+   - Update your `.env` file with `HUGGING_FACE_SPACE_URL="http://127.0.0.1:7860"`
+   - Change the `SQLALCHEMY_DATABASE_URL` in `db_setup.py` to point to your local database
+
+### 8. Run the Backend Server
    - Use below commands to run the server
       ```bash
       yarn start:backend
       ```
 
-### 8. Run the Development Server:
+### 9. Run the Development Server:
    - Use below commands to run the development server
       ```bash
        yarn start:frontend
        ```
 
-### 9. Alternatively run both the frontend and backend servers concurrently:
+### 10. Alternatively run both the frontend and backend servers concurrently:
    - Use below command
       ```bash
           yarn start
       ```
-### 10. Run the Unit test:
+### 11. Run the Unit test:
    - Use below commands to run unit test
       ```bash
          python3 -m pytest backend/tests/unit
       ```
 
-### 11. Run Type Check:
+### 12. Run Type Check:
    - Use below command for type checking
    ```bash
       cd front
       yarn type-check
    ```
-### 12. Run lint:	
+### 13. Run lint:	
    - Use below command for type checking	
    ```bash	
       cd front	
       yarn lint	
    ```	
-### 13. Fix Linting Errors	
+### 14. Fix Linting Errors	
    - Use the command below to automatically fix linting errors wherever possible:	
       ```bash	
       cd front	

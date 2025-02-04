@@ -4,7 +4,7 @@ import requests
 from db.sqlalchemy_orm import get_github_token
 from helpers.encryption_helper import encrypt_token, decrypt_token
 from helpers.request_helper import decode_code
-from multi_layer_operation_predictor.extract_functions_from_repo import FunctionExtractor
+from extract_functions_from_repository.extract_functions_from_repo import FunctionExtractor
 import os
 import logging
 

@@ -9,7 +9,6 @@ import os
 
 from dotenv import load_dotenv
 
-from multi_layer_operation_predictor.operation_predictor import get_operation_definition
 from llm.ollama_models import generate_code, ask_question
 from groqclould.groq_response import get_groq_response, answer_user_query
 from groqclould.contextual_response import get_contextual_response
@@ -70,14 +69,7 @@ def map_models(
                 prompt=currentLine, suffix=suffix, prefix=prefix, language=language
             )
         elif model == Model.MULTI_LAYER.value:
-            environment = os.getenv('ENVIRONMENT', 'development')
-            if environment == 'production':
-                # Call the Hugging Face model from hf_client.py in production
-                closest_match = get_multi_layer_model_result(currentLine, language)
-            else:
-                # Use local model in development
-                closest_match = get_operation_definition(currentLine, language)
-
+            closest_match = get_multi_layer_model_result(currentLine, language)
             return closest_match.replace(currentLine, "")
         else:
             return "Model not found"
