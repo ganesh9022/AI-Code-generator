@@ -35,7 +35,26 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+
+# Get allowed origin from environment variable, fallback to development URL if not set
+CORS_ALLOWED_ORIGIN = os.getenv('CORS_ALLOWED_ORIGIN', 'http://localhost:5173')
+
+# Configure CORS with specific settings
+CORS(app,
+     resources={r"/*": {
+         "origins": [CORS_ALLOWED_ORIGIN],
+         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+         "allow_headers": ["Content-Type", "Authorization"],
+         "supports_credentials": True,
+         "max_age": 86400  # Cache preflight requests for 24 hours
+     }})
+
+# Handle OPTIONS requests explicitly
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = app.make_default_options_response()
+        return response
 
 # Initialize database
 Base.metadata.create_all(db)

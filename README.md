@@ -209,6 +209,11 @@ The project uses a machine learning model deployed on Hugging Face Spaces for op
 
    # Environment setting (development/production)
    ENVIRONMENT=development
+
+   # CORS configuration - URL of the frontend application
+   # For development: http://localhost:5173
+   # For production: Your deployed frontend URL
+   CORS_ALLOWED_ORIGIN=
    ```
 
 ### 6. Ollama Setup
