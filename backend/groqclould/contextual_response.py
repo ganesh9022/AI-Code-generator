@@ -7,7 +7,9 @@ from contextlib import contextmanager
 import numpy as np
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
+#  in future we can change - from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
+
+from langchain_community.embeddings import SpacyEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -25,6 +27,8 @@ from constants import (
     SEPARATORS
 )
 from groqclould.system_prompt import RAG_SYSTEM_PROMPT
+from groq import Groq
+import spacy
 
 # Configure logging
 logging.basicConfig(
@@ -55,16 +59,21 @@ def get_db_session():
 
 class RAGManager:
     def __init__(self):
-        self._embed_model: Optional[HuggingFaceEmbeddings] = None
-        self._rag_llm: Optional[ChatGroq] = None
+        self._embed_model = None
         self._initialize_embed_model()
+        self._rag_llm: Optional[ChatGroq] = None
         logger.info("RAGManager initialized")
 
     def _initialize_embed_model(self):
         """Initialize the embedding model."""
         try:
-            logger.debug("Initializing embedding model")
-            self._embed_model = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+            # Download spaCy model if not already downloaded
+            try:
+                spacy.load(EMBEDDING_MODEL_NAME)
+            except OSError:
+                spacy.cli.download(EMBEDDING_MODEL_NAME)
+            
+            self._embed_model = SpacyEmbeddings(model_name=EMBEDDING_MODEL_NAME)
             logger.info("Embedding model initialized successfully")
         except Exception as e:
             logger.error(f"Error initializing embedding model: {str(e)}")

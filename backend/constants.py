@@ -11,8 +11,8 @@ CHUNK_SIZE = 3000
 CHUNK_OVERLAP = 200
 SEPARATORS = ["\n\n", "\n", " ", ""]
 
-# Model settings
-EMBEDDING_MODEL_NAME = "BAAI/bge-small-en-v1.5"
+# Model settings in future we can change the model EMBEDDING_MODEL_NAME = "BAAI/bge-small-en-v1.5"
+EMBEDDING_MODEL_NAME = "en_core_web_md"  # Using spaCy's medium-sized English model (~40MB)
 GROQ_MODEL_NAME = "llama3-8b-8192"
 
 # Create necessary directories

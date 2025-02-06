@@ -18,12 +18,12 @@ psycopg2-binary = "^2.9.10"
 ollama = "^0.4.7"
 langchain-groq = "^0.2.4"
 langchain-community = "^0.3.16"
-sentence-transformers = "^3.4.1"
 gradio-client = "^1.7.0"
 nest-asyncio = "^1.6.0"
 cryptography = "^44.0.0"
 pygithub = "^2.5.0"
 python-jose = "^3.3.0"
+spacy = "^3.8.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
