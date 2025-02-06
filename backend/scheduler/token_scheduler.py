@@ -10,15 +10,23 @@ import base64
 from requests.auth import HTTPBasicAuth
 import pytz
 import logging
+from concurrent.futures import ThreadPoolExecutor
+import weakref
 
 # Setup logging
 logger = logging.getLogger(__name__)
+
+# Maximum number of threads in the pool
+MAX_WORKERS = 3
 
 class TokenScheduler:
     def __init__(self):
         self.scheduled_tokens: Dict[str, threading.Timer] = {}
         self.lock = threading.Lock()
         self.ist_timezone = pytz.timezone('Asia/Kolkata')
+        # Create a thread pool with limited workers
+        self.executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
+        self._futures = weakref.WeakSet()
         logger.info("Initializing TokenScheduler")
         self.initialize_from_db()
     
@@ -34,9 +42,20 @@ class TokenScheduler:
                 TokenData.access_token.isnot(None)
             ).all()
             
-            # Immediately process expired tokens
-            for token in expired_tokens:
-                self._process_token_deletion(token.email)
+            # Process expired tokens using thread pool
+            if expired_tokens:
+                futures = []
+                for token in expired_tokens:
+                    future = self.executor.submit(self._process_token_deletion, token.email)
+                    futures.append(future)
+                    self._futures.add(future)
+                
+                # Wait for all expired tokens to be processed
+                for future in futures:
+                    try:
+                        future.result(timeout=30)  # 30 second timeout
+                    except Exception as e:
+                        logger.error(f"Error processing expired token: {str(e)}")
             
             if expired_tokens:
                 logger.info(f"Processed {len(expired_tokens)} expired tokens on startup")
@@ -79,8 +98,13 @@ class TokenScheduler:
             if delay < 0:
                 delay = 0
             
-            # Create and start timer
-            timer = threading.Timer(delay, self._process_token_deletion, args=[email])
+            def delayed_execution():
+                time.sleep(delay)
+                future = self.executor.submit(self._process_token_deletion, email)
+                self._futures.add(future)
+            
+            # Create and start timer using thread pool
+            timer = threading.Timer(1.0, delayed_execution)
             timer.daemon = True
             self.scheduled_tokens[email] = timer
             timer.start()
@@ -144,9 +168,17 @@ class TokenScheduler:
     def stop(self):
         """Stop all scheduled token deletions"""
         with self.lock:
+            # Cancel all timers
             for timer in self.scheduled_tokens.values():
                 timer.cancel()
             self.scheduled_tokens.clear()
+            
+            # Cancel all pending futures
+            for future in self._futures:
+                future.cancel()
+            
+            # Shutdown the thread pool
+            self.executor.shutdown(wait=False)
             logger.info("Token scheduler stopped")
 
 # Create singleton instance
