@@ -36,13 +36,13 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Get allowed origin from environment variable, fallback to development URL if not set
-CORS_ALLOWED_ORIGIN = os.getenv('CORS_ALLOWED_ORIGIN', 'http://localhost:5173')
+# Get allowed origins from environment variable, fallback to development URL if not set
+CORS_ALLOWED_ORIGIN = os.getenv('CORS_ALLOWED_ORIGIN', 'http://localhost:5173').split(',')
 
 # Configure CORS with specific settings
 CORS(app,
      resources={r"/*": {
-         "origins": [CORS_ALLOWED_ORIGIN],
+         "origins": CORS_ALLOWED_ORIGIN,
          "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
          "allow_headers": ["Content-Type", "Authorization"],
          "supports_credentials": True,
@@ -54,6 +54,13 @@ CORS(app,
 def handle_preflight():
     if request.method == "OPTIONS":
         response = app.make_default_options_response()
+        # Ensure CORS headers are added to OPTIONS response
+        if request.headers.get('Origin') in CORS_ALLOWED_ORIGIN:
+            response.headers['Access-Control-Allow-Origin'] = request.headers['Origin']
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Max-Age'] = '86400'
         return response
 
 # Initialize database
