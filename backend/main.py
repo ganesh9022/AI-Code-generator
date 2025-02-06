@@ -27,10 +27,30 @@ import atexit
 from routes.github_routes import get_github_token_route, extract_repo_functions
 from auth.clerk_auth import requires_auth
 from langchain.schema import Document
+import gc
+import resource
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
+# Setup logging with file handler to reduce memory usage
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('app.log'),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
+
+# Set memory limit
+def limit_memory():
+    soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+    # Set soft limit to 450MB (leaving some headroom below 512MB)
+    resource.setrlimit(resource.RLIMIT_AS, (450 * 1024 * 1024, hard))
+
+try:
+    limit_memory()
+except Exception as e:
+    logger.warning(f"Could not set memory limit: {e}")
 
 load_dotenv()
 
@@ -257,10 +277,16 @@ def protected_resource():
         "user": request.user
     }), 200
 
+@app.after_request
+def cleanup(response):
+    """Clean up resources after each request"""
+    gc.collect()
+    return response
+
 if __name__ == "__main__":
     nest_asyncio.apply()
     try:
         port = int(os.environ.get("PORT", 10000))
-        app.run(host="0.0.0.0", port=port, debug=True)
+        app.run(host="0.0.0.0", port=port, debug=False)  # Disable debug mode in production
     finally:
         token_scheduler.stop()

@@ -1,6 +1,6 @@
 import uuid
 from sqlalchemy import Column, Integer, String, create_engine, DateTime, inspect, Text, func, JSON, ForeignKey
-from sqlalchemy.orm import sessionmaker, declarative_base, relationship
+from sqlalchemy.orm import sessionmaker, declarative_base, relationship, scoped_session
 from flask import jsonify
 from dotenv import load_dotenv
 import os
@@ -30,8 +30,26 @@ else:
     logger.info(f"No token expiration time configured, using default of {DEFAULT_TOKEN_EXPIRATION} minutes")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-db = create_engine(DATABASE_URL, echo=True)
-Session = sessionmaker(bind=db)
+
+# Configure SQLAlchemy for optimal performance
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=5,  # Reduce pool size
+    max_overflow=10,
+    pool_timeout=30,
+    pool_recycle=1800,  # Recycle connections every 30 minutes
+    pool_pre_ping=True  # Enable connection health checks
+)
+
+# Create scoped session factory
+SessionLocal = scoped_session(
+    sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine
+    )
+)
+
 Base = declarative_base()
 ist_timezone = pytz.timezone('Asia/Kolkata')
 
@@ -239,7 +257,7 @@ def get_user_details(user_id: str, userName: str, email: str) -> tuple:
     if not userName or not email or not user_id:
         return jsonify({"error": "Missing required fields"}), 400
 
-    with Session() as session:
+    with SessionLocal() as session:
         try:
             existing_user = session.query(User).filter_by(email=email).first()
             if existing_user:
@@ -268,13 +286,13 @@ def save_github_token(email: str, access_token: str) -> tuple:
 
     try:
         # Create table if it doesn't exist
-        inspector = inspect(db)
+        inspector = inspect(engine)
         if "token_data" not in inspector.get_table_names():
-            TokenData.__table__.create(db)
+            TokenData.__table__.create(engine)
     except Exception as e:
         return jsonify({"error": "Database setup failed"}), 500
 
-    with Session() as session:
+    with SessionLocal() as session:
         try:
             # Check if token already exists
             existing_token = session.query(TokenData).filter_by(email=email).first()
@@ -329,7 +347,7 @@ def get_github_token(email: str) -> TokenData | None:
     if not email:
         return None
 
-    with Session() as session:
+    with SessionLocal() as session:
         try:
             token = session.query(TokenData).filter_by(email=email).first()
             if token:
@@ -343,8 +361,16 @@ def get_github_token(email: str) -> TokenData | None:
 # Create all tables
 try:
     logger.info("Creating database tables")
-    Base.metadata.create_all(db)
+    Base.metadata.create_all(engine)
     logger.info("Successfully created database tables")
 except Exception as e:
     logger.error(f"Failed to create database tables: {str(e)}", exc_info=True)
+
+def get_db():
+    """Get database session with automatic cleanup"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
