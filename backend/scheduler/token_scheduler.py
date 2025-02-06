@@ -10,105 +10,109 @@ import base64
 from requests.auth import HTTPBasicAuth
 import pytz
 import logging
-from concurrent.futures import ThreadPoolExecutor
-import weakref
+import queue
+import signal
 
 # Setup logging
 logger = logging.getLogger(__name__)
 
-# Maximum number of threads in the pool
-MAX_WORKERS = 3
-
 class TokenScheduler:
     def __init__(self):
-        self.scheduled_tokens: Dict[str, threading.Timer] = {}
-        self.lock = threading.Lock()
         self.ist_timezone = pytz.timezone('Asia/Kolkata')
-        # Create a thread pool with limited workers
-        self.executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
-        self._futures = weakref.WeakSet()
+        self.task_queue = queue.PriorityQueue()
+        self.running = True
+        self.lock = threading.Lock()
+        self.worker_thread = None
         logger.info("Initializing TokenScheduler")
+        self._start_worker()
         self.initialize_from_db()
     
+    def _start_worker(self):
+        """Start the background worker thread"""
+        if self.worker_thread is None or not self.worker_thread.is_alive():
+            self.worker_thread = threading.Thread(target=self._process_queue)
+            self.worker_thread.daemon = True
+            self.worker_thread.start()
+    
+    def _process_queue(self):
+        """Process tasks from the queue"""
+        while self.running:
+            try:
+                # Get the next task with a 1-second timeout
+                try:
+                    priority, task_time, email = self.task_queue.get(timeout=1)
+                    current_time = time.time()
+                    
+                    # If it's not time for this task yet, put it back in the queue
+                    if priority > current_time:
+                        self.task_queue.put((priority, task_time, email))
+                        time.sleep(1)
+                        continue
+                    
+                    # Process the task
+                    self._process_token_deletion(email)
+                    
+                except queue.Empty:
+                    continue
+                    
+            except Exception as e:
+                logger.error(f"Error in queue processing: {str(e)}")
+                time.sleep(1)
+    
     def initialize_from_db(self):
-        """Initialize scheduler with existing non-expired tokens from database and handle expired ones"""
+        """Initialize scheduler with existing non-expired tokens from database"""
         db = SessionLocal()
         try:
             current_time = datetime.now(self.ist_timezone)
             
-            # Handle expired tokens first
+            # Handle expired tokens
             expired_tokens = db.query(TokenData).filter(
                 TokenData.expires_at <= current_time,
                 TokenData.access_token.isnot(None)
             ).all()
             
-            # Process expired tokens using thread pool
-            if expired_tokens:
-                futures = []
-                for token in expired_tokens:
-                    future = self.executor.submit(self._process_token_deletion, token.email)
-                    futures.append(future)
-                    self._futures.add(future)
-                
-                # Wait for all expired tokens to be processed
-                for future in futures:
-                    try:
-                        future.result(timeout=30)  # 30 second timeout
-                    except Exception as e:
-                        logger.error(f"Error processing expired token: {str(e)}")
+            # Schedule expired tokens for immediate deletion
+            for token in expired_tokens:
+                self.schedule_token_deletion(token.email, current_time)
             
             if expired_tokens:
-                logger.info(f"Processed {len(expired_tokens)} expired tokens on startup")
+                logger.info(f"Scheduled {len(expired_tokens)} expired tokens for deletion")
             
-            # Schedule future deletions for non-expired tokens
+            # Schedule future deletions
             active_tokens = db.query(TokenData).filter(
                 TokenData.expires_at > current_time,
                 TokenData.access_token.isnot(None)
             ).all()
             
-            # Schedule deletion for each valid token
             for token in active_tokens:
                 self.schedule_token_deletion(token.email, token.expires_at)
             
             if active_tokens:
-                logger.info(f"Initialized {len(active_tokens)} active tokens for scheduled deletion")
+                logger.info(f"Scheduled {len(active_tokens)} active tokens for future deletion")
                 
         except Exception as e:
-            logger.error(f"Error initializing tokens from database: {str(e)}", exc_info=True)
+            logger.error(f"Error initializing from database: {str(e)}", exc_info=True)
         finally:
             db.close()
 
     def schedule_token_deletion(self, email: str, deletion_time: datetime):
-        """Schedule a token for deletion at specific time"""
-        with self.lock:
-            # Cancel existing timer if any
-            if email in self.scheduled_tokens:
-                self.scheduled_tokens[email].cancel()
-                logger.debug(f"Cancelled existing deletion timer for {email}")
-            
+        """Schedule a token for deletion"""
+        try:
             # Ensure deletion_time is in IST timezone
             if deletion_time.tzinfo is None:
                 deletion_time = self.ist_timezone.localize(deletion_time)
             elif deletion_time.tzinfo != self.ist_timezone:
                 deletion_time = deletion_time.astimezone(self.ist_timezone)
             
-            # Calculate delay in seconds using IST timezone
-            now = datetime.now(self.ist_timezone)
-            delay = (deletion_time - now).total_seconds()
-            if delay < 0:
-                delay = 0
+            # Convert to timestamp for priority queue
+            priority = deletion_time.timestamp()
             
-            def delayed_execution():
-                time.sleep(delay)
-                future = self.executor.submit(self._process_token_deletion, email)
-                self._futures.add(future)
-            
-            # Create and start timer using thread pool
-            timer = threading.Timer(1.0, delayed_execution)
-            timer.daemon = True
-            self.scheduled_tokens[email] = timer
-            timer.start()
+            # Add to queue
+            self.task_queue.put((priority, deletion_time, email))
             logger.info(f"Scheduled token deletion for {email} at {deletion_time} IST")
+            
+        except Exception as e:
+            logger.error(f"Error scheduling token deletion: {str(e)}")
 
     def delete_github_token(self, access_token: str) -> bool:
         """Delete token from GitHub"""
@@ -139,26 +143,19 @@ class TokenScheduler:
             return False
 
     def _process_token_deletion(self, email: str):
-        """Process single token deletion"""
+        """Process token deletion"""
         db = SessionLocal()
         try:
-            # Get token from database
             token = db.query(TokenData).filter_by(email=email).first()
             if token and token.access_token:
                 logger.info(f"Processing token deletion for {email}")
-                # Decrypt and delete from GitHub
                 decrypted_token = decrypt_token(token.access_token)
                 if self.delete_github_token(decrypted_token):
-                    # Clear the token but keep the record
                     token.access_token = None
                     db.commit()
                     logger.info(f"Successfully cleared token for {email} from database")
                 else:
                     logger.error(f"Failed to delete GitHub token for {email}")
-            
-            # Remove timer from scheduled tokens
-            with self.lock:
-                self.scheduled_tokens.pop(email, None)
             
         except Exception as e:
             logger.error(f"Error processing token deletion for {email}: {str(e)}", exc_info=True)
@@ -166,20 +163,19 @@ class TokenScheduler:
             db.close()
 
     def stop(self):
-        """Stop all scheduled token deletions"""
-        with self.lock:
-            # Cancel all timers
-            for timer in self.scheduled_tokens.values():
-                timer.cancel()
-            self.scheduled_tokens.clear()
-            
-            # Cancel all pending futures
-            for future in self._futures:
-                future.cancel()
-            
-            # Shutdown the thread pool
-            self.executor.shutdown(wait=False)
-            logger.info("Token scheduler stopped")
+        """Stop the scheduler"""
+        logger.info("Stopping token scheduler")
+        self.running = False
+        if self.worker_thread and self.worker_thread.is_alive():
+            self.worker_thread.join(timeout=5)
+        logger.info("Token scheduler stopped")
 
 # Create singleton instance
-token_scheduler = TokenScheduler() 
+token_scheduler = TokenScheduler()
+
+# Register signal handlers for graceful shutdown
+def handle_shutdown(signum, frame):
+    token_scheduler.stop()
+
+signal.signal(signal.SIGTERM, handle_shutdown)
+signal.signal(signal.SIGINT, handle_shutdown) 
