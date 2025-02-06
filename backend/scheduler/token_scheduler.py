@@ -3,7 +3,7 @@ import threading
 import time
 from typing import Dict
 import os
-from db.sqlalchemy_orm import Session, TokenData
+from db.sqlalchemy_orm import SessionLocal, TokenData
 import requests
 from helpers.encryption_helper import decrypt_token
 import base64
@@ -24,38 +24,40 @@ class TokenScheduler:
     
     def initialize_from_db(self):
         """Initialize scheduler with existing non-expired tokens from database and handle expired ones"""
-        with Session() as session:
-            try:
-                current_time = datetime.now(self.ist_timezone)
+        db = SessionLocal()
+        try:
+            current_time = datetime.now(self.ist_timezone)
+            
+            # Handle expired tokens first
+            expired_tokens = db.query(TokenData).filter(
+                TokenData.expires_at <= current_time,
+                TokenData.access_token.isnot(None)
+            ).all()
+            
+            # Immediately process expired tokens
+            for token in expired_tokens:
+                self._process_token_deletion(token.email)
+            
+            if expired_tokens:
+                logger.info(f"Processed {len(expired_tokens)} expired tokens on startup")
+            
+            # Schedule future deletions for non-expired tokens
+            active_tokens = db.query(TokenData).filter(
+                TokenData.expires_at > current_time,
+                TokenData.access_token.isnot(None)
+            ).all()
+            
+            # Schedule deletion for each valid token
+            for token in active_tokens:
+                self.schedule_token_deletion(token.email, token.expires_at)
+            
+            if active_tokens:
+                logger.info(f"Initialized {len(active_tokens)} active tokens for scheduled deletion")
                 
-                # Handle expired tokens first
-                expired_tokens = session.query(TokenData).filter(
-                    TokenData.expires_at <= current_time,
-                    TokenData.access_token.isnot(None)
-                ).all()
-                
-                # Immediately process expired tokens
-                for token in expired_tokens:
-                    self._process_token_deletion(token.email)
-                
-                if expired_tokens:
-                    logger.info(f"Processed {len(expired_tokens)} expired tokens on startup")
-                
-                # Schedule future deletions for non-expired tokens
-                active_tokens = session.query(TokenData).filter(
-                    TokenData.expires_at > current_time,
-                    TokenData.access_token.isnot(None)
-                ).all()
-                
-                # Schedule deletion for each valid token
-                for token in active_tokens:
-                    self.schedule_token_deletion(token.email, token.expires_at)
-                
-                if active_tokens:
-                    logger.info(f"Initialized {len(active_tokens)} active tokens for scheduled deletion")
-                    
-            except Exception as e:
-                logger.error(f"Error initializing tokens from database: {str(e)}", exc_info=True)
+        except Exception as e:
+            logger.error(f"Error initializing tokens from database: {str(e)}", exc_info=True)
+        finally:
+            db.close()
 
     def schedule_token_deletion(self, email: str, deletion_time: datetime):
         """Schedule a token for deletion at specific time"""
@@ -114,28 +116,30 @@ class TokenScheduler:
 
     def _process_token_deletion(self, email: str):
         """Process single token deletion"""
-        with Session() as session:
-            try:
-                # Get token from database
-                token = session.query(TokenData).filter_by(email=email).first()
-                if token and token.access_token:
-                    logger.info(f"Processing token deletion for {email}")
-                    # Decrypt and delete from GitHub
-                    decrypted_token = decrypt_token(token.access_token)
-                    if self.delete_github_token(decrypted_token):
-                        # Clear the token but keep the record
-                        token.access_token = None
-                        session.commit()
-                        logger.info(f"Successfully cleared token for {email} from database")
-                    else:
-                        logger.error(f"Failed to delete GitHub token for {email}")
-                
-                # Remove timer from scheduled tokens
-                with self.lock:
-                    self.scheduled_tokens.pop(email, None)
-                
-            except Exception as e:
-                logger.error(f"Error processing token deletion for {email}: {str(e)}", exc_info=True)
+        db = SessionLocal()
+        try:
+            # Get token from database
+            token = db.query(TokenData).filter_by(email=email).first()
+            if token and token.access_token:
+                logger.info(f"Processing token deletion for {email}")
+                # Decrypt and delete from GitHub
+                decrypted_token = decrypt_token(token.access_token)
+                if self.delete_github_token(decrypted_token):
+                    # Clear the token but keep the record
+                    token.access_token = None
+                    db.commit()
+                    logger.info(f"Successfully cleared token for {email} from database")
+                else:
+                    logger.error(f"Failed to delete GitHub token for {email}")
+            
+            # Remove timer from scheduled tokens
+            with self.lock:
+                self.scheduled_tokens.pop(email, None)
+            
+        except Exception as e:
+            logger.error(f"Error processing token deletion for {email}: {str(e)}", exc_info=True)
+        finally:
+            db.close()
 
     def stop(self):
         """Stop all scheduled token deletions"""
